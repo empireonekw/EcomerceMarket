@@ -101,6 +101,10 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
 
 `/signup` · `/login` · `/profile` (Profile tab + My Purchases tab). One login for customers and admins.
 
+- **Flow:** sign-up creates the account without signing in, then opens `/login?registered=1` with the email
+  prefilled (handed over in `sessionStorage`, never in the URL); after that first login the user lands on the
+  homepage (or `?next=`). Logging out shows a "Signing you out…" screen and returns to the homepage.
+
 - **Session:** HS256 JWT in an httpOnly, SameSite=Lax cookie (`apex_session`; customers 30 days, admins 8h).
   The JWT carries `ver` = `user.tokenVersion`; a password change or "Log out of all devices" bumps it and
   revokes every other session instantly. A non-secret `apex_auth=1` hint cookie lets `AuthContext` skip

@@ -182,15 +182,12 @@ export function PasswordForm({ email }) {
 }
 
 export function SessionControls({ expiresAt }) {
-  const router = useRouter();
   const { logout } = useAuth();
   const [pending, setPending] = useState(null);
 
-  async function signOut(everywhere) {
+  function signOut(everywhere) {
     setPending(everywhere ? 'all' : 'this');
-    await logout({ everywhere });
-    router.push('/login');
-    router.refresh();
+    logout({ everywhere });
   }
 
   return (

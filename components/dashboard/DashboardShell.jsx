@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, Banknote, LayoutDashboard, Menu, Package, Plus, Receipt } from 'lucide-react';
+import SignOutScreen from '@/components/SignOutScreen';
 import { siteConfig } from '@/lib/site';
 
 // Navigation per dashboard area. Defined here (client module) because icons are components.
@@ -44,7 +45,7 @@ function Brand({ area }) {
   );
 }
 
-function SidebarBody({ pathname, area, user }) {
+function SidebarBody({ pathname, area, user, onSignOut }) {
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <div className="px-4 pt-3">
@@ -90,8 +91,8 @@ function SidebarBody({ pathname, area, user }) {
             <p className="truncate text-xs text-stone-500">{user.email}</p>
           </div>
         </div>
-        {/* Plain form post → works without JS; the route clears the cookie and 303s to /login. */}
-        <form action="/api/auth/logout" method="post">
+        {/* Plain form post → works without JS; the route clears the cookie and 303s to the homepage. */}
+        <form action="/api/auth/logout" method="post" onSubmit={onSignOut}>
           <button type="submit" className="w-full rounded-full px-4 py-2 text-left text-sm text-stone-600 hover:bg-stone-100 hover:text-black">
             Sign out
           </button>
@@ -107,13 +108,15 @@ export default function DashboardShell({ area: areaKey, user, children }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const [signingOut, setSigningOut] = useState(false);
+
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
     <div className="min-h-dvh bg-stone-50 lg:grid lg:grid-cols-[17rem_1fr]">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh border-r border-stone-200 bg-white lg:block">
-        <SidebarBody pathname={pathname} area={area} user={user} />
+        <SidebarBody pathname={pathname} area={area} user={user} onSignOut={() => setSigningOut(true)} />
       </aside>
 
       {/* Mobile top bar + slide-in sidebar */}
@@ -135,13 +138,14 @@ export default function DashboardShell({ area: areaKey, user, children }) {
         <aside
           className={`absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-lift transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          <SidebarBody pathname={pathname} area={area} user={user} />
+          <SidebarBody pathname={pathname} area={area} user={user} onSignOut={() => setSigningOut(true)} />
         </aside>
       </div>
 
       <main id="main" className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         {children}
       </main>
+      {signingOut && <SignOutScreen />}
     </div>
   );
 }

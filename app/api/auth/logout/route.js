@@ -7,7 +7,7 @@ import User from '@/models/User';
  * POST /api/auth/logout            — clears this browser's session.
  * POST /api/auth/logout?all=1      — also revokes every other session (bumps tokenVersion).
  *
- * Works from fetch() (JSON response) and from a plain <form method="post"> (303 → /login).
+ * Works from fetch() (JSON response) and from a plain <form method="post"> (303 → homepage).
  */
 export async function POST(request) {
   if (request.nextUrl.searchParams.get('all') === '1') {
@@ -21,7 +21,7 @@ export async function POST(request) {
   const wantsJson = request.headers.get('accept')?.includes('application/json');
   const res = wantsJson
     ? NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } })
-    : NextResponse.redirect(new URL('/login', request.url), 303);
+    : NextResponse.redirect(new URL('/', request.url), 303);
   clearSessionCookies(res);
   return res;
 }

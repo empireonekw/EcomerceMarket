@@ -1,21 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { Check } from 'lucide-react';
+import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateEmail } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
 
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/profile' };
 
-export default function LoginForm({ next }) {
+/** `registered` = arriving straight from sign-up: email prefilled, then on to `next` or the homepage. */
+export default function LoginForm({ next, registered = false }) {
   const router = useRouter();
   const { login } = useAuth();
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [pending, setPending] = useState(false);
+
+  // Pick up the email SignupForm left in sessionStorage (one-time) and jump straight to the password.
+  useEffect(() => {
+    if (!registered) return;
+    let email = null;
+    try {
+      email = sessionStorage.getItem(NEW_ACCOUNT_EMAIL_KEY);
+      sessionStorage.removeItem(NEW_ACCOUNT_EMAIL_KEY);
+    } catch {}
+    if (email) {
+      setValues((v) => ({ ...v, email }));
+      document.getElementById('password')?.focus();
+    }
+  }, [registered]);
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -44,12 +60,18 @@ export default function LoginForm({ next }) {
       setPending(false);
       return;
     }
-    router.replace(next || DASHBOARD[result.user.role] || '/profile');
+    router.replace(next || (registered ? '/' : DASHBOARD[result.user.role]) || '/profile');
     router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
+      {registered && !formError && (
+        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+          <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />
+          Your account is ready. Enter your password to log in.
+        </p>
+      )}
       <FormAlert>{formError}</FormAlert>
       <div>
         <AuthLabel htmlFor="email">Email</AuthLabel>

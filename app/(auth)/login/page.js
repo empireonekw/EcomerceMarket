@@ -11,7 +11,9 @@ export const metadata = { title: 'Log in', robots: { index: false } };
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/profile' };
 
 export default async function LoginPage({ searchParams }) {
-  const next = safeNext((await searchParams).next);
+  const params = await searchParams;
+  const next = safeNext(params.next);
+  const registered = params.registered === '1';
   const user = await getCurrentUser();
 
   // Signed in but sent here from /admin without admin rights: explain instead of looping back.
@@ -36,8 +38,14 @@ export default async function LoginPage({ searchParams }) {
   const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : '/signup';
   return (
     <AuthCard
-      title="Welcome back"
-      subtitle={next?.startsWith('/admin') ? 'Log in with your admin account.' : `Log in to your ${siteConfig.name} account.`}
+      title={registered ? 'Welcome aboard' : 'Welcome back'}
+      subtitle={
+        registered
+          ? `Log in to start shopping on ${siteConfig.name}.`
+          : next?.startsWith('/admin')
+            ? 'Log in with your admin account.'
+            : `Log in to your ${siteConfig.name} account.`
+      }
       footer={
         <p>
           New to {siteConfig.name}?{' '}
@@ -47,7 +55,7 @@ export default async function LoginPage({ searchParams }) {
         </p>
       }
     >
-      <LoginForm next={next} />
+      <LoginForm next={next} registered={registered} />
     </AuthCard>
   );
 }

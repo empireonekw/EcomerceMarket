@@ -1,15 +1,21 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import SignOutScreen from '@/components/SignOutScreen';
 
 /**
  * Global auth state for the storefront: { user, isLoggedIn, loading, login(), signup(), logout(), refresh() }.
+ *
+ * Sign-up creates the account only; SignupForm hands the email to the login page through sessionStorage
+ * (NEW_ACCOUNT_EMAIL_KEY) so it never appears in a URL. logout() shows <SignOutScreen /> and lands on the homepage.
  *
  * The session itself is an httpOnly JWT cookie that JS can't read. To keep pages static (no per-request
  * cookie reads on the server) the user is resolved client-side via /api/auth/me — but only when the
  * non-secret `apex_auth` hint cookie exists, so logged-out visitors never make that request.
  */
 const AuthContext = createContext(null);
+
+export const NEW_ACCOUNT_EMAIL_KEY = 'new-account-email';
 
 const hasAuthHint = () => typeof document !== 'undefined' && /(?:^|;\s*)apex_auth=1/.test(document.cookie);
 
@@ -26,6 +32,7 @@ async function postJson(url, body) {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [signingOut, setSigningOut] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!hasAuthHint()) {
@@ -65,13 +72,14 @@ export function AuthProvider({ children }) {
   const signup = useCallback(async ({ name, email, password, acceptTerms }) => {
     const { ok, data } = await postJson('/api/auth/signup', { name, email, password, acceptTerms });
     if (!ok) return { ok: false, error: data.error || 'Sign-up failed.', fields: data.fields };
-    setUser(data.user);
     return { ok: true, user: data.user };
   }, []);
 
+  /** Clears the session, then does a full navigation home so every page re-renders signed out. */
   const logout = useCallback(async ({ everywhere = false } = {}) => {
+    setSigningOut(true);
     await postJson(`/api/auth/logout${everywhere ? '?all=1' : ''}`).catch(() => {});
-    setUser(null);
+    window.location.replace('/'); // the overlay stays up until the homepage paints
   }, []);
 
   const value = useMemo(
@@ -79,7 +87,12 @@ export function AuthProvider({ children }) {
     [user, loading, login, signup, logout, refresh],
   );
 
-  return <AuthContext value={value}>{children}</AuthContext>;
+  return (
+    <AuthContext value={value}>
+      {children}
+      {signingOut && <SignOutScreen />}
+    </AuthContext>
+  );
 }
 
 export function useAuth() {

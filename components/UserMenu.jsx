@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
 const initials = (name = '') =>
@@ -119,7 +119,6 @@ const panelClass =
  */
 export default function UserMenu() {
   const { user, loading, logout } = useAuth();
-  const router = useRouter();
   const withNext = useLoginHref();
   const { open, close, rootProps, buttonProps } = useHoverPopover();
   const panelId = useId();
@@ -133,11 +132,9 @@ export default function UserMenu() {
     );
   }
 
-  async function onLogout() {
+  function onLogout() {
     close();
-    await logout();
-    router.push('/');
-    router.refresh();
+    logout();
   }
 
   const item = 'flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-stone-100';
@@ -207,7 +204,6 @@ export default function UserMenu() {
 /** Account links inside the mobile menu panel. */
 export function MobileAuthLinks() {
   const { user, loading, logout } = useAuth();
-  const router = useRouter();
   const withNext = useLoginHref();
   const link = 'block rounded-full px-4 py-2 hover:bg-stone-100';
 
@@ -245,11 +241,7 @@ export function MobileAuthLinks() {
       )}
       <button
         type="button"
-        onClick={async () => {
-          await logout();
-          router.push('/');
-          router.refresh();
-        }}
+        onClick={() => logout()}
         className={`${link} w-full text-left text-red-600`}
       >
         Logout

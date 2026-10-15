@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
-import { setSessionCookies, publicUser, isSameOrigin } from '@/lib/auth';
+import { publicUser, isSameOrigin } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { validateName, validateEmail, validatePassword, normalizeEmail } from '@/lib/validation';
 import User from '@/models/User';
@@ -8,7 +8,8 @@ import User from '@/models/User';
 const noStore = { 'Cache-Control': 'no-store' };
 
 /**
- * POST /api/auth/signup — { name, email, password } → creates a customer and signs them in.
+ * POST /api/auth/signup — { name, email, password } → creates a customer. No session is started:
+ * the client sends the new user to /login (email prefilled) to sign in.
  * Role is ALWAYS 'customer' here; admins are created only via `npm run create-admin`.
  */
 export async function POST(request) {
@@ -47,11 +48,8 @@ export async function POST(request) {
   try {
     await connectDB();
     // Password is hashed with bcrypt (cost 12) by the User model's pre('save') hook.
-    const user = await User.create({ name, email, password, role: 'customer', termsAcceptedAt: new Date(), lastLoginAt: new Date() });
-
-    const res = NextResponse.json({ user: publicUser(user) }, { status: 201, headers: noStore });
-    setSessionCookies(res, user);
-    return res;
+    const user = await User.create({ name, email, password, role: 'customer', termsAcceptedAt: new Date() });
+    return NextResponse.json({ user: publicUser(user) }, { status: 201, headers: noStore });
   } catch (err) {
     if (err?.code === 11000) {
       return NextResponse.json(

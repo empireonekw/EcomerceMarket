@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateName, validateEmail, validatePassword } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, PasswordChecklist, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
 
@@ -65,8 +65,11 @@ export default function SignupForm({ next }) {
       setPending(false);
       return;
     }
-    router.replace(next || '/profile');
-    router.refresh();
+    // Account created (not signed in): continue on the login page with the email filled in.
+    try {
+      sessionStorage.setItem(NEW_ACCOUNT_EMAIL_KEY, values.email.trim());
+    } catch {} // storage blocked: the user just types their email
+    router.replace(`/login?registered=1${next ? `&next=${encodeURIComponent(next)}` : ''}`);
   }
 
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : '/login';
