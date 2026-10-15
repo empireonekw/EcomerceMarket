@@ -8,9 +8,11 @@ import User from '@/models/User';
 const noStore = { 'Cache-Control': 'no-store' };
 
 /**
- * POST /api/auth/signup — { name, email, password } → creates a customer. No session is started:
- * the client sends the new user to /login (email prefilled) to sign in.
- * Role is ALWAYS 'customer' here; admins are created only via `npm run create-admin`.
+ * POST /api/auth/signup — { name, email, password, acceptTerms, accountType? } → creates the account.
+ * No session is started: the client sends the new user to /login (email prefilled) to sign in.
+ *   accountType 'seller'   → seller account (from /sell/signup); shop setup happens after first login.
+ *   anything else          → customer.
+ * Admins are never created here — only via `npm run create-admin`.
  */
 export async function POST(request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403, headers: noStore });
@@ -48,7 +50,15 @@ export async function POST(request) {
   try {
     await connectDB();
     // Password is hashed with bcrypt (cost 12) by the User model's pre('save') hook.
-    const user = await User.create({ name, email, password, role: 'customer', termsAcceptedAt: new Date() });
+    const isSeller = body?.accountType === 'seller';
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: isSeller ? 'seller' : 'customer',
+      termsAcceptedAt: new Date(),
+      ...(isSeller && { seller: { totalEarnings: 0, pendingPayout: 0, paidPayout: 0, joinedAt: new Date() } }),
+    });
     return NextResponse.json({ user: publicUser(user) }, { status: 201, headers: noStore });
   } catch (err) {
     if (err?.code === 11000) {

@@ -8,6 +8,7 @@ export async function POST(request) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
   if (user.role !== 'seller') return forbidden('Seller account required.');
+  if (!user.storeName) return json({ error: 'Set up your shop first.' }, 409);
   if (!rateLimit(`payout-request:${user.id}`, { limit: 5, windowMs: 60 * 60 * 1000 }).ok) {
     return json({ error: 'Too many requests. Please try again later.' }, 429);
   }

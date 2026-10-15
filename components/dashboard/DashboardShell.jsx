@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Banknote, LayoutDashboard, Menu, Package, Plus, Receipt } from 'lucide-react';
-import SignOutScreen from '@/components/SignOutScreen';
+import { ArrowUpRight, Banknote, LayoutDashboard, Menu, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import SignOutButton from '@/components/SignOutButton';
 import { siteConfig } from '@/lib/site';
 
 // Navigation per dashboard area. Defined here (client module) because icons are components.
@@ -16,6 +16,7 @@ const AREAS = {
       { href: '/admin', label: 'Dashboard Overview', icon: LayoutDashboard, match: (p) => p === '/admin' },
       { href: '/admin/products', label: 'Products Management', icon: Package, match: (p) => p.startsWith('/admin/products') && p !== '/admin/products/add' },
       { href: '/admin/products/add', label: 'Add New Product', icon: Plus, match: (p) => p === '/admin/products/add' },
+      { href: '/admin/users', label: 'Users', icon: Users, match: (p) => p.startsWith('/admin/users') },
       { href: '/admin/orders', label: 'Orders & Sales', icon: Receipt, match: (p) => p.startsWith('/admin/orders') },
       { href: '/admin/payouts', label: 'Seller Payouts', icon: Banknote, match: (p) => p.startsWith('/admin/payouts') },
     ],
@@ -27,6 +28,7 @@ const AREAS = {
       { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p) => p === '/seller/dashboard' },
       { href: '/seller/products/add', label: 'Add Product', icon: Plus, match: (p) => p.startsWith('/seller/products/add') },
       { href: '/seller/dashboard#payouts', label: 'Payouts & Bank Details', icon: Banknote, match: () => false },
+      { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },
     ],
   },
 };
@@ -45,7 +47,7 @@ function Brand({ area }) {
   );
 }
 
-function SidebarBody({ pathname, area, user, onSignOut }) {
+function SidebarBody({ pathname, area, user }) {
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <div className="px-4 pt-3">
@@ -91,12 +93,7 @@ function SidebarBody({ pathname, area, user, onSignOut }) {
             <p className="truncate text-xs text-stone-500">{user.email}</p>
           </div>
         </div>
-        {/* Plain form post → works without JS; the route clears the cookie and 303s to the homepage. */}
-        <form action="/api/auth/logout" method="post" onSubmit={onSignOut}>
-          <button type="submit" className="w-full rounded-full px-4 py-2 text-left text-sm text-stone-600 hover:bg-stone-100 hover:text-black">
-            Sign out
-          </button>
-        </form>
+        <SignOutButton className="w-full rounded-full px-4 py-2 text-left text-sm text-stone-600 hover:bg-stone-100 hover:text-black" />
       </div>
     </div>
   );
@@ -108,15 +105,13 @@ export default function DashboardShell({ area: areaKey, user, children }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [signingOut, setSigningOut] = useState(false);
-
   useEffect(() => setMobileOpen(false), [pathname]);
 
   return (
     <div className="min-h-dvh bg-stone-50 lg:grid lg:grid-cols-[17rem_1fr]">
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-dvh border-r border-stone-200 bg-white lg:block">
-        <SidebarBody pathname={pathname} area={area} user={user} onSignOut={() => setSigningOut(true)} />
+        <SidebarBody pathname={pathname} area={area} user={user} />
       </aside>
 
       {/* Mobile top bar + slide-in sidebar */}
@@ -138,14 +133,13 @@ export default function DashboardShell({ area: areaKey, user, children }) {
         <aside
           className={`absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-white shadow-lift transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          <SidebarBody pathname={pathname} area={area} user={user} onSignOut={() => setSigningOut(true)} />
+          <SidebarBody pathname={pathname} area={area} user={user} />
         </aside>
       </div>
 
       <main id="main" className="min-w-0 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
         {children}
       </main>
-      {signingOut && <SignOutScreen />}
     </div>
   );
 }

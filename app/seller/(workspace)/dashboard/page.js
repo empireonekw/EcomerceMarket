@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle2, Clock, DollarSign, Plus, ShoppingBag } from 'lucide-react';
-import SellerProfileForm from '@/components/seller/SellerProfileForm';
+import { AlertTriangle, CheckCircle2, Clock, DollarSign, Plus, ShoppingBag } from 'lucide-react';
+import PayoutDetailsForm from '@/components/seller/PayoutDetailsForm';
+import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
 import RequestPayoutButton from '@/components/seller/RequestPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
-import { requireSeller } from '@/lib/auth';
+import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
 import { commissionPercent, splitSale, COMMISSION_RATE } from '@/lib/commission';
-import { validateBankDetails } from '@/lib/validation';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
 
@@ -19,20 +19,37 @@ const usd = (cents) => formatPrice(cents, 'USD');
 function payoutBlocker(data) {
   if (data.openRequest) return `Request for ${usd(data.openRequest.amount)} sent ${formatDateTime(data.openRequest.createdAt).date} — awaiting payment.`;
   if (data.balances.pendingPayout <= 0) return 'Your pending balance is empty.';
-  if (Object.keys(validateBankDetails(data.bankDetails)).length) return 'Add bank or wallet details below first.';
+  if (!data.hasPayoutMethod) return 'Add bank or wallet details below first.';
   return null;
 }
 
 export default async function SellerDashboardPage() {
-  const seller = await requireSeller();
+  const seller = await requireSellerStore();
   const data = await getSellerDashboard(seller.id);
   const blocker = payoutBlocker(data);
 
   return (
     <>
+      {!data.hasPayoutMethod && (
+        <div role="status" className="mb-8 flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-3">
+            <AlertTriangle size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-amber-600" />
+            <div>
+              <p className="font-medium text-amber-900">Add your payout details to get paid</p>
+              <p className="mt-0.5 text-sm text-amber-800">
+                You can list and sell right away — we just need a bank account or mobile wallet before we can send your earnings.
+              </p>
+            </div>
+          </div>
+          <a href="#payouts" className="btn btn-md btn-dark shrink-0">
+            Add payout details
+          </a>
+        </div>
+      )}
+
       <PageHeader
         title={data.storeName}
-        description={`You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale · ${commissionPercent()} platform fee`}
+        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}
         actions={
           <Link href="/seller/products/add" className={buttonClasses.primary}>
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
@@ -165,11 +182,16 @@ export default async function SellerDashboardPage() {
         </Panel>
       </div>
 
-      {/* ---------- Payment details ---------- */}
-      <div className="mt-8">
-        <Panel title="Payment details" id="payouts">
-          <div className="max-w-2xl p-5 sm:p-6">
-            <SellerProfileForm mode="update" initial={{ storeName: data.storeName, bankDetails: data.bankDetails }} />
+      {/* ---------- Settings ---------- */}
+      <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr] xl:items-start">
+        <Panel title="Payout details" id="payouts">
+          <div className="p-5 sm:p-6">
+            <PayoutDetailsForm initial={data.bankDetails} />
+          </div>
+        </Panel>
+        <Panel title="Shop settings" id="shop">
+          <div className="p-5 sm:p-6">
+            <ShopDetailsForm mode="update" initial={{ storeName: data.storeName, storeDescription: data.storeDescription }} />
           </div>
         </Panel>
       </div>

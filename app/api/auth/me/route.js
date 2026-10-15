@@ -37,7 +37,7 @@ export async function PATCH(request) {
   }
 
   await connectDB();
-  const user = await User.findById(current.id).select('+password name email role createdAt tokenVersion');
+  const user = await User.findById(current.id).select('+password name email role createdAt tokenVersion seller.storeName');
   if (!user) return NextResponse.json({ error: 'Account not found.' }, { status: 404, headers: noStore });
 
   const fields = {};

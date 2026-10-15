@@ -18,7 +18,14 @@ function validate(v) {
   return Object.fromEntries(Object.entries(e).filter(([, msg]) => msg));
 }
 
-export default function SignupForm({ next }) {
+const COPY = {
+  customer: { submit: 'Create account', pending: 'Creating account…', registered: '1' },
+  seller: { submit: 'Create seller account', pending: 'Creating seller account…', registered: 'seller' },
+};
+
+/** Shared by /signup (customer) and /sell/signup (`accountType="seller"`). Both continue on /login. */
+export default function SignupForm({ next, accountType = 'customer' }) {
+  const copy = COPY[accountType] ?? COPY.customer;
   const router = useRouter();
   const { signup } = useAuth();
   const [values, setValues] = useState({ name: '', email: '', password: '', confirm: '', acceptTerms: false });
@@ -58,6 +65,7 @@ export default function SignupForm({ next }) {
       email: values.email.trim(),
       password: values.password,
       acceptTerms: values.acceptTerms,
+      accountType,
     }).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
     if (!result.ok) {
       setServerErrors(result.fields ?? {});
@@ -69,7 +77,7 @@ export default function SignupForm({ next }) {
     try {
       sessionStorage.setItem(NEW_ACCOUNT_EMAIL_KEY, values.email.trim());
     } catch {} // storage blocked: the user just types their email
-    router.replace(`/login?registered=1${next ? `&next=${encodeURIComponent(next)}` : ''}`);
+    router.replace(`/login?registered=${copy.registered}${next ? `&next=${encodeURIComponent(next)}` : ''}`);
   }
 
   const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : '/login';
@@ -149,8 +157,8 @@ export default function SignupForm({ next }) {
       </div>
 
       <div className="pt-1">
-        <SubmitButton pending={pending} pendingLabel="Creating account…">
-          Create account
+        <SubmitButton pending={pending} pendingLabel={copy.pending}>
+          {copy.submit}
         </SubmitButton>
       </div>
     </form>

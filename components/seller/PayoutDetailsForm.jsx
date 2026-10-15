@@ -3,35 +3,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, CheckCircle2, Smartphone } from 'lucide-react';
-import { validateStoreName, validateBankDetails, WALLET_OPTIONS } from '@/lib/validation';
+import { validateBankDetails, WALLET_OPTIONS } from '@/lib/validation';
 import { inputClass, FieldError, FormAlert, SubmitButton } from '@/components/auth/AuthFields';
 
-const MODES = {
-  register: { url: '/api/seller/register', method: 'POST', submit: 'Create my seller account', pending: 'Creating store…' },
-  update: { url: '/api/seller/profile', method: 'PUT', submit: 'Save payout details', pending: 'Saving…' },
-};
-
-function validate(v) {
-  const errors = validateBankDetails(v);
-  const nameError = validateStoreName(v.storeName);
-  if (nameError) errors.storeName = nameError;
-  return errors;
-}
+const validate = (v) => validateBankDetails(v);
 
 /**
- * Store name + payout destination. Used for "Become a Seller" (register) and on the
- * seller dashboard (update). At least one of bank account / mobile wallet is required.
+ * Payout destination on the seller dashboard: a bank account and/or a mobile wallet (at least one).
+ * Kept out of shop setup — the dashboard shows an alert until it's filled in.
  */
-export default function SellerProfileForm({ mode = 'register', initial = {} }) {
+export default function PayoutDetailsForm({ initial = {} }) {
   const router = useRouter();
-  const config = MODES[mode];
   const [values, setValues] = useState({
-    storeName: initial.storeName ?? '',
-    bankName: initial.bankDetails?.bankName ?? '',
-    accountTitle: initial.bankDetails?.accountTitle ?? '',
-    accountNumber: initial.bankDetails?.accountNumber ?? '',
-    walletProvider: initial.bankDetails?.walletProvider ?? '',
-    walletNumber: initial.bankDetails?.walletNumber ?? '',
+    bankName: initial.bankName ?? '',
+    accountTitle: initial.accountTitle ?? '',
+    accountNumber: initial.accountNumber ?? '',
+    walletProvider: initial.walletProvider ?? '',
+    walletNumber: initial.walletNumber ?? '',
   });
   const [submitted, setSubmitted] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
@@ -68,22 +56,16 @@ export default function SellerProfileForm({ mode = 'register', initial = {} }) {
 
     setPending(true);
     try {
-      const { storeName, ...bankDetails } = values;
-      const res = await fetch(config.url, {
-        method: config.method,
+      const res = await fetch('/api/seller/profile', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeName, bankDetails }),
+        body: JSON.stringify({ bankDetails: values }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.status === 401) return router.push('/login?next=/sell');
+      if (res.status === 401) return router.push('/login?next=/seller/dashboard');
       if (!res.ok) {
         setServerErrors(data.fields ?? {});
         setFormError(data.error ?? 'Something went wrong.');
-        return;
-      }
-      if (mode === 'register') {
-        router.replace('/seller/dashboard');
-        router.refresh();
         return;
       }
       setSuccess('Payout details saved.');
@@ -104,14 +86,6 @@ export default function SellerProfileForm({ mode = 'register', initial = {} }) {
           {success}
         </p>
       )}
-
-      <div>
-        <label htmlFor="storeName" className="text-sm font-medium">
-          Store name
-        </label>
-        <input {...bind('storeName')} maxLength={60} autoComplete="organization" placeholder="e.g. Pixel Foundry" />
-        <FieldError id="storeName-error">{errors.storeName}</FieldError>
-      </div>
 
       <fieldset className="rounded-2xl border border-stone-200 p-4 sm:p-5">
         <legend className="flex items-center gap-2 px-1 text-sm font-medium">
@@ -181,8 +155,8 @@ export default function SellerProfileForm({ mode = 'register', initial = {} }) {
       <p className="text-xs text-stone-500">Add a bank account, a mobile wallet, or both. Payouts are sent manually by our team.</p>
 
       <div className="max-w-xs">
-        <SubmitButton pending={pending} pendingLabel={config.pending}>
-          {config.submit}
+        <SubmitButton pending={pending} pendingLabel="Saving…">
+          Save payout details
         </SubmitButton>
       </div>
     </form>

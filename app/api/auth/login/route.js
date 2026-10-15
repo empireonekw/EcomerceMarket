@@ -43,7 +43,7 @@ export async function POST(request) {
 
   try {
     await connectDB();
-    const user = await User.findOne({ email }).select('+password name email role createdAt tokenVersion');
+    const user = await User.findOne({ email }).select('+password name email role createdAt tokenVersion seller.storeName');
     const valid = await bcrypt.compare(password, user?.password ?? (await getDummyHash()));
 
     // One generic message for every failure mode, so the form never reveals which emails exist.

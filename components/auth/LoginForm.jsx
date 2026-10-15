@@ -8,9 +8,10 @@ import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateEmail } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
 
+// Where each role lands after logging in. Sellers without a shop are forwarded to /seller/onboarding.
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/profile' };
 
-/** `registered` = arriving straight from sign-up: email prefilled, then on to `next` or the homepage. */
+/** `registered` = arriving straight from sign-up: email prefilled; new customers then land on `next` or the homepage. */
 export default function LoginForm({ next, registered = false }) {
   const router = useRouter();
   const { login } = useAuth();
@@ -60,7 +61,8 @@ export default function LoginForm({ next, registered = false }) {
       setPending(false);
       return;
     }
-    router.replace(next || (registered ? '/' : DASHBOARD[result.user.role]) || '/profile');
+    const { role } = result.user;
+    router.replace(next || (registered && role === 'customer' ? '/' : DASHBOARD[role]) || '/');
     router.refresh();
   }
 
@@ -69,7 +71,7 @@ export default function LoginForm({ next, registered = false }) {
       {registered && !formError && (
         <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
           <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />
-          Your account is ready. Enter your password to log in.
+          {registered === 'seller' ? 'Seller account created. Log in to set up your shop.' : 'Your account is ready. Enter your password to log in.'}
         </p>
       )}
       <FormAlert>{formError}</FormAlert>

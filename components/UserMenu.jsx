@@ -13,11 +13,46 @@ const initials = (name = '') =>
     .map((w) => w[0].toUpperCase())
     .join('') || '?';
 
-// Role-specific dashboard link shown in the account menus.
-const DASHBOARDS = {
-  admin: { href: '/admin', label: 'Admin dashboard' },
-  seller: { href: '/seller/dashboard', label: 'Seller dashboard' },
-};
+/**
+ * Account-menu entries per role (desktop dropdown + mobile menu). Customers shop; sellers sell, so they get
+ * their workspace instead of purchases; admins manage the marketplace.
+ */
+function accountLinks(user) {
+  if (user.role === 'seller') {
+    if (!user.storeName) {
+      return [
+        { href: '/seller/onboarding', label: 'Finish shop setup' },
+        { href: '/profile', label: 'Account settings' },
+      ];
+    }
+    return [
+      { href: '/seller/dashboard', label: 'Seller dashboard' },
+      { href: '/seller/products/add', label: 'Add product' },
+      { href: '/seller/dashboard#payouts', label: 'Payouts' },
+      { href: '/seller/dashboard#shop', label: 'Shop settings' },
+      { href: '/profile', label: 'Account settings' },
+    ];
+  }
+  if (user.role === 'admin') {
+    return [
+      { href: '/admin', label: 'Admin dashboard' },
+      { href: '/admin/users', label: 'Users' },
+      { href: '/admin/orders', label: 'Orders & sales' },
+      { href: '/profile', label: 'Account settings' },
+    ];
+  }
+  return [
+    { href: '/profile', label: 'My profile' },
+    { href: '/profile?tab=downloads', label: 'My purchases' },
+  ];
+}
+
+const ROLE_BADGES = { seller: 'Seller', admin: 'Admin' };
+
+function RoleBadge({ role }) {
+  if (!ROLE_BADGES[role]) return null;
+  return <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">{ROLE_BADGES[role]}</span>;
+}
 
 const iconBtn = 'grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 hover:text-black';
 
@@ -175,22 +210,19 @@ export default function UserMenu() {
           <div className="flex items-center gap-3 border-b border-stone-100 px-3 pb-3 pt-2">
             <Avatar name={user.name} />
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user.name}</p>
-              <p className="truncate text-xs text-stone-500">{user.email}</p>
+              <p className="flex items-center gap-2 text-sm font-medium">
+                <span className="truncate">{user.name}</span>
+                <RoleBadge role={user.role} />
+              </p>
+              <p className="truncate text-xs text-stone-500">{user.role === 'seller' && user.storeName ? user.storeName : user.email}</p>
             </div>
           </div>
           <div className="pt-2">
-            <Link role="menuitem" href="/profile" className={item}>
-              My Profile
-            </Link>
-            <Link role="menuitem" href="/profile?tab=downloads" className={item}>
-              My Purchases
-            </Link>
-            {DASHBOARDS[user.role] && (
-              <Link role="menuitem" href={DASHBOARDS[user.role].href} className={item}>
-                {DASHBOARDS[user.role].label}
+            {accountLinks(user).map((l) => (
+              <Link key={l.href} role="menuitem" href={l.href} onClick={close} className={item}>
+                {l.label}
               </Link>
-            )}
+            ))}
             <button role="menuitem" type="button" onClick={onLogout} className={`${item} w-full text-left text-red-600 hover:bg-red-50`}>
               Logout
             </button>
@@ -227,18 +259,13 @@ export function MobileAuthLinks() {
       <div className="flex items-center gap-3 px-3 py-2">
         <Avatar name={user.name} className="size-8 text-xs" />
         <span className="truncate">{user.name}</span>
+        <RoleBadge role={user.role} />
       </div>
-      <Link href="/profile" className={link}>
-        My Profile
-      </Link>
-      <Link href="/profile?tab=downloads" className={link}>
-        My Purchases
-      </Link>
-      {DASHBOARDS[user.role] && (
-        <Link href={DASHBOARDS[user.role].href} className={link}>
-          {DASHBOARDS[user.role].label}
+      {accountLinks(user).map((l) => (
+        <Link key={l.href} href={l.href} className={link}>
+          {l.label}
         </Link>
-      )}
+      ))}
       <button
         type="button"
         onClick={() => logout()}

@@ -69,17 +69,17 @@ export function AuthProvider({ children }) {
     return { ok: true, user: data.user };
   }, []);
 
-  const signup = useCallback(async ({ name, email, password, acceptTerms }) => {
-    const { ok, data } = await postJson('/api/auth/signup', { name, email, password, acceptTerms });
+  const signup = useCallback(async ({ name, email, password, acceptTerms, accountType = 'customer' }) => {
+    const { ok, data } = await postJson('/api/auth/signup', { name, email, password, acceptTerms, accountType });
     if (!ok) return { ok: false, error: data.error || 'Sign-up failed.', fields: data.fields };
     return { ok: true, user: data.user };
   }, []);
 
-  /** Clears the session, then does a full navigation home so every page re-renders signed out. */
-  const logout = useCallback(async ({ everywhere = false } = {}) => {
+  /** Clears the session, then does a full navigation (home by default) so every page re-renders signed out. */
+  const logout = useCallback(async ({ everywhere = false, redirectTo = '/' } = {}) => {
     setSigningOut(true);
     await postJson(`/api/auth/logout${everywhere ? '?all=1' : ''}`).catch(() => {});
-    window.location.replace('/'); // the overlay stays up until the homepage paints
+    window.location.replace(redirectTo); // the overlay stays up until the next page paints
   }, []);
 
   const value = useMemo(

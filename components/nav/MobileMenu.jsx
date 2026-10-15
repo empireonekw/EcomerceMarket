@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NavSearch from '@/components/nav/NavSearch';
 import { MobileAuthLinks } from '@/components/UserMenu';
+import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
 
 /** Hamburger toggle + slide-down panel for screens below `lg`. */
@@ -76,12 +77,7 @@ export default function MobileMenu({ categories }) {
               ))}
             </ul>
           </nav>
-          <Link
-            href={siteConfig.sellCta.href}
-            className="btn btn-lg btn-dark mt-4 w-full"
-          >
-            {siteConfig.sellCta.label}
-          </Link>
+          <SellCta className="btn btn-lg btn-dark mt-4 w-full" />
           <div className="mt-4">
             <MobileAuthLinks />
           </div>

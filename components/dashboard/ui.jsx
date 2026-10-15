@@ -5,7 +5,7 @@ export function PageHeader({ title, description, actions }) {
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 className="headline text-3xl sm:text-4xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-stone-500">{description}</p>}
+        {description && <p className="mt-1 line-clamp-2 max-w-3xl text-sm text-stone-500">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
@@ -54,6 +54,17 @@ export function StatusBadge({ status, label }) {
       {label ?? status}
     </span>
   );
+}
+
+const ROLE_STYLES = {
+  admin: { label: 'Admin', className: 'bg-black text-white' },
+  seller: { label: 'Seller', className: 'bg-brand-50 text-brand-700' },
+  customer: { label: 'Customer', className: 'bg-stone-100 text-stone-700' },
+};
+
+export function RoleBadge({ role }) {
+  const style = ROLE_STYLES[role] ?? ROLE_STYLES.customer;
+  return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${style.className}`}>{style.label}</span>;
 }
 
 export function ProviderBadge({ provider }) {

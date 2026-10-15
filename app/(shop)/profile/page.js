@@ -91,7 +91,8 @@ function ProfileTab({ user, purchaseCount }) {
             ['Email', user.email],
             ['Member since', fmtDate(user.createdAt, { dateStyle: 'long' })],
             ['Account type', ROLE_LABELS[user.role] ?? 'Customer'],
-            ['Purchases', String(purchaseCount)],
+            ...(user.role === 'customer' ? [['Purchases', String(purchaseCount)]] : []),
+            ...(user.role === 'seller' && user.storeName ? [['Shop', user.storeName]] : []),
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="text-stone-500">{k}</dt>
@@ -99,9 +100,9 @@ function ProfileTab({ user, purchaseCount }) {
             </div>
           ))}
         </dl>
-        {user.role === 'admin' && (
-          <Link href="/admin" className="btn btn-md btn-outline mt-5 w-full">
-            Open admin dashboard
+        {WORKSPACES[user.role] && (
+          <Link href={WORKSPACES[user.role].href} className="btn btn-md btn-outline mt-5 w-full">
+            {WORKSPACES[user.role].label}
           </Link>
         )}
       </section>
@@ -114,11 +115,19 @@ function ProfileTab({ user, purchaseCount }) {
   );
 }
 
+// Sellers and admins don't shop on their account: they get settings only, plus a link to their workspace.
+const WORKSPACES = {
+  admin: { href: '/admin', label: 'Open admin dashboard' },
+  seller: { href: '/seller/dashboard', label: 'Open seller dashboard' },
+};
+
 export default async function ProfilePage({ searchParams }) {
   const { tab: rawTab } = await searchParams;
-  const tab = TABS.some((t) => t.id === rawTab) ? rawTab : 'profile';
-  const user = await requireUser(`/profile${tab === 'profile' ? '' : `?tab=${tab}`}`);
-  const purchases = await getUserPurchases(user.id);
+  const requested = TABS.some((t) => t.id === rawTab) ? rawTab : 'profile';
+  const user = await requireUser(`/profile${requested === 'profile' ? '' : `?tab=${requested}`}`);
+  const isCustomer = user.role === 'customer';
+  const tab = isCustomer ? requested : 'profile';
+  const purchases = isCustomer ? await getUserPurchases(user.id) : [];
 
   return (
     <div className="container-page py-10 sm:py-14">
@@ -132,24 +141,26 @@ export default async function ProfilePage({ searchParams }) {
         </div>
       </header>
 
-      {/* Tabs are links (URL state): shareable, back-button friendly, no client JS. */}
-      <nav aria-label="Account sections" className="mt-10 inline-flex gap-1 rounded-full bg-stone-100 p-1">
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={t.id === 'profile' ? '/profile' : `/profile?tab=${t.id}`}
-            aria-current={tab === t.id ? 'page' : undefined}
-            className={`rounded-full px-4 py-2 text-sm transition-colors ${tab === t.id ? 'bg-white text-black shadow-sm' : 'text-stone-600 hover:text-black'}`}
-          >
-            {t.label}
-            {t.id === 'downloads' && purchases.length > 0 && (
-              <span className="ml-2 rounded-full bg-black/5 px-2 py-0.5 text-xs text-stone-600">{purchases.length}</span>
-            )}
-          </Link>
-        ))}
-      </nav>
+      {/* Tabs are links (URL state): shareable, back-button friendly, no client JS. Customers only. */}
+      {isCustomer && (
+        <nav aria-label="Account sections" className="mt-10 inline-flex gap-1 rounded-full bg-stone-100 p-1">
+          {TABS.map((t) => (
+            <Link
+              key={t.id}
+              href={t.id === 'profile' ? '/profile' : `/profile?tab=${t.id}`}
+              aria-current={tab === t.id ? 'page' : undefined}
+              className={`rounded-full px-4 py-2 text-sm transition-colors ${tab === t.id ? 'bg-white text-black shadow-sm' : 'text-stone-600 hover:text-black'}`}
+            >
+              {t.label}
+              {t.id === 'downloads' && purchases.length > 0 && (
+                <span className="ml-2 rounded-full bg-black/5 px-2 py-0.5 text-xs text-stone-600">{purchases.length}</span>
+              )}
+            </Link>
+          ))}
+        </nav>
+      )}
 
-      <div className="mt-8">
+      <div className={isCustomer ? 'mt-8' : 'mt-10'}>
         {tab === 'downloads' ? <DownloadsTab purchases={purchases} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
       </div>
     </div>

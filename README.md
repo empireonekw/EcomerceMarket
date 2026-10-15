@@ -74,12 +74,19 @@ A blur placeholder is generated from `coverImage` with sharp at creation time.
 ## Multi-vendor marketplace
 
 ```
-/sell ─▶ Become a Seller (store name + bank / EasyPaisa / JazzCash) ─▶ /seller/dashboard
+/sell ─▶ /sell/signup (seller account) ─▶ /login (email prefilled) ─▶ /seller/onboarding (shop name + description) ─▶ /seller/dashboard
+/seller/dashboard ─▶ "Add your payout details" alert until a bank account / EasyPaisa / JazzCash wallet is saved
 /seller/products/add ─▶ status 'pending' ─▶ admin approves (/admin/products?status=pending) ─▶ live
 checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendingPayout ─▶ /admin/payouts ─▶ Mark as Paid
 ```
 
-- **Roles:** `customer` → `seller` (self-serve at `/sell`) · `admin` (only via `create-admin`).
+- **Roles:** `customer` (`/signup`) and `seller` (`/sell/signup`) are separate accounts — a shopping account can't
+  become a seller; `/sell` asks it to sign out first. `admin` only via `create-admin`.
+- **Shop setup gate:** a seller account has no `seller.storeName` until `/seller/onboarding` is completed.
+  `requireSellerStore()` (every page in `app/seller/(workspace)`) and the seller product/payout APIs send it back there,
+  so an abandoned setup is resumed on the next visit or login. Payout details are added later from the dashboard.
+- **Account menus by role:** customers get Profile + My purchases; sellers get their workspace (no purchases);
+  admins get admin links.
 - **Money model (integer cents):** every order line writes a `Transaction` (`gross = commission + sellerEarning`,
   with the rate used). Seller counters on `User.seller` (`totalEarnings`, `pendingPayout`, `paidPayout`) are updated
   in the **same MongoDB transaction** as the order and ledger. Commission rounds to the cent; the seller gets the
@@ -92,7 +99,8 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
 - **Payouts:** sellers may request one at a time (`Payout` status `requested`). Admin "Mark as Paid" clears
   **exactly the amount shown/sent** (newer sales stay pending), snapshots the destination, stores an optional
   transaction reference, and writes a negative `payout` ledger entry. Bank details are `select: false`.
-- **API:** `POST /api/seller/register` · `PUT /api/seller/profile` · `POST /api/seller/products` ·
+- **API:** `POST /api/seller/onboarding { storeName, storeDescription }` ·
+  `PUT /api/seller/profile { bankDetails } | { storeName, storeDescription }` · `POST /api/seller/products` ·
   `POST /api/seller/payouts` · `POST /api/admin/payouts { sellerId, amount?, reference? }` ·
   `PUT /api/products/:id { status }` (admin approval).
 - **Upgrading an existing database:** `npm run migrate:marketplace` (marks pre-existing products approved), then `npm run db:indexes`.
@@ -123,10 +131,13 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
 npm run create-admin -- --email you@example.com --name "Your Name"   # prints a generated password once
 ```
 
-Sign in at `/login` → `/admin` (Dashboard · Products · Add product · Orders).
+Sign in at `/login` → `/admin` (Dashboard · Products · Add product · Users · Orders · Payouts).
 
-- **Auth:** admins are users with `role: 'admin'` (only ever set by `create-admin`; signup always creates
-  customers). `proxy.js` only redirects when there's no cookie — the real check runs in every admin page and
+- **Users (`/admin/users`):** every account with role tabs, search, a status (active · never logged in · shop setup
+  pending · payout details missing), paid purchases (matched by email, guest orders included — display only) and
+  seller totals; `/admin/users/:id` adds the shop, masked payout method, products, sales, payouts and orders.
+- **Auth:** admins are users with `role: 'admin'` (only ever set by `create-admin`; signup only creates
+  customers and sellers). `proxy.js` only redirects when there's no cookie — the real check runs in every admin page and
   data function (`requireAdmin()` in `lib/auth.js`) and every admin API route (`authorizeAdminRequest()`),
   which also accepts `Authorization: Bearer $ADMIN_API_KEY` for scripts.
 - **CSRF:** cookie-authenticated writes must come from the same origin (checked server-side).

@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import ProductForm from '@/components/dashboard/ProductForm';
 import { PageHeader } from '@/components/dashboard/ui';
-import { requireSeller } from '@/lib/auth';
+import { requireSellerStore } from '@/lib/auth';
 import { getCategories } from '@/lib/data/categories';
 
 export const metadata = { title: 'Add Product' };
 
 export default async function SellerAddProductPage() {
-  await requireSeller('/seller/products/add');
+  await requireSellerStore('/seller/products/add');
   const categories = await getCategories();
 
   return (

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { BadgePercent, ShieldCheck, Upload, Wallet } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
-import SellerProfileForm from '@/components/seller/SellerProfileForm';
+import SwitchToSellerButton from '@/components/seller/SwitchToSellerButton';
 import { getCurrentUser } from '@/lib/auth';
 import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
 import { siteConfig } from '@/lib/site';
@@ -47,10 +47,10 @@ function Perks() {
 }
 
 /**
- * /sell — one URL, three states:
- *  - signed out  → explain + log in / sign up (returning here afterwards)
- *  - customer    → "Become a Seller" registration (store name + payout details)
- *  - seller      → straight to the seller dashboard
+ * /sell — the seller landing page:
+ *  - signed out  → explain + "Create seller account" (/sell/signup) / log in
+ *  - customer    → seller accounts are separate from shopping accounts: sign out to create one
+ *  - seller      → straight to the workspace (shop setup first if it isn't finished)
  */
 export default async function SellPage() {
   const user = await getCurrentUser();
@@ -67,13 +67,13 @@ export default async function SellPage() {
           {!user && (
             <>
               <h2 className="headline text-2xl">Start selling</h2>
-              <p className="mt-2 text-sm text-stone-600">Log in or create a free account, then set up your store in one step.</p>
+              <p className="mt-2 text-sm text-stone-600">Create a free seller account, then name your shop — about two minutes in total.</p>
               <div className="mt-6 flex flex-col gap-2">
-                <Link href="/signup?next=/sell" className="btn btn-lg btn-primary">
-                  Create an account
+                <Link href="/sell/signup" className="btn btn-lg btn-primary">
+                  Create seller account
                 </Link>
-                <Link href="/login?next=/sell" className="btn btn-lg btn-outline">
-                  I already have an account
+                <Link href="/login" className="btn btn-lg btn-outline">
+                  I already sell here — log in
                 </Link>
               </div>
             </>
@@ -81,13 +81,12 @@ export default async function SellPage() {
 
           {user?.role === 'customer' && (
             <>
-              <h2 className="headline text-2xl">Become a seller</h2>
+              <h2 className="headline text-2xl">Selling needs a seller account</h2>
               <p className="mt-2 text-sm text-stone-600">
-                Signed in as {user.email}. Name your store and tell us where to send your earnings.
+                You’re signed in as {user.email}, a shopping account. Seller accounts are separate, so your purchases
+                and your shop never mix — create one with a different email.
               </p>
-              <div className="mt-6">
-                <SellerProfileForm mode="register" />
-              </div>
+              <SwitchToSellerButton className="btn btn-lg btn-primary mt-6 w-full" />
             </>
           )}
 

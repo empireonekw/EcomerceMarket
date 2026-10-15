@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import CategoryIcon from '@/components/CategoryIcon';
+import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
 
 /** Pill link; the active page sits on a soft stone pill. */
@@ -133,12 +134,7 @@ export default function DesktopNav({ categories }) {
           </NavLink>
         ),
       )}
-      <Link
-        href={siteConfig.sellCta.href}
-        className="btn btn-sm btn-dark ml-3"
-      >
-        {siteConfig.sellCta.label}
-      </Link>
+      <SellCta className="btn btn-sm btn-dark ml-3" />
     </nav>
   );
 }

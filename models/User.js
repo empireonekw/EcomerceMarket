@@ -21,7 +21,8 @@ const bankDetailsSchema = new Schema(
 // Seller balances in integer cents. Updated atomically with $inc alongside a Transaction ledger entry.
 const sellerSchema = new Schema(
   {
-    storeName: { type: String, trim: true, maxlength: 60 },
+    storeName: { type: String, trim: true, maxlength: 60 }, // set during shop setup; absent = setup not finished
+    storeDescription: { type: String, trim: true, maxlength: 500 },
     bankDetails: { type: bankDetailsSchema, select: false }, // bank account and/or EasyPaisa / JazzCash wallet
     totalEarnings: { type: Number, default: 0, min: 0 }, // lifetime 90% share
     pendingPayout: { type: Number, default: 0, min: 0 }, // earned, not yet paid out
@@ -63,7 +64,7 @@ const userSchema = new Schema(
     // instantly invalidates all previously issued sessions.
     tokenVersion: { type: Number, default: 0 },
     lastLoginAt: { type: Date },
-    seller: { type: sellerSchema }, // present only once the user registers as a seller
+    seller: { type: sellerSchema }, // present for seller accounts (created at seller sign-up)
   },
   {
     timestamps: true,
@@ -83,7 +84,7 @@ const userSchema = new Schema(
  * (rather than 'seller +seller.bankDetails') avoids MongoDB parent/child projection collisions.
  */
 export const SELLER_WITH_BANK =
-  'role seller.storeName seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.bankDetails';
+  'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.bankDetails';
 
 // Admin dashboards list users by role, newest first.
 userSchema.index({ role: 1, createdAt: -1 });

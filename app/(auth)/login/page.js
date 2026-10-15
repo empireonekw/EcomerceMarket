@@ -13,7 +13,8 @@ const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/pr
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams;
   const next = safeNext(params.next);
-  const registered = params.registered === '1';
+  // '1' = new customer, 'seller' = new seller (see SignupForm)
+  const registered = ['1', 'seller'].includes(params.registered) ? params.registered : false;
   const user = await getCurrentUser();
 
   // Signed in but sent here from /admin without admin rights: explain instead of looping back.
@@ -36,16 +37,19 @@ export default async function LoginPage({ searchParams }) {
   if (user) redirect(next ?? DASHBOARD[user.role]);
 
   const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : '/signup';
+  const intro =
+    registered === 'seller'
+      ? { title: 'Your seller account is ready', subtitle: 'Log in to set up your shop — it only takes a minute.' }
+      : registered
+        ? { title: 'Welcome aboard', subtitle: `Log in to start shopping on ${siteConfig.name}.` }
+        : {
+            title: 'Welcome back',
+            subtitle: next?.startsWith('/admin') ? 'Log in with your admin account.' : `Log in to your ${siteConfig.name} account.`,
+          };
   return (
     <AuthCard
-      title={registered ? 'Welcome aboard' : 'Welcome back'}
-      subtitle={
-        registered
-          ? `Log in to start shopping on ${siteConfig.name}.`
-          : next?.startsWith('/admin')
-            ? 'Log in with your admin account.'
-            : `Log in to your ${siteConfig.name} account.`
-      }
+      title={intro.title}
+      subtitle={intro.subtitle}
       footer={
         <p>
           New to {siteConfig.name}?{' '}
