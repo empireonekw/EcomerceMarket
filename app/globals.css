@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand accent — electric indigo, the single saturated "action" colour (used sparingly). */
+  --color-brand-50: #eeeeff;
+  --color-brand-100: #deddff;
+  --color-brand-500: #6966fd;
+  --color-brand-600: #4d49fc;
+  --color-brand-700: #3c38e0;
+
+  --color-ink: #141414;
+
+  /* The one elevation: a soft, wide lift for hovered cards and floating panels. */
+  --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.1);
+
+  /* Auth-page colour fields (components/auth/AuthBackground.jsx). Slow and subtle; disabled by reduced motion. */
+  --animate-drift: drift 22s ease-in-out infinite alternate;
+
+  /* Hero gallery (components/home/HeroShowcase.jsx): the track holds two identical copies, so -50% = one seamless loop. */
+  --animate-marquee-x: marquee-x 60s linear infinite;
+  --animate-marquee-y: marquee-y 60s linear infinite;
+  @keyframes marquee-x {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @keyframes marquee-y {
+    to {
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+  @keyframes drift {
+    to {
+      transform: translate3d(40px, -30px, 0) scale(1.12);
+    }
+  }
+  @keyframes badge-pop {
+    0% {
+      transform: scale(0.5);
+    }
+    70% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+/* Lock page scroll while a modal dialog (cart drawer) is open. */
+html:has(dialog[open]:modal) {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-white text-ink;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* The site's heading voice: Inter at a light 320 weight with tight tracking (set the size per use). */
+@utility headline {
+  font-weight: 320;
+  letter-spacing: -0.02em;
+}
+
+/*
+ * Buttons: always pills. Combine `btn` + one size + one colour, e.g. `btn btn-md btn-primary`.
+ *  primary = indigo, the page's main action (use once per view) · dark = strong secondary
+ *  outline = everything else · soft = a settled state (e.g. "In cart")
+ */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-[480] transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-sm {
+  @apply h-9 px-4 text-sm;
+}
+@utility btn-md {
+  @apply h-11 px-6 text-sm;
+}
+@utility btn-lg {
+  @apply h-12 px-7 text-base;
+}
+@utility btn-primary {
+  @apply bg-brand-600 text-white hover:bg-brand-700;
+}
+@utility btn-dark {
+  @apply bg-black text-white hover:bg-stone-800;
+}
+@utility btn-outline {
+  @apply border border-stone-300 bg-white text-black hover:border-black;
+}
+@utility btn-soft {
+  @apply bg-stone-100 text-black hover:bg-stone-200;
+}
