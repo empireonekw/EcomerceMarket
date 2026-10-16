@@ -128,9 +128,8 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
   only accepts a customer with a paid, completed order **linked to their account** for that product; one review per
   buyer per product (`Review` model snapshots the buyer's name and product title). The homepage "Loved by buyers"
   section shows the newest six with the real average and count, flips each card on hover/focus to reveal the
-  reviewer, and stays hidden until the first review exists. The form tells buyers their name is shown publicly.
-  For design work, `SHOW_SAMPLE_REVIEWS=true` fills the section with placeholders (`lib/sample-reviews.js`) until a
-  real review exists — **set it to false before launch**.
+  reviewer. Until the first real review exists it shows the sample reviews defined in
+  `components/home/Reviews.jsx`. The form tells buyers their name is shown publicly.
 
 ## Admin portal
 

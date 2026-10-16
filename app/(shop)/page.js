@@ -4,38 +4,19 @@ import ProductGrid from '@/components/ProductGrid';
 import HeroShowcase from '@/components/home/HeroShowcase';
 import FeatureMarquee from '@/components/home/FeatureMarquee';
 import CategoryIcon from '@/components/CategoryIcon';
-import ReviewCard from '@/components/home/ReviewCard';
-import Stars from '@/components/Stars';
+import Reviews from '@/components/home/Reviews';
+import SectionHeading from '@/components/home/SectionHeading';
 import { getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
-import { getFeaturedReviews } from '@/lib/data/reviews';
 
 // ISR: served as static HTML from the cache, regenerated at most every 5 minutes
 // (and immediately after an admin creates a product — see POST /api/products).
 export const revalidate = 300;
 
-function SectionHeading({ id, title, description, children }) {
-  return (
-    <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h2 id={id} className="headline text-3xl sm:text-5xl">
-          {title}
-        </h2>
-        {description && <p className="mt-3 text-lg text-stone-600">{description}</p>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
 export default async function HomePage() {
   // Same data function that powers GET /api/products — Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, categories, reviews] = await Promise.all([
-    getProducts({ sort: 'newest', limit: 6 }),
-    getCategories(),
-    getFeaturedReviews(6),
-  ]);
+  const [{ items: latest }, categories] = await Promise.all([getProducts({ sort: 'newest', limit: 6 }), getCategories()]);
 
   return (
     <>
@@ -81,25 +62,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------------- Reviews (verified buyers; design placeholders via SHOW_SAMPLE_REVIEWS until the first one exists) ---------------- */}
-      {reviews.items.length > 0 && (
-        <section className="container-page pt-20 sm:pt-28" aria-labelledby="reviews-heading">
-          <SectionHeading id="reviews-heading" title="Loved by buyers" description="What customers say about their downloads. Hover a card to see who wrote it.">
-            <p className="flex items-center gap-2.5 text-sm text-stone-600">
-              <Stars rating={reviews.average} size={18} />
-              <span>
-                <span className="font-medium text-black tabular-nums">{reviews.average.toFixed(1)}</span> average ·{' '}
-                {reviews.count} review{reviews.count === 1 ? '' : 's'}
-              </span>
-            </p>
-          </SectionHeading>
-          <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-            {reviews.items.map((review) => (
-              <ReviewCard key={review._id} review={review} />
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* ---------------- Reviews ---------------- */}
+      <Reviews />
     </>
   );
 }
