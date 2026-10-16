@@ -2,9 +2,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth';
 import { getUserPurchases } from '@/lib/data/orders';
+import { getUserReviewMap } from '@/lib/data/reviews';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { Avatar } from '@/components/UserMenu';
 import { NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
+import ReviewButton from '@/components/profile/ReviewButton';
 
 export const metadata = { title: 'My account', robots: { index: false } };
 
@@ -18,7 +20,7 @@ const TABS = [
 const fmtDate = (d, opts = { dateStyle: 'medium' }) => new Date(d).toLocaleDateString('en-US', opts);
 const fmtDateTime = (d) => new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
-function DownloadsTab({ purchases }) {
+function DownloadsTab({ purchases, reviews, authorName }) {
   if (purchases.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
@@ -60,20 +62,19 @@ function DownloadsTab({ purchases }) {
               </p>
             </div>
           </div>
-          {p.downloadsRemaining > 0 ? (
-            <a
-              href={p.downloadUrl}
-              rel="noreferrer"
-              className="btn btn-md btn-primary shrink-0"
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Download File
-            </a>
-          ) : (
-            <span className="shrink-0 rounded-full bg-stone-100 px-4 py-2 text-center text-sm text-stone-500">Download limit reached</span>
-          )}
+          <div className="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
+            {p.downloadsRemaining > 0 ? (
+              <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Download File
+              </a>
+            ) : (
+              <span className="rounded-full bg-stone-100 px-4 py-2 text-center text-sm text-stone-500">Download limit reached</span>
+            )}
+            <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
+          </div>
         </li>
       ))}
     </ul>
@@ -127,7 +128,7 @@ export default async function ProfilePage({ searchParams }) {
   const user = await requireUser(`/profile${requested === 'profile' ? '' : `?tab=${requested}`}`);
   const isCustomer = user.role === 'customer';
   const tab = isCustomer ? requested : 'profile';
-  const purchases = isCustomer ? await getUserPurchases(user.id) : [];
+  const [purchases, reviews] = isCustomer ? await Promise.all([getUserPurchases(user.id), getUserReviewMap(user.id)]) : [[], {}];
 
   return (
     <div className="container-page py-10 sm:py-14">
@@ -161,7 +162,7 @@ export default async function ProfilePage({ searchParams }) {
       )}
 
       <div className={isCustomer ? 'mt-8' : 'mt-10'}>
-        {tab === 'downloads' ? <DownloadsTab purchases={purchases} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
+        {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
       </div>
     </div>
   );

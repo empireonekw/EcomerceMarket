@@ -2,9 +2,13 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductGrid from '@/components/ProductGrid';
 import HeroShowcase from '@/components/home/HeroShowcase';
+import FeatureMarquee from '@/components/home/FeatureMarquee';
 import CategoryIcon from '@/components/CategoryIcon';
+import ReviewCard from '@/components/home/ReviewCard';
+import Stars from '@/components/Stars';
 import { getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
+import { getFeaturedReviews } from '@/lib/data/reviews';
 
 // ISR: served as static HTML from the cache, regenerated at most every 5 minutes
 // (and immediately after an admin creates a product — see POST /api/products).
@@ -27,14 +31,16 @@ function SectionHeading({ id, title, description, children }) {
 export default async function HomePage() {
   // Same data function that powers GET /api/products — Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, categories] = await Promise.all([
-    getProducts({ sort: 'newest', limit: 8 }),
+  const [{ items: latest }, categories, reviews] = await Promise.all([
+    getProducts({ sort: 'newest', limit: 6 }),
     getCategories(),
+    getFeaturedReviews(6),
   ]);
 
   return (
     <>
       <HeroShowcase />
+      <FeatureMarquee />
 
       {/* ---------------- Shop by category ---------------- */}
       {categories.length > 0 && (
@@ -74,6 +80,26 @@ export default async function HomePage() {
           <ProductGrid products={latest} emptyMessage="No products yet — run `npm run seed`." />
         </div>
       </section>
+
+      {/* ---------------- Reviews (verified buyers; design placeholders via SHOW_SAMPLE_REVIEWS until the first one exists) ---------------- */}
+      {reviews.items.length > 0 && (
+        <section className="container-page pt-20 sm:pt-28" aria-labelledby="reviews-heading">
+          <SectionHeading id="reviews-heading" title="Loved by buyers" description="What customers say about their downloads. Hover a card to see who wrote it.">
+            <p className="flex items-center gap-2.5 text-sm text-stone-600">
+              <Stars rating={reviews.average} size={18} />
+              <span>
+                <span className="font-medium text-black tabular-nums">{reviews.average.toFixed(1)}</span> average ·{' '}
+                {reviews.count} review{reviews.count === 1 ? '' : 's'}
+              </span>
+            </p>
+          </SectionHeading>
+          <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {reviews.items.map((review) => (
+              <ReviewCard key={review._id} review={review} />
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   );
 }

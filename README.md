@@ -74,14 +74,14 @@ A blur placeholder is generated from `coverImage` with sharp at creation time.
 ## Multi-vendor marketplace
 
 ```
-/sell ─▶ /sell/signup (seller account) ─▶ /login (email prefilled) ─▶ /seller/onboarding (shop name + description) ─▶ /seller/dashboard
+Sell With Us ─▶ /sell/signup (seller account) ─▶ /login (email prefilled) ─▶ /seller/onboarding (shop name + description) ─▶ /seller/dashboard
 /seller/dashboard ─▶ "Add your payout details" alert until a bank account / EasyPaisa / JazzCash wallet is saved
 /seller/products/add ─▶ status 'pending' ─▶ admin approves (/admin/products?status=pending) ─▶ live
 checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendingPayout ─▶ /admin/payouts ─▶ Mark as Paid
 ```
 
 - **Roles:** `customer` (`/signup`) and `seller` (`/sell/signup`) are separate accounts — a shopping account can't
-  become a seller; `/sell` asks it to sign out first. `admin` only via `create-admin`.
+  become a seller; `/sell/signup` asks it to sign out first. (`/sell` permanently redirects there.) `admin` only via `create-admin`.
 - **Shop setup gate:** a seller account has no `seller.storeName` until `/seller/onboarding` is completed.
   `requireSellerStore()` (every page in `app/seller/(workspace)`) and the seller product/payout APIs send it back there,
   so an abandoned setup is resumed on the next visit or login. Payout details are added later from the dashboard.
@@ -124,6 +124,13 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
   linked automatically; guest orders are linked from their receipt page ("Save to my account"), where the
   private receipt token proves ownership (`POST /api/orders/claim`).
 - **Download history:** each purchased item tracks `downloadCount` and `lastDownloadedAt`.
+- **Reviews (verified buyers only):** My Purchases → "Write a review" (1–5 stars, 20–600 characters). `POST /api/reviews`
+  only accepts a customer with a paid, completed order **linked to their account** for that product; one review per
+  buyer per product (`Review` model snapshots the buyer's name and product title). The homepage "Loved by buyers"
+  section shows the newest six with the real average and count, flips each card on hover/focus to reveal the
+  reviewer, and stays hidden until the first review exists. The form tells buyers their name is shown publicly.
+  For design work, `SHOW_SAMPLE_REVIEWS=true` fills the section with placeholders (`lib/sample-reviews.js`) until a
+  real review exists — **set it to false before launch**.
 
 ## Admin portal
 
@@ -136,6 +143,10 @@ Sign in at `/login` → `/admin` (Dashboard · Products · Add product · Users 
 - **Users (`/admin/users`):** every account with role tabs, search, a status (active · never logged in · shop setup
   pending · payout details missing), paid purchases (matched by email, guest orders included — display only) and
   seller totals; `/admin/users/:id` adds the shop, masked payout method, products, sales, payouts and orders.
+  **Delete account** (`DELETE /api/admin/users/:id`, admin session only — not the API key) removes a customer or
+  seller after a confirmation dialog. It refuses admins, yourself, and sellers with a pending payout. A seller's
+  never-sold products are deleted; purchased ones are unpublished so buyers keep their downloads. Orders are kept
+  (unlinked from the account). Runs in one MongoDB transaction.
 - **Auth:** admins are users with `role: 'admin'` (only ever set by `create-admin`; signup only creates
   customers and sellers). `proxy.js` only redirects when there's no cookie — the real check runs in every admin page and
   data function (`requireAdmin()` in `lib/auth.js`) and every admin API route (`authorizeAdminRequest()`),

@@ -14,6 +14,11 @@ const nextConfig = {
     remotePatterns: REMOTE_IMAGE_PATTERNS,
   },
 
+  // "Sell With Us" goes straight to seller sign-up; old /sell links are redirected before anything renders.
+  async redirects() {
+    return [{ source: '/sell', destination: '/sell/signup', permanent: true }];
+  },
+
   async headers() {
     return [
       {

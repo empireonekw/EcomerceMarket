@@ -45,7 +45,7 @@ export default function Loading() {
       <section className="container-page pt-20 sm:pt-28">
         <div className="h-10 w-64 rounded-2xl bg-stone-100" />
         <div className="mt-10">
-          <ProductGridSkeleton count={8} />
+          <ProductGridSkeleton count={6} />
         </div>
       </section>
     </div>

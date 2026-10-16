@@ -28,7 +28,7 @@ const LINK_GROUPS = [
     links: [
       { label: 'About Us', href: '/about' },
       { label: 'Blog', href: '/blog' },
-      { label: 'Sell With Us', href: '/sell' },
+      { label: 'Sell With Us', href: '/sell/signup' },
     ],
   },
 ];
@@ -44,7 +44,7 @@ export default function Footer() {
             <p className="mt-4 text-lg text-stone-600">Open a store in minutes and reach buyers looking for exactly what you make.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/sell" className="btn btn-lg btn-primary">
+            <Link href="/sell/signup" className="btn btn-lg btn-primary">
               Start selling
             </Link>
             <Link href="/products" className="btn btn-lg btn-outline">

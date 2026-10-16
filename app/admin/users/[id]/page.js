@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, DollarSign, Package, ShoppingBag, Wallet } from 'lucide-react';
+import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { getAdminUserDetail } from '@/lib/data/admin-users';
 import { formatPrice } from '@/lib/utils';
@@ -51,13 +52,18 @@ export default async function AdminUserPage({ params }) {
             {u.email} · Joined {date(u.createdAt)} · Last active {u.lastLoginAt ? date(u.lastLoginAt) : 'never'}
           </p>
         </div>
+        {u.role !== 'admin' && (
+          <div className="sm:ml-auto">
+            <DeleteUserButton id={u.id} name={u.name} role={u.role} size="md" redirectTo="/admin/users" />
+          </div>
+        )}
       </header>
 
       {/* ---------- Numbers ---------- */}
       <section aria-label="Activity" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {s ? (
           <>
-            <StatCard label="Gross sales" value={usd(s.gross)} sub={`${s.sales} sale${s.sales === 1 ? '' : 's'}`} icon={ShoppingBag} />
+            <StatCard label="Products sold" value={s.sales} sub={`${usd(s.gross)} gross sales`} icon={ShoppingBag} />
             <StatCard label="Seller earnings" value={usd(s.earnings)} sub="Lifetime share after fees" icon={DollarSign} tone="positive" />
             <StatCard label="Pending payout" value={usd(s.pendingPayout)} sub={`${usd(s.paidPayout)} paid out so far`} icon={Clock} tone="warning" />
             <StatCard label="Products" value={s.products} sub={`${s.live} live · ${s.inReview} in review`} icon={Package} tone="info" />
@@ -65,7 +71,7 @@ export default async function AdminUserPage({ params }) {
         ) : (
           <>
             <StatCard label="Total spent" value={usd(u.purchases.spent)} sub="Paid orders" icon={DollarSign} tone="positive" />
-            <StatCard label="Orders" value={u.purchases.orders} sub="Paid orders with this email" icon={ShoppingBag} tone="info" />
+            <StatCard label="Items purchased" value={u.purchases.items} sub={`${u.purchases.orders} paid order${u.purchases.orders === 1 ? '' : 's'} with this email`} icon={ShoppingBag} tone="info" />
             <StatCard label="Last purchase" value={date(u.purchases.lastAt)} icon={Clock} />
             <StatCard label="Member for" value={`${Math.max(0, Math.floor((Date.now() - new Date(u.createdAt)) / 86_400_000))} days`} sub={`Since ${date(u.createdAt)}`} icon={Wallet} />
           </>

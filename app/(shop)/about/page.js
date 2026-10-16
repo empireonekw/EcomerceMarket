@@ -25,7 +25,7 @@ export default function AboutPage() {
         <Link href="/products" className="btn btn-lg btn-primary">
           Browse products
         </Link>
-        <Link href="/sell" className="btn btn-lg btn-outline">
+        <Link href="/sell/signup" className="btn btn-lg btn-outline">
           Sell with us
         </Link>
       </PageIntro>

@@ -65,7 +65,7 @@ export default async function ProductPage({ params }) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product, 4);
+  const related = await getRelatedProducts(product, 3);
   const fileSize = formatFileSize(product.fileSize);
   const discount =
     product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;

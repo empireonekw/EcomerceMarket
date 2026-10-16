@@ -49,7 +49,7 @@ const STATUS_TONES = {
 /** Order, product-moderation and payout statuses share one badge. */
 export function StatusBadge({ status, label }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${STATUS_TONES[status] ?? STATUS_TONES.cancelled}`}>
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${STATUS_TONES[status] ?? STATUS_TONES.cancelled}`}>
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {label ?? status}
     </span>
@@ -64,7 +64,7 @@ const ROLE_STYLES = {
 
 export function RoleBadge({ role }) {
   const style = ROLE_STYLES[role] ?? ROLE_STYLES.customer;
-  return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${style.className}`}>{style.label}</span>;
+  return <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${style.className}`}>{style.label}</span>;
 }
 
 export function ProviderBadge({ provider }) {

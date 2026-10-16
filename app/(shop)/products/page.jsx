@@ -86,7 +86,7 @@ export default async function ProductsPage({ searchParams }) {
       </div>
 
       <div className="mt-8">
-        <ProductGrid products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
+        <ProductGrid products={items} preloadCount={pagination.page === 1 ? 3 : 0} />
       </div>
 
       <Pagination page={pagination.page} totalPages={pagination.totalPages} params={base} />
