@@ -5,7 +5,7 @@ import Form from 'next/form';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Loader2, Search, SearchX } from 'lucide-react';
+import { Search, SearchX } from 'lucide-react';
 import { escapeRegex, formatPrice, searchTokens, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 
 const DEBOUNCE_MS = 300;
@@ -180,11 +180,8 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
           aria-label="Search"
           className="absolute left-3 top-1/2 grid size-6 -translate-y-1/2 place-items-center text-stone-500 transition-colors hover:text-black peer-focus:text-black"
         >
-          {loading ? (
-            <Loader2 className="size-[18px] animate-spin" strokeWidth={1.75} aria-hidden="true" />
-          ) : (
-            <Search className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
-          )}
+          {/* Always the search icon: loading is shown by the skeleton rows in the results panel. */}
+          <Search className="size-[18px]" strokeWidth={1.75} aria-hidden="true" />
         </button>
       </Form>
 
