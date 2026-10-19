@@ -27,7 +27,8 @@ function accountLinks(user) {
     }
     return [
       { href: '/seller/dashboard', label: 'Seller dashboard' },
-      { href: '/seller/products/add', label: 'Add product' },
+      { href: '/seller/products', label: 'My products' },
+      { href: '/seller/sales', label: 'Sales history' },
       { href: '/seller/dashboard#payouts', label: 'Payouts' },
       { href: '/seller/dashboard#shop', label: 'Shop settings' },
       { href: '/profile', label: 'Account settings' },

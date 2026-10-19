@@ -55,12 +55,13 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
         ref={dialogRef}
         aria-labelledby={titleId}
         onClick={(e) => e.target === e.currentTarget && !deleting && e.currentTarget.close()}
-        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 text-ink shadow-2xl backdrop:bg-black/40"
+        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/40"
       >
         <div className="p-6">
           <h2 id={titleId} className="text-lg font-medium">
-            Delete “{title}”?
+            Are you sure you want to delete?
           </h2>
+          <p className="mt-1 text-sm font-medium text-stone-800">{title}</p>
           <p className="mt-2 text-sm text-stone-600">
             This permanently removes the product from the store. If it has already been purchased, it will be
             <strong> unpublished instead</strong> so existing buyers keep access to their downloads.
@@ -72,17 +73,16 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
               disabled={deleting}
               className="h-10 rounded-full px-4 text-sm font-medium hover:bg-stone-100"
             >
-              Cancel
+              No, cancel
             </button>
             <button
               type="button"
               onClick={confirmDelete}
               disabled={deleting}
-              autoFocus
               className="inline-flex h-10 items-center gap-2 rounded-full bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-70"
             >
               {deleting && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-              {deleting ? 'Deleting…' : 'Delete product'}
+              {deleting ? 'Deleting…' : 'Yes, delete'}
             </button>
           </div>
         </div>

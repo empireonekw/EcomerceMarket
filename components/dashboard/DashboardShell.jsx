@@ -26,6 +26,8 @@ const AREAS = {
     home: '/seller/dashboard',
     nav: [
       { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p) => p === '/seller/dashboard' },
+      { href: '/seller/products', label: 'My Products', icon: Package, match: (p) => p === '/seller/products' },
+      { href: '/seller/sales', label: 'Sales History', icon: Receipt, match: (p) => p.startsWith('/seller/sales') },
       { href: '/seller/products/add', label: 'Add Product', icon: Plus, match: (p) => p.startsWith('/seller/products/add') },
       { href: '/seller/dashboard#payouts', label: 'Payouts & Bank Details', icon: Banknote, match: () => false },
       { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },

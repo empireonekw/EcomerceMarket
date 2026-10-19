@@ -103,6 +103,14 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
   `PUT /api/seller/profile { bankDetails } | { storeName, storeDescription }` · `POST /api/seller/products` ·
   `POST /api/seller/payouts` · `POST /api/admin/payouts { sellerId, amount?, reference? }` ·
   `PUT /api/products/:id { status }` (admin approval).
+- **Seller workspace:** Dashboard (balances, 12-month earnings chart + table, products, recent sales, payout and
+  shop settings) · **My products** (`/seller/products`: status, sales, earnings; hide/show approved items, delete with a
+  Yes/No confirmation — sold items are unpublished, never deleted) · **Sales history** (`/seller/sales`: every ledger
+  sale with date, product, order, buyer email partly hidden, price, fee, earnings; month filter, pagination).
+  API: `PATCH /api/seller/products/:id { isPublished }` · `DELETE /api/seller/products/:id`.
+- **Seller analytics (admin):** `/admin/users/:id` for a seller adds monthly earnings (12 months), earnings per
+  product per month (6 months) and an activity log built from the ledger, products and payouts
+  (`lib/data/seller-analytics.js`, shared with the seller workspace).
 - **Upgrading an existing database:** `npm run migrate:marketplace` (marks pre-existing products approved), then `npm run db:indexes`.
 
 ## Customer accounts
@@ -142,8 +150,10 @@ Sign in at `/login` → `/admin` (Dashboard · Products · Add product · Users 
 - **Users (`/admin/users`):** every account with role tabs, search, a status (active · never logged in · shop setup
   pending · payout details missing), paid purchases (matched by email, guest orders included — display only) and
   seller totals; `/admin/users/:id` adds the shop, masked payout method, products, sales, payouts and orders.
-  **Delete account** (`DELETE /api/admin/users/:id`, admin session only — not the API key) removes a customer or
-  seller after a confirmation dialog. It refuses admins, yourself, and sellers with a pending payout. A seller's
+  **Delete account** (`DELETE /api/admin/users/:id { password }`, admin session only — not the API key) removes a
+  customer or seller after a confirmation dialog **and the admin's own password**. Rows have checkboxes + **Select all**
+  for bulk delete (`POST /api/admin/users/bulk-delete { ids, password }`, ≤100; blocked accounts are skipped with a
+  reason). Wrong passwords are throttled (5 per 15 min); correct ones never are. It refuses admins, yourself, and sellers with a pending payout. A seller's
   never-sold products are deleted; purchased ones are unpublished so buyers keep their downloads. Orders are kept
   (unlinked from the account). Runs in one MongoDB transaction.
 - **Auth:** admins are users with `role: 'admin'` (only ever set by `create-admin`; signup only creates

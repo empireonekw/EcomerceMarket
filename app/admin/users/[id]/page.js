@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, DollarSign, Package, ShoppingBag, Wallet } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
+import { ActivityLog, EarningsPanel, ProductMonthlyPanel } from '@/components/dashboard/SellerAnalytics';
 import { getAdminUserDetail } from '@/lib/data/admin-users';
+import { getMonthlyEarnings, getProductMonthlyEarnings, getSellerActivity } from '@/lib/data/seller-analytics';
 import { formatPrice } from '@/lib/utils';
 
 export const metadata = { title: 'User details' };
@@ -26,9 +28,12 @@ function Details({ rows }) {
 
 export default async function AdminUserPage({ params }) {
   const { id } = await params;
-  const u = await getAdminUserDetail(id);
+  const u = await getAdminUserDetail(id); // authorizes the admin first
   if (!u) notFound();
   const s = u.selling;
+  const [monthly, byProduct, activity] = s
+    ? await Promise.all([getMonthlyEarnings(u.id, 12), getProductMonthlyEarnings(u.id, 6), getSellerActivity(u.id)])
+    : [];
 
   return (
     <>
@@ -77,6 +82,17 @@ export default async function AdminUserPage({ params }) {
           </>
         )}
       </section>
+
+      {/* ---------- Seller analytics: monthly earnings, per-product breakdown, activity ---------- */}
+      {s && (
+        <div className="mt-8 space-y-6">
+          <EarningsPanel months={monthly} title="Seller earnings by month" />
+          <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr] xl:items-start">
+            <ProductMonthlyPanel data={byProduct} />
+            <ActivityLog events={activity} />
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1.4fr] xl:items-start">
         {/* ---------- Account + shop ---------- */}

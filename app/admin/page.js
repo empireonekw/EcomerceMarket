@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, DollarSign, Package, Receipt } from 'lucide-react';
+import { ArrowUpRight, DollarSign, Landmark, Package, Receipt, Store, Users } from 'lucide-react';
 import { PageHeader, StatCard, StatusBadge, ProviderBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
 import { getDashboardStats } from '@/lib/data/admin';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
@@ -17,7 +17,7 @@ export default async function AdminDashboardPage() {
     <>
       <PageHeader
         title="Dashboard Overview"
-        description="Sales, orders and catalog at a glance."
+        description="Users, sellers, sales and catalog at a glance."
         actions={
           <Link href="/admin/products/add" className={buttonClasses.primary}>
             + Add product
@@ -25,9 +25,9 @@ export default async function AdminDashboardPage() {
         }
       />
 
-      <section aria-label="Key metrics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Platform overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Total Revenue"
+          label="Platform Revenue"
           value={usd(stats.revenue.total)}
           sub={
             stats.revenue.demo > 0
@@ -38,23 +38,45 @@ export default async function AdminDashboardPage() {
           tone="positive"
         />
         <StatCard
+          label="Total Users"
+          value={stats.users.total.toLocaleString('en-US')}
+          sub={`${stats.users.customers.toLocaleString('en-US')} customers`}
+          icon={Users}
+          tone="info"
+        />
+        <StatCard
+          label="Total Sellers"
+          value={stats.users.sellers.toLocaleString('en-US')}
+          sub={stats.users.sellersWithoutShop ? `${stats.users.sellersWithoutShop} haven’t set up a shop` : 'All shops set up'}
+          icon={Store}
+          tone={stats.users.sellersWithoutShop ? 'warning' : 'positive'}
+        />
+        <StatCard
+          label="Total Products"
+          value={stats.products.total.toLocaleString('en-US')}
+          sub={
+            stats.products.pendingReview
+              ? `${stats.products.active} live · ${stats.products.pendingReview} awaiting approval`
+              : `${stats.products.active} live${stats.products.drafts ? ` · ${stats.products.drafts} not live` : ''}`
+          }
+          icon={Package}
+          tone={stats.products.pendingReview ? 'warning' : 'info'}
+        />
+      </section>
+
+      <section aria-label="Orders and earnings" className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <StatCard
           label="Total Orders"
           value={stats.orders.total.toLocaleString('en-US')}
           sub={`${stats.orders.last30d} in the last 30 days`}
           icon={Receipt}
         />
         <StatCard
-          label="Active Products"
-          value={stats.products.active.toLocaleString('en-US')}
-          sub={
-            stats.products.pendingReview
-              ? `${stats.products.pendingReview} awaiting approval`
-              : stats.products.drafts
-                ? `${stats.products.drafts} not live`
-                : 'All products are live'
-          }
-          icon={Package}
-          tone={stats.products.pendingReview ? 'warning' : 'info'}
+          label="Your Earnings"
+          value={usd(stats.platform.commission)}
+          sub={`Commission + platform-owned sales, from ${usd(stats.platform.salesGross)} in product sales`}
+          icon={Landmark}
+          tone="positive"
         />
         <a
           href="/"

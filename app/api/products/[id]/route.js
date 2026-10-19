@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { refreshStorefront } from '@/lib/revalidate';
 import { getProductBySlug, getProductById } from '@/lib/data/products';
 import { updateProduct, deleteProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
@@ -9,11 +9,6 @@ const MAX_BODY_BYTES = 64 * 1024;
 const unauthorized = () =>
   NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: { 'WWW-Authenticate': 'Bearer' } });
 
-function refreshStorefront(...slugs) {
-  revalidatePath('/');
-  for (const slug of new Set(slugs.filter(Boolean))) revalidatePath(`/products/${slug}`);
-  revalidateTag('categories', 'max');
-}
 
 /**
  * GET /api/products/:id — public product details by ObjectId or slug (never includes downloadUrl).

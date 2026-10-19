@@ -27,7 +27,8 @@ const sellerSchema = new Schema(
     totalEarnings: { type: Number, default: 0, min: 0 }, // lifetime 90% share
     pendingPayout: { type: Number, default: 0, min: 0 }, // earned, not yet paid out
     paidPayout: { type: Number, default: 0, min: 0 }, // paid out so far
-    joinedAt: { type: Date },
+    joinedAt: { type: Date }, // seller account created
+    storeSetupAt: { type: Date }, // shop named (/seller/onboarding)
   },
   { _id: false },
 );
@@ -84,7 +85,7 @@ const userSchema = new Schema(
  * (rather than 'seller +seller.bankDetails') avoids MongoDB parent/child projection collisions.
  */
 export const SELLER_WITH_BANK =
-  'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.bankDetails';
+  'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.storeSetupAt seller.bankDetails';
 
 // Admin dashboards list users by role, newest first.
 userSchema.index({ role: 1, createdAt: -1 });
