@@ -1,11 +1,12 @@
 'use client';
 
 import { useId, useRef, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
 
-/** Seller → My products row actions: hide/show (approved products) and delete with a Yes/No confirmation. */
+/** Seller → My products row actions: edit, hide/show (approved products) and delete with a Yes/No confirmation. */
 export default function SellerProductActions({ product }) {
   const { _id: id, title, status, isPublished } = product;
   const router = useRouter();
@@ -60,6 +61,14 @@ export default function SellerProductActions({ product }) {
   const pending = Boolean(busy) || refreshing;
   return (
     <div className="flex items-center justify-end gap-1">
+      <Link
+        href={`/seller/products/${id}/edit`}
+        className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100"
+      >
+        <Pencil size={15} strokeWidth={1.75} aria-hidden="true" />
+        Edit
+        <span className="sr-only"> {title}</span>
+      </Link>
       {status === 'approved' && (
         <button
           type="button"

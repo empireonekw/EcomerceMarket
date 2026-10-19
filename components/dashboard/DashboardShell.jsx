@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, Banknote, LayoutDashboard, Menu, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import LinkPending from '@/components/LinkPending';
 import SignOutButton from '@/components/SignOutButton';
 import { siteConfig } from '@/lib/site';
 
@@ -26,7 +27,7 @@ const AREAS = {
     home: '/seller/dashboard',
     nav: [
       { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p) => p === '/seller/dashboard' },
-      { href: '/seller/products', label: 'My Products', icon: Package, match: (p) => p === '/seller/products' },
+      { href: '/seller/products', label: 'My Products', icon: Package, match: (p) => p === '/seller/products' || p.endsWith('/edit') },
       { href: '/seller/sales', label: 'Sales History', icon: Receipt, match: (p) => p.startsWith('/seller/sales') },
       { href: '/seller/products/add', label: 'Add Product', icon: Plus, match: (p) => p.startsWith('/seller/products/add') },
       { href: '/seller/dashboard#payouts', label: 'Payouts & Bank Details', icon: Banknote, match: () => false },
@@ -69,7 +70,7 @@ function SidebarBody({ pathname, area, user }) {
                   }`}
                 >
                   <Icon {...ICON} className="shrink-0" />
-                  {label}
+                  <LinkPending>{label}</LinkPending>
                 </Link>
               </li>
             );

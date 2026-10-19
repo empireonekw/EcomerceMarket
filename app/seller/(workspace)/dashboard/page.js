@@ -75,7 +75,7 @@ export default async function SellerDashboardPage() {
       {/* ---------- Products ---------- */}
       <div className="mt-8">
         <Panel
-          title="My products"
+          title="Latest products"
           action={
             <Link href="/seller/products" className="text-sm font-medium text-stone-500 hover:text-ink">
               Manage all

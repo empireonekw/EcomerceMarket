@@ -107,7 +107,9 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
   shop settings) · **My products** (`/seller/products`: status, sales, earnings; hide/show approved items, delete with a
   Yes/No confirmation — sold items are unpublished, never deleted) · **Sales history** (`/seller/sales`: every ledger
   sale with date, product, order, buyer email partly hidden, price, fee, earnings; month filter, pagination).
-  API: `PATCH /api/seller/products/:id { isPublished }` · `DELETE /api/seller/products/:id`.
+  **Edit** (`/seller/products/:id/edit`) changes any upload field and sends the product back to review (hidden from the
+  store until re-approved) — also how rejected products are resubmitted.
+  API: `PUT /api/seller/products/:id` · `PATCH /api/seller/products/:id { isPublished }` · `DELETE /api/seller/products/:id`.
 - **Seller analytics (admin):** `/admin/users/:id` for a seller adds monthly earnings (12 months), earnings per
   product per month (6 months) and an activity log built from the ledger, products and payouts
   (`lib/data/seller-analytics.js`, shared with the seller workspace).
@@ -183,6 +185,21 @@ Add to cart ─▶ CartDrawer ─▶ /checkout ─▶ POST /api/orders ─▶ /c
 - **Receipts:** a random access token (only its SHA-256 is stored) unlocks `/checkout/success`.
 - **Downloads:** HMAC-signed tokens (`AUTH_SECRET`), 24h expiry, re-checked against the order on every use,
   max 10 downloads per item. Storage keys resolve via `createSignedStorageUrl()` in `lib/storage.js` (plug in S3/R2).
+
+## Performance
+
+- **Region:** the MongoDB cluster is in AWS Mumbai (`ap-south-1`), so `vercel.json` pins Vercel Functions to
+  `bom1` (Mumbai). Keep them in the same region — every query is a network round trip.
+- **Connections:** `lib/mongodb.js` caches one pool per process and keeps `minPoolSize: 5` warm, so a page's parallel
+  queries reuse open sockets instead of each paying a TLS + auth handshake.
+- **Client router cache:** `experimental.staleTimes.dynamic = 30` makes back/forward between visited dashboard pages
+  instant; saves and deletes call `router.refresh()`, which bypasses it.
+- **Loading states:** every dashboard list has its own `loading.jsx` skeleton (`components/dashboard/Skeletons.jsx`);
+  sidebar and pagination links show a spinner while their page loads (`components/LinkPending.jsx`).
+- **Pagination:** server-side for open-ended lists (admin users/products/orders, seller products & sales,
+  My purchases); client-side (`components/dashboard/PagedList.jsx`) for short bounded panels.
+- **Local testing:** `npm run dev` compiles each page on first visit and is much slower than production — judge speed
+  with `npm run build && npm start`.
 
 ## Conventions
 

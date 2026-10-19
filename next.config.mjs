@@ -3,6 +3,12 @@ import { REMOTE_IMAGE_PATTERNS } from './lib/image-hosts.js';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  experimental: {
+    // Keep visited dynamic pages (dashboards, lists) in the client router cache for 30s, so going back/forward
+    // between them is instant. Mutations still call router.refresh(), which bypasses this cache.
+    staleTimes: { dynamic: 30 },
+  },
   poweredByHeader: false,
 
   images: {

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import LinkPending from '@/components/LinkPending';
 
 function buildHref(basePath, params, page) {
   const qs = new URLSearchParams();
@@ -33,7 +34,7 @@ export default function Pagination({ page, totalPages, basePath = '/products', p
     <nav aria-label="Pagination" className="mt-12 flex flex-wrap items-center justify-center gap-2">
       {page > 1 ? (
         <Link href={buildHref(basePath, params, page - 1)} className={idle} rel="prev">
-          ← Prev
+          <LinkPending replace>← Prev</LinkPending>
         </Link>
       ) : (
         <span className={disabled}>← Prev</span>
@@ -50,14 +51,14 @@ export default function Pagination({ page, totalPages, basePath = '/products', p
           </span>
         ) : (
           <Link key={p} href={buildHref(basePath, params, p)} className={idle}>
-            {p}
+            <LinkPending replace>{p}</LinkPending>
           </Link>
         ),
       )}
 
       {page < totalPages ? (
         <Link href={buildHref(basePath, params, page + 1)} className={idle} rel="next">
-          Next →
+          <LinkPending replace>Next →</LinkPending>
         </Link>
       ) : (
         <span className={disabled}>Next →</span>

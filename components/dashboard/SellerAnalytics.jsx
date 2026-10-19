@@ -1,5 +1,6 @@
 import { Banknote, CircleDollarSign, LogIn, Package, Store, UserPlus, Wallet } from 'lucide-react';
 import EarningsChart from '@/components/dashboard/EarningsChart';
+import PagedList from '@/components/dashboard/PagedList';
 import { Panel, formatDateTime } from '@/components/dashboard/ui';
 import { formatPrice } from '@/lib/utils';
 
@@ -107,17 +108,17 @@ const EVENT_TONES = { sale: 'bg-emerald-50 text-emerald-700', paid: 'bg-brand-50
 /** Timeline of what the seller did and what happened to their account, newest first. */
 export function ActivityLog({ events }) {
   return (
-    <Panel title="Activity log" action={<span className="text-sm text-stone-500">Latest {events.length}</span>}>
+    <Panel title="Activity log" action={<span className="text-sm text-stone-500">Latest {events.length} events</span>}>
       {events.length === 0 ? (
         <p className="px-5 py-8 text-center text-sm text-stone-500">No activity yet.</p>
       ) : (
-        <ol className="max-h-[32rem] overflow-y-auto px-5 py-4">
+        <PagedList pageSize={8} label="Activity" className="px-5 py-4">
           {events.map((e, i) => {
             const Icon = EVENT_ICONS[e.type] ?? Package;
             const { date, time } = formatDateTime(e.at);
             return (
-              <li key={`${e.type}-${e.at}-${i}`} className="relative flex gap-3 pb-5 last:pb-0">
-                {i < events.length - 1 && <span aria-hidden="true" className="absolute left-4 top-9 h-[calc(100%-2.25rem)] w-px bg-stone-200" />}
+              <li key={`${e.type}-${e.at}-${i}`} className="group/event relative flex gap-3 pb-5 last:pb-0">
+                <span aria-hidden="true" className="absolute left-4 top-9 h-[calc(100%-2.25rem)] w-px bg-stone-200 group-last/event:hidden" />
                 <span className={`grid size-8 shrink-0 place-items-center rounded-full ${EVENT_TONES[e.type] ?? 'bg-stone-100 text-stone-600'}`}>
                   <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
                 </span>
@@ -131,7 +132,7 @@ export function ActivityLog({ events }) {
               </li>
             );
           })}
-        </ol>
+        </PagedList>
       )}
     </Panel>
   );

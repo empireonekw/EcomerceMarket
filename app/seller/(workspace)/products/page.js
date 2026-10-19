@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import Pagination from '@/components/Pagination';
 import SellerProductActions from '@/components/seller/SellerProductActions';
 import { PageHeader, StatusBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
@@ -17,16 +18,16 @@ function statusOf(p) {
 }
 
 /** Seller → My products: every listing with its status, sales and earnings; hide/show and delete. */
-export default async function SellerProductsPage() {
+export default async function SellerProductsPage({ searchParams }) {
   const seller = await requireSellerStore('/seller/products');
-  const products = await getSellerProducts(seller.id);
-  const live = products.filter((p) => p.status === 'approved' && p.isPublished).length;
+  const { page } = await searchParams;
+  const { items: products, total, live, pagination } = await getSellerProducts(seller.id, { page });
 
   return (
     <>
       <PageHeader
         title="My products"
-        description={`${products.length} product${products.length === 1 ? '' : 's'} · ${live} live in the store`}
+        description={`${total} product${total === 1 ? '' : 's'} · ${live} live in the store`}
         actions={
           <Link href="/seller/products/add" className={buttonClasses.primary}>
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
@@ -35,7 +36,7 @@ export default async function SellerProductsPage() {
         }
       />
 
-      {products.length === 0 ? (
+      {total === 0 ? (
         <EmptyState title="No products yet">
           <Link href="/seller/products/add" className="font-medium text-black underline underline-offset-2">
             Upload your first product
@@ -97,6 +98,8 @@ export default async function SellerProductsPage() {
           </div>
         </div>
       )}
+
+      <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/seller/products" />
     </>
   );
 }

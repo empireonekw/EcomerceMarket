@@ -7,6 +7,7 @@ import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { Avatar } from '@/components/UserMenu';
 import { NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
 import ReviewButton from '@/components/profile/ReviewButton';
+import Pagination from '@/components/Pagination';
 
 export const metadata = { title: 'My account', robots: { index: false } };
 
@@ -20,7 +21,9 @@ const TABS = [
 const fmtDate = (d, opts = { dateStyle: 'medium' }) => new Date(d).toLocaleDateString('en-US', opts);
 const fmtDateTime = (d) => new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 
-function DownloadsTab({ purchases, reviews, authorName }) {
+const PURCHASES_PAGE_SIZE = 8;
+
+function DownloadsTab({ purchases, reviews, authorName, page }) {
   if (purchases.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
@@ -36,48 +39,55 @@ function DownloadsTab({ purchases, reviews, authorName }) {
     );
   }
 
+  const totalPages = Math.max(1, Math.ceil(purchases.length / PURCHASES_PAGE_SIZE));
+  const current = Math.min(Math.max(1, Number.parseInt(page, 10) || 1), totalPages);
+  const shown = purchases.slice((current - 1) * PURCHASES_PAGE_SIZE, current * PURCHASES_PAGE_SIZE);
+
   return (
-    <ul className="space-y-3">
-      {purchases.map((p) => (
-        <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center">
-          <div className="flex min-w-0 flex-1 items-center gap-4">
-            <Link href={`/products/${p.slug}`} className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100">
-              {p.coverImage && <Image src={p.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
-            </Link>
-            <div className="min-w-0">
-              <Link href={`/products/${p.slug}`} className="line-clamp-2 font-medium hover:underline">
-                {p.title}
+    <>
+      <ul className="space-y-3">
+        {shown.map((p) => (
+          <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-4">
+              <Link href={`/products/${p.slug}`} className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100">
+                {p.coverImage && <Image src={p.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
               </Link>
-              <p className="mt-1 text-sm text-stone-500">
-                <span className="font-medium text-ink">{p.pricePaid === 0 ? 'Free' : formatPrice(p.pricePaid, p.currency)}</span>
-                {' · '}Purchased <time dateTime={p.purchasedAt}>{fmtDate(p.purchasedAt)}</time>
-                {' · '}Order #{p.orderNumber}
-              </p>
-              <p className="mt-0.5 text-xs text-stone-500">
-                {p.downloadCount === 0
-                  ? 'Not downloaded yet'
-                  : `Downloaded ${p.downloadCount}× · last ${fmtDateTime(p.lastDownloadedAt)}`}
-                {' · '}
-                {p.downloadsRemaining} remaining
-              </p>
+              <div className="min-w-0">
+                <Link href={`/products/${p.slug}`} className="line-clamp-2 font-medium hover:underline">
+                  {p.title}
+                </Link>
+                <p className="mt-1 text-sm text-stone-500">
+                  <span className="font-medium text-ink">{p.pricePaid === 0 ? 'Free' : formatPrice(p.pricePaid, p.currency)}</span>
+                  {' · '}Purchased <time dateTime={p.purchasedAt}>{fmtDate(p.purchasedAt)}</time>
+                  {' · '}Order #{p.orderNumber}
+                </p>
+                <p className="mt-0.5 text-xs text-stone-500">
+                  {p.downloadCount === 0
+                    ? 'Not downloaded yet'
+                    : `Downloaded ${p.downloadCount}× · last ${fmtDateTime(p.lastDownloadedAt)}`}
+                  {' · '}
+                  {p.downloadsRemaining} remaining
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
-            {p.downloadsRemaining > 0 ? (
-              <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Download File
-              </a>
-            ) : (
-              <span className="rounded-full bg-stone-100 px-4 py-2 text-center text-sm text-stone-500">Download limit reached</span>
-            )}
-            <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
-          </div>
-        </li>
-      ))}
-    </ul>
+            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
+              {p.downloadsRemaining > 0 ? (
+                <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Download File
+                </a>
+              ) : (
+                <span className="rounded-full bg-stone-100 px-4 py-2 text-center text-sm text-stone-500">Download limit reached</span>
+              )}
+              <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <Pagination page={current} totalPages={totalPages} basePath="/profile" params={{ tab: 'downloads' }} />
+    </>
   );
 }
 
@@ -123,7 +133,7 @@ const WORKSPACES = {
 };
 
 export default async function ProfilePage({ searchParams }) {
-  const { tab: rawTab } = await searchParams;
+  const { tab: rawTab, page } = await searchParams;
   const requested = TABS.some((t) => t.id === rawTab) ? rawTab : 'profile';
   const user = await requireUser(`/profile${requested === 'profile' ? '' : `?tab=${requested}`}`);
   const isCustomer = user.role === 'customer';
@@ -162,7 +172,7 @@ export default async function ProfilePage({ searchParams }) {
       )}
 
       <div className={isCustomer ? 'mt-8' : 'mt-10'}>
-        {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
+        {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} page={page} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
       </div>
     </div>
   );

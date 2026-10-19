@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, DollarSign, Package, ShoppingBag, Wallet } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
+import PagedList from '@/components/dashboard/PagedList';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { ActivityLog, EarningsPanel, ProductMonthlyPanel } from '@/components/dashboard/SellerAnalytics';
 import { getAdminUserDetail } from '@/lib/data/admin-users';
@@ -139,7 +140,7 @@ export default async function AdminUserPage({ params }) {
               {u.products.length === 0 ? (
                 <p className="px-5 py-6 text-center text-sm text-stone-500">No products uploaded yet.</p>
               ) : (
-                <ul className="divide-y divide-stone-100">
+                <PagedList pageSize={8} label="Products" className="divide-y divide-stone-100">
                   {u.products.map((p) => (
                     <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                       <div className="min-w-0">
@@ -156,7 +157,7 @@ export default async function AdminUserPage({ params }) {
                       />
                     </li>
                   ))}
-                </ul>
+                </PagedList>
               )}
             </Panel>
           )}
@@ -218,7 +219,7 @@ export default async function AdminUserPage({ params }) {
                   <EmptyState title="No orders">Orders placed with {u.email} appear here.</EmptyState>
                 </div>
               ) : (
-                <ul className="divide-y divide-stone-100">
+                <PagedList pageSize={5} label="Purchases" className="divide-y divide-stone-100">
                   {u.recentOrders.map((o) => (
                     <li key={o._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                       <div className="min-w-0">
@@ -234,7 +235,7 @@ export default async function AdminUserPage({ params }) {
                       </div>
                     </li>
                   ))}
-                </ul>
+                </PagedList>
               )}
             </Panel>
           )}

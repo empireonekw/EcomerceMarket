@@ -148,10 +148,16 @@ function SellerEarnings({ priceCents }) {
   );
 }
 
-// Where each dashboard area submits and returns to. Sellers can only create; admins create and edit.
+// Where each dashboard area submits and returns to. Seller edits go back to review.
 const VARIANTS = {
-  admin: { createUrl: '/api/products', doneUrl: '/admin/products', createdToast: 'Product created', submitLabel: 'Create product' },
-  seller: { createUrl: '/api/seller/products', doneUrl: '/seller/dashboard', createdToast: 'Submitted for review', submitLabel: 'Submit for review' },
+  admin: { createUrl: '/api/products', updateUrl: (id) => `/api/products/${id}`, doneUrl: '/admin/products', createdToast: 'Product created', submitLabel: 'Create product' },
+  seller: {
+    createUrl: '/api/seller/products',
+    updateUrl: (id) => `/api/seller/products/${id}`,
+    doneUrl: '/seller/products',
+    createdToast: 'Submitted for review',
+    submitLabel: 'Submit for review',
+  },
 };
 
 /**
@@ -247,7 +253,7 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
 
     setSaving(true);
     try {
-      const res = await fetch(isEdit ? `/api/products/${product._id}` : config.createUrl, {
+      const res = await fetch(isEdit ? config.updateUrl(product._id) : config.createUrl, {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -267,7 +273,7 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
       }
 
       toast.success(
-        isEdit ? 'Changes saved' : config.createdToast,
+        isEdit ? (isSeller ? 'Changes submitted for review' : 'Changes saved') : config.createdToast,
         isSeller ? `“${data.title}” will go live once an admin approves it.` : `“${data.title}” · /products/${data.slug}`,
       );
       router.push(config.doneUrl);
@@ -521,7 +527,7 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             className="btn btn-lg btn-primary"
           >
             {saving && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-            {saving ? (isEdit ? 'Saving…' : 'Submitting…') : isEdit ? 'Save changes' : config.submitLabel}
+            {saving ? (isEdit ? 'Saving…' : 'Submitting…') : isEdit ? (isSeller ? 'Save & send for review' : 'Save changes') : config.submitLabel}
           </button>
           <Link href="/admin/products" className="flex h-11 items-center justify-center rounded-full text-sm font-medium text-stone-600 hover:bg-stone-100">
             Cancel

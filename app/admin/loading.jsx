@@ -1,14 +1,18 @@
+import { DashboardPageSkeleton, HeaderSkeleton, PanelSkeleton, StatsSkeleton } from '@/components/dashboard/Skeletons';
+
+// Default for admin routes without their own loading.jsx (dashboard overview, add/edit product).
 export default function AdminLoading() {
   return (
-    <div className="animate-pulse" aria-busy="true" aria-label="Loading">
-      <div className="h-8 w-56 rounded-lg bg-stone-200" />
-      <div className="mt-2 h-4 w-80 max-w-full rounded bg-stone-200" />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {Array.from({ length: 4 }, (_, i) => (
-          <div key={i} className="h-32 rounded-2xl bg-stone-200" />
-        ))}
+    <DashboardPageSkeleton>
+      <HeaderSkeleton action />
+      <StatsSkeleton />
+      <div className="mt-4">
+        <StatsSkeleton count={3} />
       </div>
-      <div className="mt-8 h-96 rounded-2xl bg-stone-200" />
-    </div>
+      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+        <PanelSkeleton rows={6} />
+        <PanelSkeleton rows={5} />
+      </div>
+    </DashboardPageSkeleton>
   );
 }
