@@ -2,6 +2,9 @@ import { REMOTE_IMAGE_PATTERNS } from './lib/image-hosts.js';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // scripts/deploy.sh builds into .next-build while the live site keeps serving .next.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+
   reactStrictMode: true,
 
   experimental: {
