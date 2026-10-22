@@ -178,7 +178,7 @@ export default async function AdminProductsPage({ searchParams }) {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          {p.isPublished && (
+                          {p.isPublished && p.status === 'approved' && (
                             <a
                               href={`/products/${p.slug}`}
                               target="_blank"

@@ -529,7 +529,7 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             {saving && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
             {saving ? (isEdit ? 'Saving…' : 'Submitting…') : isEdit ? (isSeller ? 'Save & send for review' : 'Save changes') : config.submitLabel}
           </button>
-          <Link href="/admin/products" className="flex h-11 items-center justify-center rounded-full text-sm font-medium text-stone-600 hover:bg-stone-100">
+          <Link href={config.doneUrl} className="flex h-11 items-center justify-center rounded-full text-sm font-medium text-stone-600 hover:bg-stone-100">
             Cancel
           </Link>
         </div>

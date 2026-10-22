@@ -1,0 +1,206 @@
+import { ChartSkeleton, DashboardPageSkeleton, FilterBarSkeleton, HeaderSkeleton, PanelSkeleton, StatsSkeleton, TableSkeleton } from '@/components/dashboard/Skeletons';
+
+// One loading skeleton per dashboard page. Used twice, so both always match:
+//  - by each route's loading.jsx (shown by Next.js while the page streams in), and
+//  - by DashboardShell the moment a sidebar link is clicked (skeletonFor), before the server has answered.
+
+const bar = 'rounded-full bg-stone-200/80';
+
+export function AdminOverviewSkeleton() {
+  return (
+    <DashboardPageSkeleton>
+      <HeaderSkeleton action />
+      <StatsSkeleton />
+      <div className="mt-4">
+        <StatsSkeleton count={3} />
+      </div>
+      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+        <PanelSkeleton rows={6} />
+        <PanelSkeleton rows={5} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminProductsSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading products">
+      <HeaderSkeleton action />
+      <FilterBarSkeleton />
+      <TableSkeleton rows={10} cols={5} thumb={true} />
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminUsersSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading users">
+      <HeaderSkeleton />
+      <StatsSkeleton />
+      <FilterBarSkeleton />
+      <TableSkeleton rows={8} cols={7} thumb={false} />
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminUserSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading user">
+      <div className={`h-4 w-20 ${bar}`} />
+      <div className="mb-8 mt-4 flex items-center gap-4">
+        <div className="size-14 rounded-full bg-stone-200/80" />
+        <div>
+          <div className={`h-9 w-64 ${bar}`} />
+          <div className={`mt-3 h-4 w-80 max-w-full ${bar}`} />
+        </div>
+      </div>
+      <StatsSkeleton />
+      <div className="mt-8">
+        <ChartSkeleton />
+      </div>
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+        <PanelSkeleton rows={4} />
+        <PanelSkeleton rows={6} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminOrdersSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading orders">
+      <HeaderSkeleton action />
+      <FilterBarSkeleton />
+      <TableSkeleton rows={10} cols={5} thumb={false} />
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminPayoutsSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading payouts">
+      <HeaderSkeleton />
+      <StatsSkeleton />
+      <div className="mt-8">
+        <TableSkeleton rows={6} cols={5} thumb={false} />
+      </div>
+      <div className="mt-8">
+        <PanelSkeleton rows={4} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+export function AdminMessagesSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading messages">
+      <HeaderSkeleton />
+      <FilterBarSkeleton />
+      <PanelSkeleton rows={6} />
+    </DashboardPageSkeleton>
+  );
+}
+
+/** Add / edit product (admin and seller): mirrors ProductForm's sections and sidebar. */
+export function ProductFormSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading product form">
+      <HeaderSkeleton />
+      <div className="grid gap-6 xl:grid-cols-[1fr_20rem] xl:items-start">
+        <div className="space-y-6">
+          {[3, 2, 3, 3].map((fields, i) => (
+            <div key={i} className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+              <div className={`h-4 w-28 ${bar}`} />
+              <div className={`mt-2 h-3 w-64 max-w-full ${bar}`} />
+              <div className="mt-5 space-y-5">
+                {Array.from({ length: fields }, (_, f) => (
+                  <div key={f}>
+                    <div className={`h-3.5 w-24 ${bar}`} />
+                    <div className="mt-2 h-11 rounded-xl bg-stone-200/80" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-6">
+          <PanelSkeleton rows={3} />
+          <div className="rounded-2xl border border-stone-200 bg-white p-3">
+            <div className="aspect-[4/3] rounded-xl bg-stone-200/80" />
+            <div className={`mt-3 h-4 w-3/4 ${bar}`} />
+            <div className={`mt-2 h-4 w-16 ${bar}`} />
+          </div>
+          <div className="h-12 rounded-full bg-stone-200/80" />
+        </div>
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+export function SellerDashboardSkeleton() {
+  return (
+    <DashboardPageSkeleton>
+      <HeaderSkeleton action />
+      <StatsSkeleton />
+      <div className="mt-8">
+        <ChartSkeleton />
+      </div>
+      <div className="mt-8">
+        <TableSkeleton rows={4} cols={5} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+export function SellerProductsSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading your products">
+      <HeaderSkeleton action />
+      <TableSkeleton rows={8} cols={6} />
+    </DashboardPageSkeleton>
+  );
+}
+
+export function SellerSalesSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading sales">
+      <HeaderSkeleton />
+      <StatsSkeleton />
+      <FilterBarSkeleton />
+      <TableSkeleton rows={10} cols={7} thumb={false} />
+    </DashboardPageSkeleton>
+  );
+}
+
+export function SellerPayoutsSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading payouts">
+      <HeaderSkeleton />
+      <StatsSkeleton count={3} />
+      <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+        <PanelSkeleton rows={6} />
+        <PanelSkeleton rows={4} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+const isProductForm = (p, base) => p === `${base}/add` || (p.startsWith(`${base}/`) && p.endsWith('/edit'));
+
+/** The skeleton of the dashboard page at `pathname`, or null when there isn't one. */
+export function skeletonFor(pathname) {
+  const p = pathname.replace(/\/$/, '');
+  if (p === '/admin') return AdminOverviewSkeleton;
+  if (isProductForm(p, '/admin/products') || isProductForm(p, '/seller/products')) return ProductFormSkeleton;
+  if (p === '/admin/products') return AdminProductsSkeleton;
+  if (p === '/admin/users') return AdminUsersSkeleton;
+  if (p.startsWith('/admin/users/')) return AdminUserSkeleton;
+  if (p === '/admin/orders') return AdminOrdersSkeleton;
+  if (p === '/admin/payouts') return AdminPayoutsSkeleton;
+  if (p === '/admin/messages') return AdminMessagesSkeleton;
+  if (p === '/seller/dashboard') return SellerDashboardSkeleton;
+  if (p === '/seller/products') return SellerProductsSkeleton;
+  if (p === '/seller/sales') return SellerSalesSkeleton;
+  if (p === '/seller/payouts') return SellerPayoutsSkeleton;
+  return null;
+}

@@ -194,8 +194,9 @@ Add to cart ─▶ CartDrawer ─▶ /checkout ─▶ POST /api/orders ─▶ /c
   queries reuse open sockets instead of each paying a TLS + auth handshake.
 - **Client router cache:** `experimental.staleTimes.dynamic = 30` makes back/forward between visited dashboard pages
   instant; saves and deletes call `router.refresh()`, which bypasses it.
-- **Loading states:** every dashboard list has its own `loading.jsx` skeleton (`components/dashboard/Skeletons.jsx`);
-  sidebar and pagination links show a spinner while their page loads (`components/LinkPending.jsx`).
+- **Loading states:** every dashboard page has a skeleton in `components/dashboard/RouteSkeletons.jsx`, used by its
+  `loading.jsx` and by `DashboardShell`, which shows it the instant a sidebar link is clicked (before the server
+  answers) so navigation never waits. Pagination links show a spinner while their page loads (`components/LinkPending.jsx`).
 - **Pagination:** server-side for open-ended lists (admin users/products/orders, seller products & sales,
   My purchases); client-side (`components/dashboard/PagedList.jsx`) for short bounded panels.
 - **Local testing:** `npm run dev` compiles each page on first visit and is much slower than production — judge speed

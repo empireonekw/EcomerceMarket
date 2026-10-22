@@ -25,7 +25,7 @@ die()  { printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "Please run this as root."
 cd "$APP_DIR"
-[ -f package.json ] && grep -q '"name": "ecomerce-market"' package.json || die "Run this from the Ecomerce Market code folder (got $APP_DIR)."
+[ -f package.json ] && grep -q '"name": "ecommerce-market"' package.json || die "Run this from the E-Commerce Market code folder (got $APP_DIR)."
 
 if command -v apt-get >/dev/null 2>&1; then PKG=apt
 elif command -v dnf >/dev/null 2>&1; then PKG=dnf
@@ -69,7 +69,7 @@ else
 # ecomercemarket.com production settings (written by scripts/server/setup.sh).
 MONGODB_URI=$MONGO
 NEXT_PUBLIC_SITE_URL=https://$DOMAIN
-NEXT_PUBLIC_SITE_NAME=Ecomerce Market
+NEXT_PUBLIC_SITE_NAME=E-Commerce Market
 # Signs logins and download links. Changing it logs everyone out.
 AUTH_SECRET=$(openssl rand -hex 48)
 # Bearer token for the admin API.

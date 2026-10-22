@@ -20,7 +20,7 @@ export default async function EditProductPage({ params }) {
         description={`/products/${product.slug} · ${product.salesCount} sale${product.salesCount === 1 ? '' : 's'}`}
         actions={
           <>
-            {product.isPublished && (
+            {product.isPublished && product.status === 'approved' && (
               <a
                 href={`/products/${product.slug}`}
                 target="_blank"
