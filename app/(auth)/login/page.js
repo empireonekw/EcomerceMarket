@@ -8,7 +8,7 @@ import { siteConfig } from '@/lib/site';
 
 export const metadata = { title: 'Log in', robots: { index: false } };
 
-const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/profile' };
+const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
 
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams;

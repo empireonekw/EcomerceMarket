@@ -107,13 +107,13 @@ export default async function CheckoutSuccessPage({ searchParams }) {
                     </Link>
                     {link && (
                       <p className="mt-0.5 text-xs text-stone-500">
-                        {link.downloadsRemaining} downloads remaining · link refreshes each time you open this page
+                        Re-download any time · link refreshes each time you open this page
                       </p>
                     )}
                   </div>
                 </div>
 
-                {link && link.downloadsRemaining > 0 ? (
+                {link ? (
                   <a
                     href={link.url}
                     rel="noreferrer"
@@ -126,7 +126,7 @@ export default async function CheckoutSuccessPage({ searchParams }) {
                   </a>
                 ) : (
                   <span className="shrink-0 rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-500">
-                    {link ? 'Download limit reached' : 'Not available'}
+                    Not available
                   </span>
                 )}
               </li>

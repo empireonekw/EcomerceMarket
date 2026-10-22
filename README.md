@@ -184,7 +184,7 @@ Add to cart ─▶ CartDrawer ─▶ /checkout ─▶ POST /api/orders ─▶ /c
   `DEMO_CHECKOUT=true`** (local testing); otherwise they're refused (`402`) until a provider is wired in.
 - **Receipts:** a random access token (only its SHA-256 is stored) unlocks `/checkout/success`.
 - **Downloads:** HMAC-signed tokens (`AUTH_SECRET`), 24h expiry, re-checked against the order on every use,
-  max 10 downloads per item. Storage keys resolve via `createSignedStorageUrl()` in `lib/storage.js` (plug in S3/R2).
+  unlimited re-downloads (throttled to 10/hour per item, `lib/downloads.js`). Storage keys resolve via `createSignedStorageUrl()` in `lib/storage.js` (plug in S3/R2).
 
 ## Performance
 

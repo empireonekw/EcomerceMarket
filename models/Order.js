@@ -4,7 +4,6 @@ const { Schema } = mongoose;
 
 export const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'];
 export const ORDER_STATUSES = ['pending', 'completed', 'cancelled']; // fulfillment state
-export const MAX_DOWNLOADS_PER_ITEM = 10;
 
 // Snapshot of the product at purchase time, so later price/title edits never alter past orders.
 const orderItemSchema = new Schema(

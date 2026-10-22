@@ -9,10 +9,11 @@ import Order from '../models/Order.js';
 import Transaction from '../models/Transaction.js';
 import Payout from '../models/Payout.js';
 import Review from '../models/Review.js';
+import ContactMessage from '../models/ContactMessage.js';
 
 await connectDB();
 
-for (const Model of [User, Category, Product, Order, Transaction, Payout, Review]) {
+for (const Model of [User, Category, Product, Order, Transaction, Payout, Review, ContactMessage]) {
   const dropped = await Model.syncIndexes();
   const indexes = await Model.listIndexes();
   console.log(`✓ ${Model.modelName}: ${indexes.map((i) => i.name).join(', ')}${dropped.length ? ` (dropped: ${dropped.join(', ')})` : ''}`);

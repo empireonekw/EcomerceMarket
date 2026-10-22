@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Banknote, LayoutDashboard, Menu, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import { ArrowUpRight, Banknote, LayoutDashboard, Mail, Menu, Package, Plus, Receipt, Store, Users } from 'lucide-react';
 import LinkPending from '@/components/LinkPending';
 import SignOutButton from '@/components/SignOutButton';
 import { siteConfig } from '@/lib/site';
@@ -20,6 +20,7 @@ const AREAS = {
       { href: '/admin/users', label: 'Users', icon: Users, match: (p) => p.startsWith('/admin/users') },
       { href: '/admin/orders', label: 'Orders & Sales', icon: Receipt, match: (p) => p.startsWith('/admin/orders') },
       { href: '/admin/payouts', label: 'Seller Payouts', icon: Banknote, match: (p) => p.startsWith('/admin/payouts') },
+      { href: '/admin/messages', label: 'Messages', icon: Mail, match: (p) => p.startsWith('/admin/messages') },
     ],
   },
   seller: {
@@ -30,7 +31,7 @@ const AREAS = {
       { href: '/seller/products', label: 'My Products', icon: Package, match: (p) => p === '/seller/products' || p.endsWith('/edit') },
       { href: '/seller/sales', label: 'Sales History', icon: Receipt, match: (p) => p.startsWith('/seller/sales') },
       { href: '/seller/products/add', label: 'Add Product', icon: Plus, match: (p) => p.startsWith('/seller/products/add') },
-      { href: '/seller/dashboard#payouts', label: 'Payouts & Bank Details', icon: Banknote, match: () => false },
+      { href: '/seller/payouts', label: 'Payouts & Bank Details', icon: Banknote, match: (p) => p.startsWith('/seller/payouts') },
       { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },
     ],
   },

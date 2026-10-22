@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useRef, useState } from 'react';
+import { AlertTriangle, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { validateName, validatePassword } from '@/lib/validation';
@@ -215,6 +216,127 @@ export function SessionControls({ expiresAt }) {
           {pending === 'all' ? 'Signing out…' : 'Log out of all devices'}
         </button>
       </div>
+    </section>
+  );
+}
+
+const DELETE_EFFECTS = {
+  customer: [
+    'Your profile, sign-in and saved details are removed.',
+    'My Purchases goes away with the account — download anything you want to keep first.',
+    'Your product reviews are removed.',
+  ],
+  seller: [
+    'Your profile, shop and payout details are removed.',
+    'Products that never sold are deleted; sold ones are taken off sale so their buyers keep their downloads.',
+    'Any balance must be paid out before you can delete the account.',
+  ],
+};
+
+/** "Delete account permanently": explains what happens, then asks for the password in a dialog (DELETE /api/auth/me). */
+export function DeleteAccount({ role }) {
+  const dialogRef = useRef(null);
+  const id = useId();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [formError, setFormError] = useState(null);
+  const [pending, setPending] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+  const effects = DELETE_EFFECTS[role] ?? DELETE_EFFECTS.customer;
+
+  function open() {
+    setPassword('');
+    setError(null);
+    setFormError(null);
+    dialogRef.current?.showModal();
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    setFormError(null);
+    if (!password) return setError('Enter your password to confirm.');
+    setPending(true);
+    try {
+      const res = await fetch('/api/auth/me', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.fields?.password ?? null);
+        setFormError(data.fields?.password ? null : (data.error ?? 'Could not delete your account.'));
+        setPending(false);
+        return;
+      }
+      setDeleted(true);
+      window.location.replace('/'); // full navigation so every page renders signed out
+    } catch {
+      setFormError('Network error — please try again.');
+      setPending(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-red-200 bg-white p-5 sm:p-6">
+      <h2 className="headline text-2xl">Delete account</h2>
+      <p className="mt-0.5 text-sm text-stone-500">Permanently delete your account and personal data. This can’t be undone.</p>
+      <button type="button" onClick={open} className="btn btn-md mt-4 border border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50">
+        <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
+        Delete account permanently
+      </button>
+
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={`${id}-title`}
+        onClick={(e) => e.target === e.currentTarget && !pending && e.currentTarget.close()}
+        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/40"
+      >
+        <form onSubmit={onSubmit} noValidate className="space-y-5 p-6">
+          <div className="flex gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-red-50 text-red-600">
+              <AlertTriangle size={20} strokeWidth={1.75} aria-hidden="true" />
+            </span>
+            <div>
+              <h2 id={`${id}-title`} className="headline text-2xl">
+                Delete your account?
+              </h2>
+              <p className="mt-1 text-sm text-stone-600">This is permanent and can’t be undone.</p>
+            </div>
+          </div>
+          <ul className="list-disc space-y-1.5 rounded-xl bg-stone-50 py-3 pl-8 pr-4 text-sm text-stone-600 marker:text-stone-400">
+            {effects.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <FormAlert>{formError}</FormAlert>
+          <div>
+            <label htmlFor={`${id}-password`} className="text-sm font-medium text-stone-800">
+              Enter your password to confirm
+            </label>
+            <PasswordInput
+              id={`${id}-password`}
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
+              error={error}
+            />
+            <FieldError id={`${id}-password-error`}>{error}</FieldError>
+          </div>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => dialogRef.current?.close()} disabled={pending} className="btn btn-md btn-outline">
+              Cancel
+            </button>
+            <button type="submit" disabled={pending} className="btn btn-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-60">
+              {pending && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+              {deleted ? 'Account deleted' : pending ? 'Deleting…' : 'Delete permanently'}
+            </button>
+          </div>
+        </form>
+      </dialog>
     </section>
   );
 }

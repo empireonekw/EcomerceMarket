@@ -5,7 +5,7 @@ import { getUserPurchases } from '@/lib/data/orders';
 import { getUserReviewMap } from '@/lib/data/reviews';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { Avatar } from '@/components/UserMenu';
-import { NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
+import { DeleteAccount, NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
 import ReviewButton from '@/components/profile/ReviewButton';
 import Pagination from '@/components/Pagination';
 
@@ -65,22 +65,17 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
                   {p.downloadCount === 0
                     ? 'Not downloaded yet'
                     : `Downloaded ${p.downloadCount}× · last ${fmtDateTime(p.lastDownloadedAt)}`}
-                  {' · '}
-                  {p.downloadsRemaining} remaining
+                  {' · '}Re-download any time
                 </p>
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
-              {p.downloadsRemaining > 0 ? (
-                <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Download File
-                </a>
-              ) : (
-                <span className="rounded-full bg-stone-100 px-4 py-2 text-center text-sm text-stone-500">Download limit reached</span>
-              )}
+              <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Download File
+              </a>
               <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
             </div>
           </li>
@@ -121,6 +116,7 @@ function ProfileTab({ user, purchaseCount }) {
         <NameForm initialName={user.name} />
         <PasswordForm email={user.email} />
         <SessionControls expiresAt={user.session.expiresAt} />
+        {user.role !== 'admin' && <DeleteAccount role={user.role} />}
       </div>
     </div>
   );

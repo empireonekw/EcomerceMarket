@@ -1,9 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock, DollarSign, Plus, ShoppingBag } from 'lucide-react';
-import PayoutDetailsForm from '@/components/seller/PayoutDetailsForm';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
-import RequestPayoutButton from '@/components/seller/RequestPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
@@ -18,17 +16,9 @@ export const metadata = { title: { absolute: `Seller Dashboard · ${siteConfig.n
 
 const usd = (cents) => formatPrice(cents, 'USD');
 
-function payoutBlocker(data) {
-  if (data.openRequest) return `Request for ${usd(data.openRequest.amount)} sent ${formatDateTime(data.openRequest.createdAt).date} — awaiting payment.`;
-  if (data.balances.pendingPayout <= 0) return 'Your pending balance is empty.';
-  if (!data.hasPayoutMethod) return 'Add bank or wallet details below first.';
-  return null;
-}
-
 export default async function SellerDashboardPage() {
   const seller = await requireSellerStore();
   const [data, monthly] = await Promise.all([getSellerDashboard(seller.id), getMonthlyEarnings(seller.id, 12)]);
-  const blocker = payoutBlocker(data);
 
   return (
     <>
@@ -43,9 +33,9 @@ export default async function SellerDashboardPage() {
               </p>
             </div>
           </div>
-          <a href="#payouts" className="btn btn-md btn-dark shrink-0">
+          <Link href="/seller/payouts" className="btn btn-md btn-dark shrink-0">
             Add payout details
-          </a>
+          </Link>
         </div>
       )}
 
@@ -141,7 +131,7 @@ export default async function SellerDashboardPage() {
         </Panel>
       </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+      <div className="mt-8 grid gap-6 xl:grid-cols-2 xl:items-start">
         {/* ---------- Recent sales (ledger) ---------- */}
         <Panel
           title="Recent sales"
@@ -170,40 +160,16 @@ export default async function SellerDashboardPage() {
           )}
         </Panel>
 
-        {/* ---------- Payouts ---------- */}
-        <Panel title="Payouts" action={<span className="text-sm text-stone-500">Available: {usd(data.balances.pendingPayout)}</span>}>
-          <div className="border-b border-stone-100 p-5">
-            <RequestPayoutButton disabled={Boolean(blocker)} reason={blocker} />
-          </div>
-          {data.payouts.length === 0 ? (
-            <p className="px-5 py-6 text-center text-sm text-stone-500">No payouts yet.</p>
-          ) : (
-            <ul className="divide-y divide-stone-100">
-              {data.payouts.map((p) => (
-                <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
-                  <div>
-                    <p className="font-medium tabular-nums">{usd(p.amount)}</p>
-                    <p className="text-xs text-stone-500">
-                      {formatDateTime(p.paidAt ?? p.createdAt).date}
-                      {p.reference && ` · Ref ${p.reference}`}
-                    </p>
-                  </div>
-                  <StatusBadge status={p.status} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
-      </div>
-
-      {/* ---------- Settings ---------- */}
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr] xl:items-start">
-        <Panel title="Payout details" id="payouts">
-          <div className="p-5 sm:p-6">
-            <PayoutDetailsForm initial={data.bankDetails} />
-          </div>
-        </Panel>
-        <Panel title="Shop settings" id="shop">
+        {/* ---------- Shop settings (payouts & bank details live on /seller/payouts) ---------- */}
+        <Panel
+          title="Shop settings"
+          id="shop"
+          action={
+            <Link href="/seller/payouts" className="text-sm font-medium text-stone-500 hover:text-ink">
+              Payouts & bank details
+            </Link>
+          }
+        >
           <div className="p-5 sm:p-6">
             <ShopDetailsForm mode="update" initial={{ storeName: data.storeName, storeDescription: data.storeDescription }} />
           </div>

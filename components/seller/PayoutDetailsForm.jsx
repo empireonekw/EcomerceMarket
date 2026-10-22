@@ -62,7 +62,7 @@ export default function PayoutDetailsForm({ initial = {} }) {
         body: JSON.stringify({ bankDetails: values }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.status === 401) return router.push('/login?next=/seller/dashboard');
+      if (res.status === 401) return router.push('/login?next=/seller/payouts');
       if (!res.ok) {
         setServerErrors(data.fields ?? {});
         setFormError(data.error ?? 'Something went wrong.');

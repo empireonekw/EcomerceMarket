@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import { Download, ShieldCheck, Infinity as InfinityIcon } from 'lucide-react';
+import { Building2, Download, Mail, ShieldCheck, Infinity as InfinityIcon } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
+import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
 import { siteConfig } from '@/lib/site';
+
+const sellerShare = commissionPercent(1 - COMMISSION_RATE);
 
 export const metadata = {
   title: 'About Us',
@@ -41,6 +44,57 @@ export default function AboutPage() {
           </li>
         ))}
       </ul>
+
+      {/* ---------- Who runs the platform ---------- */}
+      <section aria-labelledby="who-heading" className="mt-16 grid gap-8 border-t border-stone-200 pt-16 sm:mt-20 sm:pt-20 lg:grid-cols-12 lg:gap-10">
+        <div className="lg:col-span-5">
+          <h2 id="who-heading" className="headline text-3xl leading-tight sm:text-4xl">
+            Who runs {siteConfig.name}
+          </h2>
+        </div>
+        <div className="space-y-5 text-lg leading-relaxed text-stone-600 lg:col-span-7">
+          <p>
+            {siteConfig.name} is owned and operated by <span className="font-medium text-black">{siteConfig.operator}</span>. We run the marketplace itself: the
+            storefront, secure checkout, instant delivery, customer support and seller payouts.
+          </p>
+          <p>
+            The products are made by independent creators, who own their work and set their own prices. We review every product before it goes live, sell it on
+            the creator’s behalf, and pay them {sellerShare} of every sale. Every purchase comes with lifetime re-downloads and a clear{' '}
+            <Link href="/terms#refunds" className="text-black underline underline-offset-4 hover:text-brand-600">
+              refund policy
+            </Link>
+            .
+          </p>
+
+          <dl className="grid gap-4 pt-3 sm:grid-cols-2">
+            <div className="flex gap-3 rounded-2xl border border-stone-200 bg-white p-5">
+              <Building2 size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-600" />
+              <div>
+                <dt className="text-sm text-stone-500">Operated by</dt>
+                <dd className="mt-0.5 text-base font-medium text-black">{siteConfig.operator}</dd>
+              </div>
+            </div>
+            <div className="flex gap-3 rounded-2xl border border-stone-200 bg-white p-5">
+              <Mail size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-600" />
+              <div className="min-w-0">
+                <dt className="text-sm text-stone-500">Support</dt>
+                <dd className="mt-0.5 text-base font-medium">
+                  <a href={`mailto:${siteConfig.supportEmail}`} className="break-all text-black hover:text-brand-600 hover:underline">
+                    {siteConfig.supportEmail}
+                  </a>
+                </dd>
+              </div>
+            </div>
+          </dl>
+          <p className="text-base">
+            Questions or feedback? Visit our{' '}
+            <Link href="/contact" className="text-black underline underline-offset-4 hover:text-brand-600">
+              Contact page
+            </Link>{' '}
+            — a real person reads every message.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

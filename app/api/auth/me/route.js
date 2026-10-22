@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/mongodb';
 import { getRequestUser, setSessionCookies, clearSessionCookies, publicUser } from '@/lib/auth';
-import { rateLimit } from '@/lib/rate-limit';
+import { isRateLimited, rateLimit } from '@/lib/rate-limit';
+import { InputError } from '@/lib/data/product-writes';
+import { DELETE_ACCOUNT_LIMIT, deleteOwnAccount } from '@/lib/data/account';
 import { validateName, validatePassword } from '@/lib/validation';
 import User from '@/models/User';
 
@@ -75,4 +78,33 @@ export async function PATCH(request) {
   const res = NextResponse.json({ user: publicUser(user), passwordChanged }, { headers: noStore });
   if (passwordChanged) setSessionCookies(res, user); // …then re-issue one for this browser only
   return res;
+}
+
+/**
+ * DELETE /api/auth/me — { password } — permanently deletes the signed-in customer or seller account
+ * (lib/data/account.js), then clears this browser's session. Other sessions die with the account.
+ */
+export async function DELETE(request) {
+  const current = await getRequestUser(request); // same-origin enforced
+  if (!current) return NextResponse.json({ error: 'Please log in again.' }, { status: 401, headers: noStore });
+  const throttleKey = `account-delete:${current.id}`;
+  if (isRateLimited(throttleKey, DELETE_ACCOUNT_LIMIT)) {
+    return NextResponse.json({ error: 'Too many wrong passwords. Please wait a few minutes.' }, { status: 429, headers: noStore });
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const { reviewsDeleted } = await deleteOwnAccount(current.id, body?.password);
+    if (reviewsDeleted > 0) revalidatePath('/'); // the homepage Reviews section is statically cached (ISR)
+    const res = NextResponse.json({ ok: true }, { headers: noStore });
+    clearSessionCookies(res);
+    return res;
+  } catch (err) {
+    if (err instanceof InputError) {
+      if (err.status === 403 && err.fields?.password) rateLimit(throttleKey, DELETE_ACCOUNT_LIMIT); // count the failure
+      return NextResponse.json({ error: err.message, fields: err.fields }, { status: err.status, headers: noStore });
+    }
+    console.error('[DELETE /api/auth/me]', err);
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500, headers: noStore });
+  }
 }

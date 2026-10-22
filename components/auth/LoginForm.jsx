@@ -8,10 +8,10 @@ import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateEmail } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
 
-// Where each role lands after logging in. Sellers without a shop are forwarded to /seller/onboarding.
-const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/profile' };
+// Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /seller/onboarding.
+const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
 
-/** `registered` = arriving straight from sign-up: email prefilled; new customers then land on `next` or the homepage. */
+/** `registered` = arriving straight from sign-up: email prefilled. A `next` (e.g. checkout) always wins. */
 export default function LoginForm({ next, registered = false }) {
   const router = useRouter();
   const { login } = useAuth();
@@ -62,7 +62,7 @@ export default function LoginForm({ next, registered = false }) {
       return;
     }
     const { role } = result.user;
-    router.replace(next || (registered && role === 'customer' ? '/' : DASHBOARD[role]) || '/');
+    router.replace(next || DASHBOARD[role] || '/');
     router.refresh();
   }
 
