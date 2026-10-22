@@ -33,74 +33,97 @@ const LINK_GROUPS = [
   },
 ];
 
+const LEGAL = [
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Privacy Policy', href: '/privacy' },
+];
+
+/**
+ * Site footer: a wave out of the white page into a warm beige block — call to action, trust points,
+ * link columns, then the brand line and a slim legal bar. Pure server markup (no client JS).
+ */
 export default function Footer() {
   return (
-    <footer className="mt-24 sm:mt-32">
-      {/* ---------- Closing call to action ---------- */}
-      <div className="container-page">
-        <div className="flex flex-col items-start gap-8 rounded-2xl bg-stone-100 px-6 py-12 sm:px-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-2xl">
-            <h2 className="headline text-4xl leading-[1.08] text-balance sm:text-5xl">Have something worth selling?</h2>
-            <p className="mt-4 text-lg text-stone-600">Open a store in minutes and reach buyers looking for exactly what you make.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/sell/signup" className="btn btn-lg btn-primary">
-              Start selling
-            </Link>
-            <Link href="/products" className="btn btn-lg btn-outline">
-              Browse products
-            </Link>
-          </div>
-        </div>
-      </div>
+    <footer className="mt-24 text-ink sm:mt-32">
+      {/* Wavy top edge (same colour as the block below, so the two read as one shape). */}
+      <svg aria-hidden="true" viewBox="0 0 1440 90" preserveAspectRatio="none" className="block h-10 w-full text-beige sm:h-16 lg:h-20">
+        <path d="M0 52C190 18 380 6 600 22s420 58 640 52c80-2 150-12 200-22v38H0Z" fill="currentColor" />
+      </svg>
 
-      <div className="container-page">
-        <ul className="grid gap-8 border-b border-stone-200 py-12 sm:grid-cols-2 lg:grid-cols-4">
-          {TRUST.map(({ icon: Icon, title, text }) => (
-            <li key={title}>
-              <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
-              <p className="mt-3 font-medium">{title}</p>
-              <p className="mt-1 text-sm text-stone-500">{text}</p>
-            </li>
-          ))}
-        </ul>
+      <div className="-mt-px bg-beige">
+        <div className="container-page pb-10 pt-10 sm:pt-14">
+          <div className="grid gap-14 lg:grid-cols-12 lg:gap-8">
+            {/* ---------- Call to action + trust points ---------- */}
+            <div className="lg:col-span-6">
+              <h2 className="headline text-4xl leading-[1.05] text-balance sm:text-5xl lg:text-[3.5rem]">Have something worth selling?</h2>
+              <p className="mt-4 max-w-lg text-lg text-stone-600">Open a store in minutes and reach buyers looking for exactly what you make.</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/sell/signup" className="btn btn-lg btn-primary">
+                  Start selling
+                </Link>
+                <Link href="/products" className="btn btn-lg border border-stone-400/60 text-black hover:border-black hover:bg-white/60">
+                  Browse products
+                </Link>
+              </div>
 
-        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+              <ul className="mt-12 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                {TRUST.map(({ icon: Icon, title, text }) => (
+                  <li key={title} className="flex gap-3">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-brand-600">
+                      <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium">{title}</p>
+                      <p className="mt-0.5 text-sm text-stone-600">{text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* ---------- Link columns ---------- */}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:justify-items-end">
+              {LINK_GROUPS.map((group) => (
+                <nav key={group.title} aria-label={group.title} className="lg:min-w-36">
+                  <p className="headline text-2xl">{group.title}</p>
+                  <ul className="mt-5 space-y-3.5">
+                    {group.links.map((l) => (
+                      <li key={l.href}>
+                        <Link href={l.href} className="text-[15px] text-stone-700 transition-colors hover:text-black hover:underline hover:underline-offset-4">
+                          {l.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          </div>
+
+          {/* ---------- Brand line ---------- */}
+          <div className="mt-16 max-w-sm">
             <Logo />
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-stone-500">{siteConfig.description}</p>
+            <p className="mt-3 text-sm leading-relaxed text-stone-600">{siteConfig.description}</p>
           </div>
 
-          {LINK_GROUPS.map((group) => (
-            <nav key={group.title} aria-label={group.title}>
-              <p className="text-sm text-stone-500">{group.title}</p>
-              <ul className="mt-4 space-y-2.5 text-sm">
-                {group.links.map((l) => (
-                  <li key={l.href}>
-                    <Link href={l.href} className="text-black transition-colors hover:text-brand-600">
+          {/* ---------- Legal bar ---------- */}
+          <div className="mt-10 flex flex-col gap-3 border-t border-beige-dark pt-6 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
+            </p>
+            <nav aria-label="Legal">
+              <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                {LEGAL.map((l, i) => (
+                  <li key={l.href} className="flex items-center gap-3">
+                    {i > 0 && <span aria-hidden="true" className="size-1 rounded-full bg-stone-400" />}
+                    <Link href={l.href} className="transition-colors hover:text-black">
                       {l.label}
                     </Link>
                   </li>
                 ))}
               </ul>
             </nav>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t border-stone-200">
-        <div className="container-page flex flex-col gap-3 py-6 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
-          </p>
-          <nav aria-label="Legal" className="flex gap-6">
-            <Link href="/terms" className="hover:text-black">
-              Terms of Service
-            </Link>
-            <Link href="/privacy" className="hover:text-black">
-              Privacy Policy
-            </Link>
-          </nav>
+          </div>
         </div>
       </div>
     </footer>

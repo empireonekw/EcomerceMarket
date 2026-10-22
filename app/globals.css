@@ -11,6 +11,8 @@
   --color-brand-700: #3c38e0;
 
   --color-ink: #141414;
+  --color-beige: #f3ede2; /* warm neutral for large calm surfaces (footer) */
+  --color-beige-dark: #e7dfd0; /* hover / dividers on beige */
 
   /* The one elevation: a soft, wide lift for hovered cards and floating panels. */
   --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.1);
