@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowUpRight, Download, Flame } from 'lucide-react';
 import AddToCartButton from '@/components/AddToCartButton';
 import CategoryIcon from '@/components/CategoryIcon';
-import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 
 // Earned, not hand-picked: products with at least this many sales get the "Bestseller" badge.
 const BESTSELLER_MIN_SALES = 250;
@@ -15,7 +15,7 @@ const BESTSELLER_MIN_SALES = 250;
  * Pass `preload` only for above-the-fold cards (first row) to improve LCP.
  */
 export default function ProductCard({ product, preload = false }) {
-  const { _id, title, slug, shortDescription, price, compareAtPrice, currency, coverImage, coverBlurDataURL, category, fileFormat, salesCount } =
+  const { _id, title, slug, shortDescription, price, compareAtPrice, currency, coverImage, coverBlurDataURL, category, fileFormat, deliveryType, salesCount } =
     product;
   const href = `/products/${slug}`;
   const discount = compareAtPrice > price ? Math.round((1 - price / compareAtPrice) * 100) : 0;
@@ -102,12 +102,12 @@ export default function ProductCard({ product, preload = false }) {
             {salesCount > 0 && (
               <p className="mt-1.5 flex items-center gap-1 text-xs text-stone-500">
                 <Download size={12} strokeWidth={2} aria-hidden="true" />
-                {salesCount.toLocaleString('en-US')} sold
+                {salesCount.toLocaleString('en-US')} {price === 0 ? 'downloads' : 'sold'}
               </p>
             )}
           </div>
           {/* Pass only what the cart needs to keep the client payload small. */}
-          <AddToCartButton compact className="relative z-10" product={{ _id, slug, title, price, currency, coverImage }} />
+          <AddToCartButton compact className="relative z-10" product={{ _id, slug, title, price, currency, coverImage, accessLink: isAccessLink({ deliveryType, fileFormat }) }} />
         </div>
       </div>
     </article>

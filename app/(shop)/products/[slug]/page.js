@@ -5,7 +5,7 @@ import ProductGrid from '@/components/ProductGrid';
 import AddToCartButton from '@/components/AddToCartButton';
 import BuyNowButton from '@/components/BuyNowButton';
 import { getProductBySlug, getRelatedProducts } from '@/lib/data/products';
-import { formatFileSize, formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
 
 // ISR: rendered on first visit, served from cache, refreshed at most every 5 minutes.
@@ -76,6 +76,7 @@ export default async function ProductPage({ params }) {
     price: product.price,
     currency: product.currency,
     coverImage: product.coverImage,
+    accessLink: isAccessLink(product),
   };
 
   return (
@@ -173,7 +174,7 @@ export default async function ProductPage({ params }) {
           <dl className="mt-8 divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white text-sm">
             <div className="flex justify-between gap-4 px-4 py-3">
               <dt className="text-stone-500">Delivery</dt>
-              <dd className="font-medium">{product.deliveryType === 'external' ? 'Private access link' : 'Instant download'}</dd>
+              <dd className="font-medium">{deliveryLabel(product)}</dd>
             </div>
             {product.fileFormat && (
               <div className="flex justify-between gap-4 px-4 py-3">
@@ -189,7 +190,7 @@ export default async function ProductPage({ params }) {
             )}
             {product.salesCount > 0 && (
               <div className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-stone-500">Sales</dt>
+                <dt className="text-stone-500">{product.price === 0 ? 'Downloads' : 'Sales'}</dt>
                 <dd className="font-medium">{product.salesCount.toLocaleString('en-US')}</dd>
               </div>
             )}

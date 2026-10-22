@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
-import { PRICING, formatTaxRate } from '@/lib/pricing';
+import { formatTaxRate } from '@/lib/pricing';
 
 function SummaryRow({ label, value, strong = false }) {
   return (
@@ -104,7 +104,7 @@ export default function CartDrawer() {
                     <Link href={`/products/${item.slug}`} className="line-clamp-2 text-sm font-medium hover:underline">
                       {item.title}
                     </Link>
-                    <p className="mt-0.5 text-xs text-stone-500">Instant digital download</p>
+                    <p className="mt-0.5 text-xs text-stone-500">{item.accessLink ? 'Instant access link' : 'Instant digital download'}</p>
                     <div className="mt-auto flex items-center justify-between pt-2">
                       <span className="text-sm font-medium">{item.price === 0 ? 'Free' : money(item.price)}</span>
                       <button
@@ -123,10 +123,15 @@ export default function CartDrawer() {
 
             <footer className="border-t border-stone-200 px-5 py-5">
               <dl className="space-y-2">
-                <SummaryRow label="Subtotal" value={money(totals.subtotal)} />
-                <SummaryRow label="Service fee" value={PRICING.serviceFeeCents ? money(totals.fee) : 'Free'} />
-                <SummaryRow label={`Tax (${formatTaxRate()})`} value={money(totals.tax)} />
-                <div className="border-t border-stone-200 pt-2">
+                {/* Fee and tax lines only when they add something; otherwise the total says it all. */}
+                {(totals.fee > 0 || totals.tax > 0) && (
+                  <>
+                    <SummaryRow label="Subtotal" value={money(totals.subtotal)} />
+                    {totals.fee > 0 && <SummaryRow label="Service fee" value={money(totals.fee)} />}
+                    {totals.tax > 0 && <SummaryRow label={`Tax (${formatTaxRate()})`} value={money(totals.tax)} />}
+                  </>
+                )}
+                <div className={totals.fee > 0 || totals.tax > 0 ? 'border-t border-stone-200 pt-2' : ''}>
                   <SummaryRow label="Total" value={money(totals.total)} strong />
                 </div>
               </dl>

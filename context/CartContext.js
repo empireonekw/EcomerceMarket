@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore } from 'react';
+import { isAccessLink } from '@/lib/utils';
 import { calculateTotals } from '@/lib/pricing';
 
 /**
@@ -59,13 +60,15 @@ const getServerSnapshot = () => EMPTY;
 const noopSubscribe = () => () => {};
 
 /** Only the fields the cart UI needs — keeps localStorage small. */
-const toCartItem = ({ _id, slug, title, price, currency = 'USD', coverImage }) => ({
+// accessLink: delivered as an access link (Figma / Notion / external) rather than a file — drives the cart wording.
+const toCartItem = ({ _id, slug, title, price, currency = 'USD', coverImage, accessLink, deliveryType, fileFormat }) => ({
   _id: String(_id),
   slug,
   title,
   price,
   currency,
   coverImage,
+  accessLink: accessLink ?? isAccessLink({ deliveryType, fileFormat }),
 });
 
 const CartContext = createContext(null);

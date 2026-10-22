@@ -172,18 +172,24 @@ export default async function CheckoutSuccessPage({ searchParams }) {
             ))}
           </tbody>
           <tfoot className="text-stone-600">
-            <tr>
-              <th scope="row" className="pt-3 text-left font-normal">Subtotal</th>
-              <td className="pt-3 text-right">{money(order.subtotal)}</td>
-            </tr>
-            <tr>
-              <th scope="row" className="pt-1 text-left font-normal">Service fee</th>
-              <td className="pt-1 text-right">{money(order.feeAmount)}</td>
-            </tr>
-            <tr>
-              <th scope="row" className="pt-1 text-left font-normal">Tax</th>
-              <td className="pt-1 text-right">{money(order.taxAmount)}</td>
-            </tr>
+            {(order.feeAmount > 0 || order.taxAmount > 0) && (
+              <tr>
+                <th scope="row" className="pt-3 text-left font-normal">Subtotal</th>
+                <td className="pt-3 text-right">{money(order.subtotal)}</td>
+              </tr>
+            )}
+            {order.feeAmount > 0 && (
+              <tr>
+                <th scope="row" className="pt-1 text-left font-normal">Service fee</th>
+                <td className="pt-1 text-right">{money(order.feeAmount)}</td>
+              </tr>
+            )}
+            {order.taxAmount > 0 && (
+              <tr>
+                <th scope="row" className="pt-1 text-left font-normal">Tax</th>
+                <td className="pt-1 text-right">{money(order.taxAmount)}</td>
+              </tr>
+            )}
             <tr className="text-base font-medium text-ink">
               <th scope="row" className="pt-3 text-left">Total paid</th>
               <td className="pt-3 text-right">{money(order.totalAmount)}</td>

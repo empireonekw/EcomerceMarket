@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
-import { PRICING, formatTaxRate } from '@/lib/pricing';
+import { formatTaxRate } from '@/lib/pricing';
 
 function Spinner() {
   return <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />;
@@ -172,19 +172,28 @@ export default function CheckoutForm({ demoMode = false }) {
           ))}
         </ul>
         <dl className="mt-4 space-y-2 border-t border-stone-200 pt-4 text-sm">
-          <div className="flex justify-between text-stone-600">
-            <dt>Subtotal</dt>
-            <dd className="font-medium text-ink">{money(totals.subtotal)}</dd>
-          </div>
-          <div className="flex justify-between text-stone-600">
-            <dt>Service fee</dt>
-            <dd className="font-medium text-ink">{PRICING.serviceFeeCents ? money(totals.fee) : 'Free'}</dd>
-          </div>
-          <div className="flex justify-between text-stone-600">
-            <dt>Tax ({formatTaxRate()})</dt>
-            <dd className="font-medium text-ink">{money(totals.tax)}</dd>
-          </div>
-          <div className="flex justify-between border-t border-stone-200 pt-3 text-base font-medium">
+          {/* Fee and tax lines only when they add something; otherwise the total says it all. */}
+          {(totals.fee > 0 || totals.tax > 0) && (
+            <>
+              <div className="flex justify-between text-stone-600">
+                <dt>Subtotal</dt>
+                <dd className="font-medium text-ink">{money(totals.subtotal)}</dd>
+              </div>
+              {totals.fee > 0 && (
+                <div className="flex justify-between text-stone-600">
+                  <dt>Service fee</dt>
+                  <dd className="font-medium text-ink">{money(totals.fee)}</dd>
+                </div>
+              )}
+              {totals.tax > 0 && (
+                <div className="flex justify-between text-stone-600">
+                  <dt>Tax ({formatTaxRate()})</dt>
+                  <dd className="font-medium text-ink">{money(totals.tax)}</dd>
+                </div>
+              )}
+            </>
+          )}
+          <div className={`flex justify-between text-base font-medium ${totals.fee > 0 || totals.tax > 0 ? 'border-t border-stone-200 pt-3' : ''}`}>
             <dt>Total</dt>
             <dd>{money(totals.total)}</dd>
           </div>

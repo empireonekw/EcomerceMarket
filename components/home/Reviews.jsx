@@ -77,7 +77,18 @@ export default async function Reviews() {
 
   return (
     <section className="container-page pt-20 sm:pt-28" aria-labelledby="reviews-heading">
-      <SectionHeading id="reviews-heading" title="Loved by buyers" description="What customers say about their downloads. Hover a card to see who wrote it.">
+      <SectionHeading
+        id="reviews-heading"
+        title="Loved by buyers"
+        description={
+          <>
+            What customers say about their downloads.{' '}
+            {/* Touch screens can't hover: say "tap" there, "hover" only where a mouse can. */}
+            <span className="[@media(hover:hover)]:hidden">Tap a card to see who wrote it.</span>
+            <span className="hidden [@media(hover:hover)]:inline">Hover over a card to see who wrote it.</span>
+          </>
+        }
+      >
         <p className="flex items-center gap-2.5 text-sm text-stone-600">
           <Stars rating={reviews.average} size={18} />
           <span>
