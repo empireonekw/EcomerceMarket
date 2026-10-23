@@ -1,4 +1,4 @@
-# E-Commerce Market
+# Sellpify
 
 Digital products marketplace (templates, e-books, software, vector packs) built with
 **Next.js 16 (App Router, JavaScript)**, **Tailwind CSS v4** and **MongoDB Atlas + Mongoose 9**.

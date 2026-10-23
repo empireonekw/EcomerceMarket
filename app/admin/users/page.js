@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import Form from 'next/form';
 import { Store, UserPlus, Users, UserRound } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import UsersTable from '@/components/admin/UsersTable';
+import { FilterTabs, PendingContent, PendingNavProvider, PendingSearchForm } from '@/components/dashboard/PendingNav';
+import { AdminUsersListSkeleton } from '@/components/dashboard/RouteSkeletons';
 import { PageHeader, StatCard, EmptyState, buttonClasses } from '@/components/dashboard/ui';
 import { requireAdmin } from '@/lib/auth';
 import { getAdminUsers } from '@/lib/data/admin-users';
@@ -53,51 +54,47 @@ export default async function AdminUsersPage({ searchParams }) {
         <StatCard label="New in 30 days" value={summary.newLast30d.toLocaleString('en-US')} sub="Sign-ups this month" icon={UserPlus} tone="positive" />
       </section>
 
-      <div className="mb-5 mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <nav aria-label="Filter by role" className="-mx-4 flex gap-1 overflow-x-auto px-4 lg:mx-0 lg:px-0">
-          {ROLE_TABS.map((t) => {
-            const active = params.role === t.value;
-            return (
-              <Link
-                key={t.value || 'all'}
-                href={tabHref(t.value, params.q)}
-                aria-current={active ? 'page' : undefined}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors ${active ? 'bg-black text-white' : 'text-stone-600 hover:bg-stone-100 hover:text-black'}`}
-              >
-                {t.label}
-                <span className={`ml-1.5 tabular-nums ${active ? 'text-white/60' : 'text-stone-400'}`}>
-                  {t.key === 'total' ? summary.total : summary.byRole[t.key]}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Tabs and search switch instantly; the list shows a skeleton until the new results arrive. */}
+      <PendingNavProvider>
+        <div className="mb-5 mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <FilterTabs
+            label="Filter by role"
+            activeKey={params.role}
+            items={ROLE_TABS.map((t) => ({
+              key: t.value,
+              label: t.label,
+              count: t.key === 'total' ? summary.total : summary.byRole[t.key],
+              href: tabHref(t.value, params.q),
+            }))}
+          />
 
-        <Form action="/admin/users" className="flex gap-2">
-          {params.role && <input type="hidden" name="role" value={params.role} />}
-          <label htmlFor="q" className="sr-only">
-            Search users
-          </label>
-          <input id="q" name="q" type="search" defaultValue={params.q} placeholder="Name, email or shop…" className={`${field} w-full lg:w-72`} />
-          <button type="submit" className={buttonClasses.secondary}>
-            Search
-          </button>
-        </Form>
-      </div>
+          <PendingSearchForm
+            action="/admin/users"
+            params={{ role: params.role }}
+            defaultValue={params.q}
+            label="Search users"
+            placeholder="Name, email or shop…"
+            inputClassName={`${field} w-full lg:w-72`}
+            buttonClassName={buttonClasses.secondary}
+          />
+        </div>
 
-      {items.length === 0 ? (
-        <EmptyState title={filtered ? 'No users match these filters' : 'No users yet'}>
-          {filtered && (
-            <Link href="/admin/users" className="font-medium text-black underline underline-offset-2">
-              Clear filters
-            </Link>
+        <PendingContent fallback={<AdminUsersListSkeleton />}>
+          {items.length === 0 ? (
+            <EmptyState title={filtered ? 'No users match these filters' : 'No users yet'}>
+              {filtered && (
+                <Link href="/admin/users" className="font-medium text-black underline underline-offset-2">
+                  Clear filters
+                </Link>
+              )}
+            </EmptyState>
+          ) : (
+            <UsersTable items={items} currentAdminId={admin.id} />
           )}
-        </EmptyState>
-      ) : (
-        <UsersTable items={items} currentAdminId={admin.id} />
-      )}
 
-      <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={{ q: params.q, role: params.role }} />
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={{ q: params.q, role: params.role }} />
+        </PendingContent>
+      </PendingNavProvider>
     </>
   );
 }

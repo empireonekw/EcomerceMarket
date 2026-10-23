@@ -32,13 +32,26 @@ export function AdminProductsSkeleton() {
   );
 }
 
+/** Users table only (bulk bar + rows) — shown in place while a role tab or search loads. */
+export function AdminUsersListSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading users">
+      <div className="mb-3 flex h-12 items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4">
+        <div className="size-4 rounded bg-stone-200/80" />
+        <div className={`h-3.5 w-36 ${bar}`} />
+      </div>
+      <TableSkeleton rows={8} cols={7} thumb={false} />
+    </DashboardPageSkeleton>
+  );
+}
+
 export function AdminUsersSkeleton() {
   return (
     <DashboardPageSkeleton label="Loading users">
       <HeaderSkeleton />
       <StatsSkeleton />
       <FilterBarSkeleton />
-      <TableSkeleton rows={8} cols={7} thumb={false} />
+      <AdminUsersListSkeleton />
     </DashboardPageSkeleton>
   );
 }
