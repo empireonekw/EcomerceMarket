@@ -4,7 +4,7 @@
  * Its own app name and port, so it never touches the other sites on the server.
  * It listens on 127.0.0.1 only: the public reaches it through nginx.
  *
- *   pm2 logs ecomerce-market           # live logs
+ *   pm2 logs sellpify           # live logs
  *
  * Deploys: bash scripts/deploy.sh
  */
@@ -13,7 +13,7 @@ const PORT = Number(process.env.PORT) || 4800;
 module.exports = {
   apps: [
     {
-      name: 'ecomerce-market',
+      name: 'sellpify',
       script: 'node_modules/next/dist/bin/next',
       args: `start -p ${PORT} -H 127.0.0.1`,
       // One process: lib/rate-limit.js keeps its counters in memory, so more workers would each count separately.

@@ -2,19 +2,19 @@
 # One-time setup of sellpify.com on 13.140.168.178 (run as root, from the
 # cloned repo). Safe to re-run.
 #
-#   git clone https://github.com/empireonekw/EcomerceMarket.git /www/wwwroot/ecomerce-market
-#   bash /www/wwwroot/ecomerce-market/scripts/server/setup.sh
+#   git clone https://github.com/empireonekw/EcomerceMarket.git /www/wwwroot/sellpify
+#   bash /www/wwwroot/sellpify/scripts/server/setup.sh
 #
 # Installs Node.js + PM2 if missing, asks once for the MongoDB connection string
 # (every other setting is generated), builds and starts the site as PM2 app
-# `ecomerce-market` on 127.0.0.1:4800, and puts nginx in front for
+# `sellpify` on 127.0.0.1:4800, and puts nginx in front for
 # sellpify.com (Cloudflare connects to it on port 443). Other sites on this
 # server (guestposting.live, rankkw.*, anything on port 80) are left untouched.
 set -euo pipefail
 
 main() {
 
-APP=ecomerce-market
+APP=sellpify
 DOMAIN=${DOMAIN:-sellpify.com}
 PORT=4800
 APP_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -25,7 +25,7 @@ die()  { printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "Please run this as root."
 cd "$APP_DIR"
-[ -f package.json ] && grep -q '"name": "ecommerce-market"' package.json || die "Run this from the Sellpify code folder (got $APP_DIR)."
+[ -f package.json ] && grep -q '"name": "sellpify"' package.json || die "Run this from the Sellpify code folder (got $APP_DIR)."
 
 if command -v apt-get >/dev/null 2>&1; then PKG=apt
 elif command -v dnf >/dev/null 2>&1; then PKG=dnf
