@@ -14,13 +14,14 @@ const FEATURES = [
 ];
 
 /**
- * Benefits strip under the hero: icon-in-circle cards with thin dividers, scrolling right → left.
+ * Full-width benefits strip between "Shop by category" and "Latest products": icon-in-circle cards with thin
+ * dividers, scrolling right → left.
  * Pure CSS (no client JS): the list is rendered twice and the track moves -50% per loop (marquee-x in
  * globals.css). Pauses on hover and keyboard focus; never moves under "reduce motion".
  */
 export default function FeatureMarquee() {
   return (
-    <section aria-labelledby="features-heading" className="group/features overflow-hidden border-b border-stone-200 bg-stone-50 py-10 sm:py-12">
+    <section aria-labelledby="features-heading" className="group/features mt-20 overflow-hidden border-y border-stone-200 bg-stone-50 py-10 sm:mt-28 sm:py-12">
       <div className="mb-8 flex justify-center px-4">
         <h2
           id="features-heading"

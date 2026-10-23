@@ -21,7 +21,6 @@ export default async function HomePage() {
   return (
     <>
       <HeroShowcase />
-      <FeatureMarquee />
 
       {/* ---------------- Shop by category ---------------- */}
       {categories.length > 0 && (
@@ -49,6 +48,9 @@ export default async function HomePage() {
           </ul>
         </section>
       )}
+
+      {/* ---------------- Why shop with us (scrolling banner) ---------------- */}
+      <FeatureMarquee />
 
       {/* ---------------- Latest products ---------------- */}
       <section className="container-page pt-20 sm:pt-28" aria-labelledby="latest-heading">
