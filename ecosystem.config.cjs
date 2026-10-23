@@ -1,5 +1,5 @@
 /**
- * PM2 config for ecomercemarket.com on 13.140.168.178 (next to the rankkw sites).
+ * PM2 config for sellpify.com on 13.140.168.178 (next to the rankkw sites).
  *
  * Its own app name and port, so it never touches the other sites on the server.
  * It listens on 127.0.0.1 only: the public reaches it through nginx.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy ecomercemarket.com with (almost) no downtime, the same way as the rankkw sites:
+# Deploy sellpify.com with (almost) no downtime, the same way as the rankkw sites:
 # the new build goes into .next-build while the live site keeps serving .next;
 # only a complete build is swapped in, then the app restarts and a health check
 # runs. A build that does not come up healthy is rolled back by itself.
