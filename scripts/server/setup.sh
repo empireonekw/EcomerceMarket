@@ -7,7 +7,7 @@
 #
 # Installs Node.js + PM2 if missing, asks once for the MongoDB connection string
 # (every other setting is generated), builds and starts the site as PM2 app
-# `sellpify` on 127.0.0.1:4800, and puts nginx in front for
+# `sellpify` on 127.0.0.1:4810, and puts nginx in front for
 # sellpify.com (Cloudflare connects to it on port 443). Other sites on this
 # server (guestposting.live, rankkw.*, anything on port 80) are left untouched.
 set -euo pipefail
@@ -16,7 +16,7 @@ main() {
 
 APP=sellpify
 DOMAIN=${DOMAIN:-sellpify.com}
-PORT=4800
+PORT=4810
 APP_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 say()  { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }

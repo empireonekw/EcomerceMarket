@@ -8,7 +8,7 @@
  *
  * Deploys: bash scripts/deploy.sh
  */
-const PORT = Number(process.env.PORT) || 4800;
+const PORT = Number(process.env.PORT) || 4810;
 
 module.exports = {
   apps: [

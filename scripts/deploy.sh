@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP=sellpify
-PORT=${PORT:-4800}
+PORT=${PORT:-4810}
 HEALTH="http://127.0.0.1:${PORT}/api/health"
 
 echo "==> Pulling latest code"
