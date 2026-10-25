@@ -65,9 +65,8 @@ export default function MobileMenu({ categories }) {
                     <ul className="mb-1 ml-3 border-l border-stone-200 pl-2">
                       {categories.map((c) => (
                         <li key={c.slug}>
-                          <Link href={`/products?category=${c.slug}`} className="flex items-center justify-between rounded-full px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-50 hover:text-black">
+                          <Link href={`/products?category=${c.slug}`} className="flex items-center rounded-full px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-50 hover:text-black">
                             {c.name}
-                            {c.productCount != null && <span className="text-xs text-stone-400">{c.productCount}</span>}
                           </Link>
                         </li>
                       ))}

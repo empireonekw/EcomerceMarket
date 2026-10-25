@@ -14,18 +14,18 @@ const FEATURES = [
 ];
 
 /**
- * Full-width benefits strip between "Shop by category" and "Latest products": icon-in-circle cards with thin
- * dividers, scrolling right → left.
+ * Slim full-width benefits strip between "Shop by category" and "Latest products": icon beside a title and
+ * one-line note, thin dividers, scrolling right → left.
  * Pure CSS (no client JS): the list is rendered twice and the track moves -50% per loop (marquee-x in
  * globals.css). Pauses on hover and keyboard focus; never moves under "reduce motion".
  */
 export default function FeatureMarquee() {
   return (
-    <section aria-labelledby="features-heading" className="group/features mt-20 overflow-hidden border-y border-stone-200 bg-stone-50 py-10 sm:mt-28 sm:py-12">
-      <div className="mb-8 flex justify-center px-4">
+    <section aria-labelledby="features-heading" className="group/features mt-20 overflow-hidden border-y border-stone-200 bg-stone-50 py-8 sm:mt-28 sm:py-10">
+      <div className="mb-7 flex justify-center px-4">
         <h2
           id="features-heading"
-          className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700"
+          className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-sm font-medium text-stone-700"
         >
           <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-600" />
           Why shop with us
@@ -40,12 +40,14 @@ export default function FeatureMarquee() {
           // The second copy only closes the loop: hidden from assistive tech.
           <ul key={copy} aria-hidden={copy === 1 || undefined} className="flex shrink-0">
             {FEATURES.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex w-72 shrink-0 flex-col items-center border-r border-stone-200 px-8 text-center sm:w-80">
-                <span className="grid size-12 place-items-center rounded-full border border-stone-200 bg-white text-stone-800">
-                  <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
+              <li key={title} className="flex w-80 shrink-0 items-center gap-4 border-r border-stone-200 px-7">
+                <span className="grid size-11 shrink-0 place-items-center rounded-full border border-stone-200 bg-white text-stone-800">
+                  <Icon size={19} strokeWidth={1.75} aria-hidden="true" />
                 </span>
-                <h3 className="mt-4 font-medium text-black">{title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-stone-500 text-balance">{text}</p>
+                <div className="min-w-0">
+                  <h3 className="text-[15px] font-medium text-black">{title}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm leading-snug text-stone-500">{text}</p>
+                </div>
               </li>
             ))}
           </ul>

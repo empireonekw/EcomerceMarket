@@ -90,10 +90,7 @@ function ShopMenu({ categories, active }) {
                     <CategoryIcon slug={c.slug} className="size-5" />
                   </span>
                   <span className="min-w-0">
-                    <span className="flex items-baseline gap-2 text-sm font-medium">
-                      {c.name}
-                      {c.productCount != null && <span className="text-xs font-normal text-stone-400">{c.productCount}</span>}
-                    </span>
+                    <span className="block text-sm font-medium">{c.name}</span>
                     {c.description && <span className="mt-0.5 line-clamp-2 block text-xs text-stone-500">{c.description}</span>}
                   </span>
                 </Link>
