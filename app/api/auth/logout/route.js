@@ -19,7 +19,7 @@ export async function POST(request) {
   }
 
   const wantsJson = request.headers.get('accept')?.includes('application/json');
-  // Relative Location on purpose: behind nginx, request.url is the internal address (http://localhost:4800),
+  // Relative Location on purpose: behind nginx, request.url is the internal address (http://localhost:4810),
   // so an absolute redirect built from it would send the browser there instead of to the public domain.
   const res = wantsJson
     ? NextResponse.json({ ok: true }, { headers: { 'Cache-Control': 'no-store' } })

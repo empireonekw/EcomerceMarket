@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Deploy ecomercemarket.com with (almost) no downtime, the same way as the rankkw sites:
+# Deploy sellpify.com with (almost) no downtime, the same way as the rankkw sites:
 # the new build goes into .next-build while the live site keeps serving .next;
 # only a complete build is swapped in, then the app restarts and a health check
 # runs. A build that does not come up healthy is rolled back by itself.
 #
-# Usage (on the server, in /www/wwwroot/ecomerce-market):   bash scripts/deploy.sh
+# Usage (on the server, in /www/wwwroot/sellpify):   bash scripts/deploy.sh
 # Roll back to the previous build by hand:
-#   mv .next .next-bad && mv .next-old .next && pm2 restart ecomerce-market
+#   mv .next .next-bad && mv .next-old .next && pm2 restart sellpify
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-APP=ecomerce-market
-PORT=${PORT:-4800}
+APP=sellpify
+PORT=${PORT:-4810}
 HEALTH="http://127.0.0.1:${PORT}/api/health"
 
 echo "==> Pulling latest code"

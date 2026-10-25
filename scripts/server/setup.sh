@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# One-time setup of ecomercemarket.com on 13.140.168.178 (run as root, from the
+# One-time setup of sellpify.com on 13.140.168.178 (run as root, from the
 # cloned repo). Safe to re-run.
 #
-#   git clone https://github.com/empireonekw/EcomerceMarket.git /www/wwwroot/ecomerce-market
-#   bash /www/wwwroot/ecomerce-market/scripts/server/setup.sh
+#   git clone https://github.com/empireonekw/EcomerceMarket.git /www/wwwroot/sellpify
+#   bash /www/wwwroot/sellpify/scripts/server/setup.sh
 #
 # Installs Node.js + PM2 if missing, asks once for the MongoDB connection string
 # (every other setting is generated), builds and starts the site as PM2 app
-# `ecomerce-market` on 127.0.0.1:4800, and puts nginx in front for
-# ecomercemarket.com (Cloudflare connects to it on port 443). Other sites on this
+# `sellpify` on 127.0.0.1:4810, and puts nginx in front for
+# sellpify.com (Cloudflare connects to it on port 443). Other sites on this
 # server (guestposting.live, rankkw.*, anything on port 80) are left untouched.
 set -euo pipefail
 
 main() {
 
-APP=ecomerce-market
-DOMAIN=ecomercemarket.com
-PORT=4800
+APP=sellpify
+DOMAIN=${DOMAIN:-sellpify.com}
+PORT=4810
 APP_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 say()  { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
@@ -25,7 +25,7 @@ die()  { printf '\n\033[1;31mXX  %s\033[0m\n' "$*"; exit 1; }
 
 [ "$(id -u)" = 0 ] || die "Please run this as root."
 cd "$APP_DIR"
-[ -f package.json ] && grep -q '"name": "ecommerce-market"' package.json || die "Run this from the Sellpify code folder (got $APP_DIR)."
+[ -f package.json ] && grep -q '"name": "sellpify"' package.json || die "Run this from the Sellpify code folder (got $APP_DIR)."
 
 if command -v apt-get >/dev/null 2>&1; then PKG=apt
 elif command -v dnf >/dev/null 2>&1; then PKG=dnf
@@ -58,7 +58,10 @@ command -v pm2 >/dev/null 2>&1 || { say "Installing PM2"; npm install -g pm2 >/d
 # ---------------------------------------------------------------- 2. settings
 say "2/6 Settings (.env.local)"
 if [ -f .env.local ]; then
-  echo "Keeping the existing $APP_DIR/.env.local"
+  echo "Keeping the existing $APP_DIR/.env.local (site URL set to https://$DOMAIN)"
+  # The site URL and name are inlined at build time, so point an older file at this domain.
+  sed -i "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=https://$DOMAIN|; s|^NEXT_PUBLIC_SITE_NAME=.*|NEXT_PUBLIC_SITE_NAME=Sellpify|" .env.local
+  grep -q '^NEXT_PUBLIC_SUPPORT_EMAIL=' .env.local || echo "NEXT_PUBLIC_SUPPORT_EMAIL=support@$DOMAIN" >> .env.local
 else
   echo "Paste the MongoDB connection string (mongodb+srv://...) and press Enter:"
   read -r MONGO </dev/tty
@@ -66,10 +69,11 @@ else
   case "$MONGO" in mongodb://*|mongodb+srv://*) ;; *) die "That is not a MongoDB connection string. Run this again." ;; esac
   umask 077
   cat > .env.local <<EOF
-# ecomercemarket.com production settings (written by scripts/server/setup.sh).
+# $DOMAIN production settings (written by scripts/server/setup.sh).
 MONGODB_URI=$MONGO
 NEXT_PUBLIC_SITE_URL=https://$DOMAIN
 NEXT_PUBLIC_SITE_NAME=Sellpify
+NEXT_PUBLIC_SUPPORT_EMAIL=support@$DOMAIN
 # Signs logins and download links. Changing it logs everyone out.
 AUTH_SECRET=$(openssl rand -hex 48)
 # Bearer token for the admin API.
