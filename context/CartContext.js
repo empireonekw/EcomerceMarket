@@ -78,12 +78,17 @@ export function CartProvider({ children }) {
   // false during SSR + hydration, true afterwards — lets UIs avoid flashing "empty cart".
   const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [isOpen, setIsOpen] = useState(false);
+  // The "Added to your cart" notice under the navbar (components/CartToast.jsx). `key` restarts it on every add.
+  const [added, setAdded] = useState(null);
 
-  const addToCart = useCallback((product, { open = true } = {}) => {
+  /** Adds a product and shows the "Added to your cart" notice; `notify: false` skips it (e.g. Buy now). */
+  const addToCart = useCallback((product, { notify = true } = {}) => {
     const current = readCart();
     if (!current.some((i) => i._id === String(product._id))) writeCart([...current, toCartItem(product)]);
-    if (open) setIsOpen(true);
+    if (notify) setAdded({ item: toCartItem(product), key: Date.now() });
   }, []);
+
+  const dismissAdded = useCallback(() => setAdded(null), []);
 
   const removeFromCart = useCallback((id) => writeCart(readCart().filter((i) => i._id !== String(id))), []);
 
@@ -112,10 +117,15 @@ export function CartProvider({ children }) {
       syncCart,
       getCartTotal,
       isOpen,
-      openCart: () => setIsOpen(true),
+      openCart: () => {
+        setAdded(null);
+        setIsOpen(true);
+      },
       closeCart: () => setIsOpen(false),
+      added,
+      dismissAdded,
     };
-  }, [items, hydrated, isOpen, addToCart, removeFromCart, clearCart, syncCart, getCartTotal]);
+  }, [items, hydrated, isOpen, added, addToCart, removeFromCart, clearCart, syncCart, getCartTotal, dismissAdded]);
 
   return <CartContext value={value}>{children}</CartContext>;
 }

@@ -18,7 +18,7 @@ export default function BuyNowButton({ product, className = '' }) {
     <button
       type="button"
       onClick={() => {
-        addToCart(product, { open: false });
+        addToCart(product, { notify: false });
         router.push('/checkout');
       }}
       className={`btn btn-lg btn-primary w-full ${className}`}

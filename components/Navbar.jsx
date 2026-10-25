@@ -2,6 +2,7 @@ import Link from 'next/link';
 import DesktopNav from '@/components/nav/DesktopNav';
 import MobileMenu from '@/components/nav/MobileMenu';
 import NavSearch from '@/components/nav/NavSearch';
+import CartToast from '@/components/CartToast';
 import CartBadge from '@/components/CartBadge';
 import Logo from '@/components/Logo';
 import UserMenu from '@/components/UserMenu';
@@ -69,6 +70,7 @@ export default async function Navbar() {
             <MobileMenu categories={categories} />
           </div>
         </div>
+        <CartToast />
       </header>
     </>
   );

@@ -4,7 +4,8 @@ import { Check, Plus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 /**
- * `product` only needs { _id, slug, title, price, currency, coverImage }. Opens the cart drawer on add.
+ * `product` only needs { _id, slug, title, price, currency, coverImage }. Adding shows the "Added to your cart"
+ * notice under the navbar (components/CartToast.jsx); once in the cart, the button opens the cart drawer.
  * `compact` = the small "Add" pill used on product cards; otherwise a full-width large button.
  */
 export default function AddToCartButton({ product, compact = false, className = '' }) {
