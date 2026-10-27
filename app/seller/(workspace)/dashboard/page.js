@@ -8,6 +8,7 @@ import { getSellerDashboard } from '@/lib/data/seller';
 import { getMonthlyEarnings } from '@/lib/data/seller-analytics';
 import { EarningsPanel } from '@/components/dashboard/SellerAnalytics';
 import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { listingStatus } from '@/lib/listing';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
 
@@ -43,9 +44,9 @@ export default async function SellerDashboardPage() {
         title={data.storeName}
         description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees — you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
         actions={
-          <Link href="/seller/products/add" className={buttonClasses.primary}>
+          <Link href="/seller/listings/new" className={buttonClasses.primary}>
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
-            Add product
+            Add a listing
           </Link>
         }
       />
@@ -65,18 +66,18 @@ export default async function SellerDashboardPage() {
       {/* ---------- Products ---------- */}
       <div className="mt-8">
         <Panel
-          title="Latest products"
+          title="Latest listings"
           action={
-            <Link href="/seller/products" className="text-sm font-medium text-stone-500 hover:text-ink">
+            <Link href="/seller/listings" className="text-sm font-medium text-stone-500 hover:text-ink">
               Manage all
             </Link>
           }
         >
           {data.products.length === 0 ? (
             <div className="p-5">
-              <EmptyState title="No products yet">
-                <Link href="/seller/products/add" className="font-medium text-ink underline underline-offset-2">
-                  Upload your first product
+              <EmptyState title="No listings yet">
+                <Link href="/seller/listings/new" className="font-medium text-ink underline underline-offset-2">
+                  Add your first listing
                 </Link>{' '}
                 — it goes live once approved.
               </EmptyState>
@@ -113,14 +114,11 @@ export default async function SellerDashboardPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-right tabular-nums">{usd(p.price)}</td>
-                      <td className="px-5 py-3 text-right font-medium tabular-nums">{usd(splitSale(p.price).sellerEarning)}</td>
+                      <td className="px-5 py-3 text-right tabular-nums">{p.price == null ? '—' : usd(p.price)}</td>
+                      <td className="px-5 py-3 text-right font-medium tabular-nums">{p.price == null ? '—' : usd(splitSale(p.price).sellerEarning)}</td>
                       <td className="px-5 py-3 text-right tabular-nums">{p.salesCount}</td>
                       <td className="px-5 py-3">
-                        <StatusBadge
-                          status={p.status === 'approved' && !p.isPublished ? 'cancelled' : p.status}
-                          label={{ pending: 'In review', approved: p.isPublished ? 'Live' : 'Hidden', rejected: 'Rejected' }[p.status]}
-                        />
+                        <StatusBadge status={listingStatus(p).tone} label={listingStatus(p).label} />
                       </td>
                     </tr>
                   ))}

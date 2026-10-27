@@ -11,13 +11,17 @@ async function sellerOrError(request) {
   return { user };
 }
 
-/** PUT /api/seller/products/:id — edit the product (same fields as upload); it goes back to "In review". */
+/**
+ * PUT /api/seller/products/:id — edit a listing (same fields as create). It goes back to "In review", or with
+ * `draft: true` becomes a private draft again; either way it leaves the store until it's approved.
+ */
 export async function PUT(request, { params }) {
   const { user, error } = await sellerOrError(request);
   if (error) return error;
   try {
     const { id } = await params;
-    const { product, previousSlug } = await updateSellerProduct(user.id, id, await readJson(request, 64 * 1024));
+    const body = await readJson(request, 64 * 1024);
+    const { product, previousSlug } = await updateSellerProduct(user.id, id, body, { draft: body.draft === true });
     refreshStorefront(previousSlug, product.slug); // it leaves the store until re-approved
     return json(product);
   } catch (err) {

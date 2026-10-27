@@ -24,8 +24,14 @@ const nextConfig = {
   },
 
   // "Sell With Us" goes straight to seller sign-up; old /sell links are redirected before anything renders.
+  // Seller "products" pages became "Listings".
   async redirects() {
-    return [{ source: '/sell', destination: '/sell/signup', permanent: true }];
+    return [
+      { source: '/sell', destination: '/sell/signup', permanent: true },
+      { source: '/seller/products', destination: '/seller/listings', permanent: true },
+      { source: '/seller/products/add', destination: '/seller/listings/new', permanent: true },
+      { source: '/seller/products/:id/edit', destination: '/seller/listings/:id/edit', permanent: true },
+    ];
   },
 
   async headers() {

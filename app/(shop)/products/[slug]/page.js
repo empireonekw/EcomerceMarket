@@ -1,11 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ProductGallery from '@/components/ProductGallery';
 import ProductGrid from '@/components/ProductGrid';
+import RichText from '@/components/RichText';
 import AddToCartButton from '@/components/AddToCartButton';
 import BuyNowButton from '@/components/BuyNowButton';
 import { getProductBySlug, getRelatedProducts } from '@/lib/data/products';
 import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { LICENSES, labelOf } from '@/lib/listing';
+import { stripRichText } from '@/lib/rich-text';
 import { siteConfig } from '@/lib/site';
 
 // ISR: rendered on first visit, served from cache, refreshed at most every 5 minutes.
@@ -23,7 +27,7 @@ export async function generateMetadata({ params }) {
   const product = await getProductBySlug(slug);
   if (!product) return { title: 'Product not found', robots: { index: false } };
 
-  const description = (product.shortDescription || product.description).slice(0, 160);
+  const description = (product.shortDescription || stripRichText(product.description)).slice(0, 160);
   const images = product.coverImage ? [{ url: product.coverImage, alt: product.title }] : undefined;
   return {
     title: product.title,
@@ -40,8 +44,8 @@ function productJsonLd(product) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
-    description: product.shortDescription || product.description.slice(0, 300),
-    image: product.coverImage ? [product.coverImage] : undefined,
+    description: product.shortDescription || stripRichText(product.description).slice(0, 300),
+    image: product.images?.length ? product.images : product.coverImage ? [product.coverImage] : undefined,
     sku: product._id,
     category: product.category?.name,
     offers: {
@@ -108,25 +112,29 @@ export default async function ProductPage({ params }) {
       </nav>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
-        {/* ---------- Cover ---------- */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
-          {product.coverImage ? (
-            <Image
-              src={product.coverImage}
-              alt={product.title}
-              fill
-              preload // LCP element
-              placeholder="blur"
-              blurDataURL={product.coverBlurDataURL || NEUTRAL_BLUR_DATA_URL}
-              sizes="(min-width: 1280px) 720px, (min-width: 1024px) 58vw, 100vw"
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-stone-100 text-7xl font-medium text-stone-400">
-              {product.title.charAt(0)}
-            </div>
-          )}
-        </div>
+        {/* ---------- Cover (or a gallery when the listing has several photos) ---------- */}
+        {product.images?.length > 1 || product.videos?.length > 0 ? (
+          <ProductGallery images={product.images?.length ? product.images : [product.coverImage].filter(Boolean)} videos={product.videos ?? []} title={product.title} coverBlurDataURL={product.coverBlurDataURL} />
+        ) : (
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+            {product.coverImage ? (
+              <Image
+                src={product.coverImage}
+                alt={product.title}
+                fill
+                preload // LCP element
+                placeholder="blur"
+                blurDataURL={product.coverBlurDataURL || NEUTRAL_BLUR_DATA_URL}
+                sizes="(min-width: 1280px) 720px, (min-width: 1024px) 58vw, 100vw"
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center bg-stone-100 text-7xl font-medium text-stone-400">
+                {product.title.charAt(0)}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ---------- Buy box ---------- */}
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -182,6 +190,12 @@ export default async function ProductPage({ params }) {
                 <dd className="text-right font-medium">{product.fileFormat}</dd>
               </div>
             )}
+            {product.license && (
+              <div className="flex justify-between gap-4 px-4 py-3">
+                <dt className="text-stone-500">Licence</dt>
+                <dd className="text-right font-medium">{labelOf(LICENSES, product.license)}</dd>
+              </div>
+            )}
             {fileSize && (
               <div className="flex justify-between gap-4 px-4 py-3">
                 <dt className="text-stone-500">Size</dt>
@@ -203,7 +217,7 @@ export default async function ProductPage({ params }) {
         <h2 id="about-heading" className="headline text-3xl">
           About this product
         </h2>
-        <div className="mt-4 whitespace-pre-line leading-relaxed text-stone-700">{product.description}</div>
+        <RichText text={product.description} className="mt-4 leading-relaxed text-stone-700" />
 
         {product.tags?.length > 0 && (
           <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags">

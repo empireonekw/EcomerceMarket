@@ -29,6 +29,17 @@ export async function GET(_request, { params }) {
 
     const delivery = await resolveDelivery(result.product);
 
+    if (delivery.type === 'stream') {
+      const ascii = delivery.filename.replace(/[^\x20-\x7e]|["\\]/g, '_'); // plain-ASCII fallback for old browsers
+      return new NextResponse(delivery.stream, {
+        headers: {
+          ...PRIVATE,
+          'Content-Type': delivery.contentType,
+          ...(delivery.size && { 'Content-Length': String(delivery.size) }),
+          'Content-Disposition': `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(delivery.filename)}`,
+        },
+      });
+    }
     if (delivery.type === 'redirect') {
       return NextResponse.redirect(delivery.url, { status: 302, headers: PRIVATE });
     }

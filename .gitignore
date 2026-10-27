@@ -21,3 +21,6 @@ npm-debug.log*
 
 # local copies of env files
 env.download
+
+# seller uploads stored on this server (lib/uploads.js)
+/uploads
