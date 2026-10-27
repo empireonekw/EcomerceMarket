@@ -17,6 +17,11 @@ HEALTH="http://127.0.0.1:${PORT}/api/health"
 echo "==> Pulling latest code"
 git pull --ff-only
 
+# Paid orders must never complete without payment on the live site (lib/payments.js also refuses it there).
+if grep -q '^DEMO_CHECKOUT=true' .env.local 2>/dev/null; then
+  echo "!! DEMO_CHECKOUT=true in .env.local — it is ignored on the live site, but set it to false: sed -i 's/^DEMO_CHECKOUT=true/DEMO_CHECKOUT=false/' .env.local"
+fi
+
 echo "==> Installing packages"
 npm ci --no-audit --no-fund
 
