@@ -2,6 +2,7 @@ import ReviewCard from '@/components/home/ReviewCard';
 import SectionHeading from '@/components/home/SectionHeading';
 import Stars from '@/components/Stars';
 import { getFeaturedReviews } from '@/lib/data/reviews';
+import { publicName } from '@/lib/utils';
 
 const monthsAgo = (n) => new Date(Date.UTC(2026, 9 - n, 12)).toISOString();
 
@@ -65,7 +66,7 @@ const SAMPLE_REVIEWS = [
 ];
 
 const SAMPLES = {
-  items: SAMPLE_REVIEWS,
+  items: SAMPLE_REVIEWS.map((r) => ({ ...r, authorName: publicName(r.authorName) })), // same style as real reviews
   count: SAMPLE_REVIEWS.length,
   average: SAMPLE_REVIEWS.reduce((sum, r) => sum + r.rating, 0) / SAMPLE_REVIEWS.length,
 };

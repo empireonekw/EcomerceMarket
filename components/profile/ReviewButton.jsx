@@ -6,12 +6,13 @@ import { Star } from 'lucide-react';
 import Stars from '@/components/Stars';
 import { FieldError, FormAlert, SubmitButton, inputClass } from '@/components/auth/AuthFields';
 import { REVIEW_LIMITS } from '@/lib/validation';
+import { publicName } from '@/lib/utils';
 
 const LABELS = ['', 'Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
 
 /**
  * My Purchases → "Write a review" for one product (verified purchase), or the rating already given.
- * Reviews are public with the buyer's name, which the form says up front.
+ * Reviews are public with the buyer's first name and last initial, which the form says up front.
  */
 export default function ReviewButton({ productId, productTitle, authorName, existingRating }) {
   const router = useRouter();
@@ -129,7 +130,7 @@ export default function ReviewButton({ productId, productTitle, authorName, exis
           </div>
 
           <p className="rounded-xl bg-stone-50 px-4 py-3 text-xs leading-relaxed text-stone-600">
-            Your review will be shown publicly on our homepage with your name, <strong className="font-medium text-stone-800">{authorName}</strong>, and a
+            Your review will be shown publicly on our homepage with your name, <strong className="font-medium text-stone-800">{publicName(authorName)}</strong>, and a
             “Verified buyer” badge.
           </p>
 
