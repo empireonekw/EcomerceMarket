@@ -2,7 +2,7 @@ import { BadgePercent, Clock, DollarSign, Users } from 'lucide-react';
 import ClearPayoutButton from '@/components/admin/ClearPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { getPayoutOverview } from '@/lib/data/payouts';
-import { commissionPercent } from '@/lib/commission';
+import { commissionPercent, NO_PLATFORM_FEE } from '@/lib/commission';
 import { WALLET_OPTIONS } from '@/lib/validation';
 import { formatPrice } from '@/lib/utils';
 
@@ -40,7 +40,7 @@ export default async function AdminPayoutsPage() {
 
   return (
     <>
-      <PageHeader title="Seller Payouts" description={`${commissionPercent()} platform commission on seller sales · payouts are sent manually`} />
+      <PageHeader title="Seller Payouts" description={`${NO_PLATFORM_FEE ? 'No platform commission on seller sales' : `${commissionPercent()} platform commission on seller sales`} · payouts are sent manually`} />
 
       <section aria-label="Marketplace totals" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -50,7 +50,7 @@ export default async function AdminPayoutsPage() {
           icon={DollarSign}
           tone="positive"
         />
-        <StatCard label="Admin Commission Earned" value={usd(totals.commission)} sub={`${commissionPercent()} of seller sales`} icon={BadgePercent} tone="info" />
+        <StatCard label="Admin Commission Earned" value={usd(totals.commission)} sub={NO_PLATFORM_FEE ? 'From earlier sales — no commission is charged now' : `${commissionPercent()} of seller sales`} icon={BadgePercent} tone="info" />
         <StatCard label="Pending Seller Payouts" value={usd(totals.pendingPayouts)} sub={`${queue.length} seller${queue.length === 1 ? '' : 's'} awaiting payment`} icon={Clock} tone="warning" />
         <StatCard label="Paid to Sellers" value={usd(totals.paidPayouts)} sub={`${totals.sellerCount} registered seller${totals.sellerCount === 1 ? '' : 's'}`} icon={Users} />
       </section>

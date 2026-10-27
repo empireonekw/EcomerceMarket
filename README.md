@@ -77,7 +77,7 @@ A blur placeholder is generated from `coverImage` with sharp at creation time.
 Sell With Us ─▶ /sell/signup (seller account) ─▶ /login (email prefilled) ─▶ /seller/onboarding (shop name + description) ─▶ /seller/dashboard
 /seller/dashboard ─▶ "Add your payout details" alert until a bank account / EasyPaisa / JazzCash wallet is saved
 /seller/products/add ─▶ status 'pending' ─▶ admin approves (/admin/products?status=pending) ─▶ live
-checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendingPayout ─▶ /admin/payouts ─▶ Mark as Paid
+checkout ─▶ Transaction ledger (commission / seller share) + seller.pendingPayout ─▶ /admin/payouts ─▶ Mark as Paid
 ```
 
 - **Roles:** `customer` (`/signup`) and `seller` (`/sell/signup`) are separate accounts — a shopping account can't
@@ -91,7 +91,7 @@ checkout ─▶ Transaction ledger (10% commission / 90% seller) + seller.pendin
   with the rate used). Seller counters on `User.seller` (`totalEarnings`, `pendingPayout`, `paidPayout`) are updated
   in the **same MongoDB transaction** as the order and ledger. Commission rounds to the cent; the seller gets the
   remainder, so the split always sums exactly. Platform-owned products (no `sellerId`) keep 100%.
-  Tax/fees stay with the platform. Rate: `NEXT_PUBLIC_COMMISSION_RATE` (default `0.10`).
+  Tax/fees stay with the platform. Rate: `NEXT_PUBLIC_COMMISSION_RATE` (default `0` — no platform fee; sellers keep 100%).
 - **Moderation:** seller uploads are `status: 'pending'`; only `PUBLIC_PRODUCT_FILTER` (`isPublished && approved`)
   products are listed or purchasable. Sellers can't set status, visibility, featured, slug or `sellerId`.
 - **Files:** sellers submit `pdfFileUrl` — a schema alias of the private `downloadUrl`, delivered through the same

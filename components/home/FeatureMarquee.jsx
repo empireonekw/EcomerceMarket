@@ -1,5 +1,5 @@
 import { BadgeCheck, Download, FileStack, Library, Lock, ShieldCheck, Users, Wallet } from 'lucide-react';
-import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 
 // Only promises the platform actually keeps (delivery, moderation, checkout, files, payouts).
 const FEATURES = [
@@ -9,7 +9,7 @@ const FEATURES = [
   { icon: Wallet, title: 'Pay Once, Keep It', text: 'No subscriptions. One price, and the files are yours.' },
   { icon: Library, title: 'Your Personal Library', text: 'Every purchase stays in your account, ready to re-download.' },
   { icon: ShieldCheck, title: 'Protected Files', text: 'Signed, expiring download links keep every file safe.' },
-  { icon: Users, title: 'Independent Creators', text: `Buy from the people who make it — they keep ${commissionPercent(1 - COMMISSION_RATE)}.` },
+  { icon: Users, title: 'Independent Creators', text: NO_PLATFORM_FEE ? 'Buy from the people who make it — they keep every cent.' : `Buy from the people who make it — they keep ${commissionPercent(1 - COMMISSION_RATE)}.` },
   { icon: FileStack, title: 'Ready-to-Use Formats', text: 'PDF, Figma, Notion, ZIP and more — open and start working.' },
 ];
 

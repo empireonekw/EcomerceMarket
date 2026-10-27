@@ -7,7 +7,7 @@ import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
 import { getMonthlyEarnings } from '@/lib/data/seller-analytics';
 import { EarningsPanel } from '@/components/dashboard/SellerAnalytics';
-import { commissionPercent, splitSale, COMMISSION_RATE } from '@/lib/commission';
+import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
 
@@ -41,7 +41,7 @@ export default async function SellerDashboardPage() {
 
       <PageHeader
         title={data.storeName}
-        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}
+        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees — you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
         actions={
           <Link href="/seller/products/add" className={buttonClasses.primary}>
             <Plus size={16} strokeWidth={2} aria-hidden="true" />
@@ -51,7 +51,7 @@ export default async function SellerDashboardPage() {
       />
 
       <section aria-label="Earnings" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={`Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} tone="positive" />
+        <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={NO_PLATFORM_FEE ? 'Everything you’ve earned, all time' : `Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} tone="positive" />
         <StatCard label="Pending Payout" value={usd(data.balances.pendingPayout)} sub="Earned, not yet paid out" icon={Clock} tone="warning" />
         <StatCard label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
         <StatCard label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
@@ -150,7 +150,8 @@ export default async function SellerDashboardPage() {
                   <div className="min-w-0">
                     <p className="truncate font-medium">{t.product?.title ?? 'Deleted product'}</p>
                     <p className="text-xs text-stone-500">
-                      {formatDateTime(t.createdAt).date} · {usd(t.gross)} − {usd(t.commission)} fee
+                      {formatDateTime(t.createdAt).date}
+                      {t.commission > 0 && ` · ${usd(t.gross)} − ${usd(t.commission)} fee`}
                     </p>
                   </div>
                   <span className="font-medium tabular-nums text-emerald-700">+{usd(t.sellerEarning)}</span>

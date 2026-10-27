@@ -1,5 +1,5 @@
 import LegalPage from '@/components/LegalPage';
-import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 import { siteConfig } from '@/lib/site';
 import { DOWNLOADS_PER_HOUR } from '@/lib/downloads';
 
@@ -91,7 +91,9 @@ const SECTIONS = [
       [
         'You keep ownership. You keep all copyright and other rights in your products. Listing a product only gives us a non-exclusive, worldwide, royalty-free licence to host, show, promote and deliver it to buyers. That licence ends when you remove the product, except for buyers who already bought it, who keep their lifetime access.',
         'You control your listings. You set your own prices, and you can edit, hide or delete your products at any time from your seller dashboard. New products and edits are reviewed before they go live.',
-        `You keep ${sellerShare} of every sale. A ${fee} platform commission covers hosting, payments, delivery and support. Your earnings and full sales history are always visible in your dashboard.`,
+        NO_PLATFORM_FEE
+          ? `You keep 100% of every sale. We don’t charge sellers a platform fee or commission. Your earnings and full sales history are always visible in your dashboard.`
+          : `You keep ${sellerShare} of every sale. A ${fee} platform commission covers hosting, payments, delivery and support. Your earnings and full sales history are always visible in your dashboard.`,
         'You get paid. Earnings are paid out to the bank account or mobile wallet you add in your dashboard.',
         'Fair treatment. If we decline or remove a listing, you can contact us to find out why and ask for it to be reviewed again.',
       ],

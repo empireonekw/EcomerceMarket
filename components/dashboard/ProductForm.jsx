@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/dashboard/Toaster';
 import { slugify, formatPrice } from '@/lib/utils';
 import { isAllowedImageUrl } from '@/lib/image-hosts';
-import { splitSale, commissionPercent } from '@/lib/commission';
+import { splitSale, commissionPercent, NO_PLATFORM_FEE } from '@/lib/commission';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -141,7 +141,7 @@ function SellerEarnings({ priceCents }) {
     <Section title="Your earnings" description="New products are reviewed by our team before going live.">
       <dl className="space-y-2 text-sm">
         {row('Price', split ? formatPrice(priceCents) : '—')}
-        {row(`Platform fee (${commissionPercent()})`, split ? `−${formatPrice(split.commission)}` : '—')}
+        {NO_PLATFORM_FEE ? row('Platform fee', 'None') : row(`Platform fee (${commissionPercent()})`, split ? `−${formatPrice(split.commission)}` : '—')}
         {row('You earn per sale', split ? formatPrice(split.sellerEarning) : '—', true)}
       </dl>
     </Section>

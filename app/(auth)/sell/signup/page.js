@@ -6,12 +6,12 @@ import SignupForm from '@/components/auth/SignupForm';
 import SellerSteps from '@/components/seller/SellerSteps';
 import SwitchToSellerButton from '@/components/seller/SwitchToSellerButton';
 import { getCurrentUser } from '@/lib/auth';
-import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 
 export const metadata = { title: 'Create a seller account', robots: { index: false } };
 
 const PERKS = [
-  { icon: BadgePercent, label: `Keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale` },
+  { icon: BadgePercent, label: NO_PLATFORM_FEE ? 'No platform fees — keep 100%' : `Keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale` },
   { icon: ShieldCheck, label: 'Protected, instant delivery' },
   { icon: Wallet, label: 'Bank & wallet payouts' },
 ];

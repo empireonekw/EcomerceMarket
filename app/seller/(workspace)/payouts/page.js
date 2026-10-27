@@ -4,7 +4,7 @@ import RequestPayoutButton from '@/components/seller/RequestPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerPayouts } from '@/lib/data/seller';
-import { commissionPercent, COMMISSION_RATE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 import { formatPrice } from '@/lib/utils';
 
 export const metadata = { title: 'Payouts & Bank Details' };
@@ -28,7 +28,7 @@ export default async function SellerPayoutsPage() {
     <>
       <PageHeader
         title="Payouts & Bank Details"
-        description={`You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale. Request a payout any time you have a balance — our team sends it to the details below.`}
+        description={`${NO_PLATFORM_FEE ? 'No platform fees — you keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance — our team sends it to the details below.`}
       />
 
       {!data.hasPayoutMethod && (

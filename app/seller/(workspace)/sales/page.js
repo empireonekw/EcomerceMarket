@@ -23,7 +23,7 @@ function monthOptions() {
 
 /**
  * Seller → Sales history: every sale from the ledger — date, product, order, buyer (email partly hidden),
- * price, platform fee and what the seller earned. Server-rendered on each request, so it's always current.
+ * price, platform fee (only when older sales had one) and what the seller earned. Server-rendered on each request, so it's always current.
  */
 export default async function SellerSalesPage({ searchParams }) {
   const seller = await requireSellerStore('/seller/sales');
@@ -32,15 +32,17 @@ export default async function SellerSalesPage({ searchParams }) {
   const month = months.some((m) => m.value === sp.month) ? sp.month : '';
   const { items, totals, pagination } = await getSellerSales(seller.id, { page: sp.page, month });
   const period = month ? months.find((m) => m.value === month).label : 'All time';
+  // There's no platform fee now; the fee column/card only appears for older sales that were charged one.
+  const showFees = totals.commission > 0;
 
   return (
     <>
       <PageHeader title="Sales history" description={`Every sale of your products · ${period}`} />
 
-      <section aria-label="Sales totals" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Sales totals" className={`grid gap-4 sm:grid-cols-2 ${showFees ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}>
         <StatCard label="Products sold" value={totals.count.toLocaleString('en-US')} sub={period} icon={ShoppingBag} />
         <StatCard label="Gross sales" value={usd(totals.gross)} sub="What buyers paid" icon={CircleDollarSign} tone="info" />
-        <StatCard label="Platform fees" value={usd(totals.commission)} sub="Commission on these sales" icon={Percent} />
+        {showFees && <StatCard label="Platform fees" value={usd(totals.commission)} sub="Commission on these sales" icon={Percent} />}
         <StatCard label="You earned" value={usd(totals.earnings)} sub="Your share of these sales" icon={Wallet} tone="positive" />
       </section>
 
@@ -79,7 +81,7 @@ export default async function SellerSalesPage({ searchParams }) {
                   <th scope="col" className="px-5 py-3">Order</th>
                   <th scope="col" className="px-5 py-3">Buyer</th>
                   <th scope="col" className="px-5 py-3 text-right">Price</th>
-                  <th scope="col" className="px-5 py-3 text-right">Fee</th>
+                  {showFees && <th scope="col" className="px-5 py-3 text-right">Fee</th>}
                   <th scope="col" className="px-5 py-3 text-right">You earned</th>
                 </tr>
               </thead>
@@ -105,7 +107,7 @@ export default async function SellerSalesPage({ searchParams }) {
                       </td>
                       <td className="whitespace-nowrap px-5 py-3 text-stone-600">{s.buyer}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-right">{usd(s.gross)}</td>
-                      <td className="whitespace-nowrap px-5 py-3 text-right text-stone-500">−{usd(s.commission)}</td>
+                      {showFees && <td className="whitespace-nowrap px-5 py-3 text-right text-stone-500">{s.commission > 0 ? `−${usd(s.commission)}` : '—'}</td>}
                       <td className="whitespace-nowrap px-5 py-3 text-right font-medium text-emerald-700">+{usd(s.earnings)}</td>
                     </tr>
                   );

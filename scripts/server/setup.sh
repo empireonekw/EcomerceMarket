@@ -82,7 +82,7 @@ ADMIN_API_KEY=$(openssl rand -hex 32)
 DEMO_CHECKOUT=false
 NEXT_PUBLIC_TAX_RATE=0
 NEXT_PUBLIC_SERVICE_FEE_CENTS=0
-NEXT_PUBLIC_COMMISSION_RATE=0.10
+NEXT_PUBLIC_COMMISSION_RATE=0
 EOF
   chmod 600 .env.local
   echo "Saved $APP_DIR/.env.local (login and admin secrets generated)"

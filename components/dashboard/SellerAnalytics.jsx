@@ -13,6 +13,7 @@ const cell = (cents) => (cents ? usd(cents) : <span className="text-stone-300">â
 export function EarningsPanel({ months, title = 'Monthly earnings' }) {
   const total = months.reduce((s, m) => s + m.earnings, 0);
   const sales = months.reduce((s, m) => s + m.sales, 0);
+  const showFees = months.some((m) => m.commission > 0); // no platform fee now; only older sales may have one
   return (
     <Panel
       title={title}
@@ -35,7 +36,7 @@ export function EarningsPanel({ months, title = 'Monthly earnings' }) {
                 <th scope="col" className="px-5 py-2.5">Month</th>
                 <th scope="col" className="px-5 py-2.5 text-right">Sales</th>
                 <th scope="col" className="px-5 py-2.5 text-right">Gross</th>
-                <th scope="col" className="px-5 py-2.5 text-right">Platform fee</th>
+                {showFees && <th scope="col" className="px-5 py-2.5 text-right">Platform fee</th>}
                 <th scope="col" className="px-5 py-2.5 text-right">Earnings</th>
               </tr>
             </thead>
@@ -45,7 +46,7 @@ export function EarningsPanel({ months, title = 'Monthly earnings' }) {
                   <th scope="row" className="px-5 py-2.5 font-normal text-stone-700">{m.label}</th>
                   <td className="px-5 py-2.5 text-right">{m.sales || <span className="text-stone-300">â€”</span>}</td>
                   <td className="px-5 py-2.5 text-right">{cell(m.gross)}</td>
-                  <td className="px-5 py-2.5 text-right text-stone-500">{cell(m.commission)}</td>
+                  {showFees && <td className="px-5 py-2.5 text-right text-stone-500">{cell(m.commission)}</td>}
                   <td className="px-5 py-2.5 text-right font-medium">{cell(m.earnings)}</td>
                 </tr>
               ))}
