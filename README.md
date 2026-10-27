@@ -186,6 +186,19 @@ Add to cart ─▶ CartDrawer ─▶ /checkout ─▶ POST /api/orders ─▶ /c
 - **Downloads:** HMAC-signed tokens (`AUTH_SECRET`), 24h expiry, re-checked against the order on every use,
   unlimited re-downloads (throttled to 10/hour per item, `lib/downloads.js`). Storage keys resolve via `createSignedStorageUrl()` in `lib/storage.js` (plug in S3/R2).
 
+## Seller uploads
+
+Listing photos (up to 20), videos (up to 2) and the PDF/ZIP buyers receive are uploaded from the listing form
+(`components/seller/ListingForm.jsx`). Rules and limits live in `lib/listing.js` (`UPLOAD_RULES`); storage in `lib/uploads.js`:
+
+- **Vercel Blob** when `BLOB_READ_WRITE_TOKEN` is set — the browser uploads straight to Blob with a short-lived,
+  type- and size-limited token from `POST /api/seller/uploads`.
+- **Local disk** otherwise (`UPLOAD_DIR`, default `./uploads`) via `PUT /api/seller/uploads/local`; photos and videos are
+  served by `GET /api/files/media/…`. Not available on Vercel (read-only disk).
+
+Every PDF/ZIP is checked by its file signature, not just its name. Buyers' files are never linked directly: `/api/downloads`
+streams them after verifying the order. Sellers can deliver a link (Canva, Notion, Figma, Drive) instead of a file.
+
 ## Performance
 
 - **Region:** the MongoDB cluster is in AWS Mumbai (`ap-south-1`), so `vercel.json` pins Vercel Functions to

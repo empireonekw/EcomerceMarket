@@ -165,11 +165,77 @@ export function SellerDashboardSkeleton() {
   );
 }
 
-export function SellerProductsSkeleton() {
+export function SellerListingsSkeleton() {
   return (
-    <DashboardPageSkeleton label="Loading your products">
-      <HeaderSkeleton action />
-      <TableSkeleton rows={8} cols={6} />
+    <DashboardPageSkeleton label="Loading your listings">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div className={`h-9 w-36 ${bar}`} />
+        <div className="flex gap-3">
+          <div className="hidden h-11 w-72 rounded-full bg-stone-200/80 sm:block" />
+          <div className="h-11 w-36 rounded-full bg-stone-200/80" />
+        </div>
+      </div>
+      <div className="grid gap-8 lg:grid-cols-[1fr_15rem] xl:grid-cols-[1fr_16rem]">
+        <div>
+          <div className="mb-5 flex gap-2">
+            {[28, 20, 24, 18].map((w, i) => (
+              <div key={i} className="h-9 rounded-full bg-stone-200/80" style={{ width: `${w * 4}px` }} />
+            ))}
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+                <div className="aspect-[4/3] bg-stone-200/80" />
+                <div className="space-y-2.5 p-4">
+                  <div className={`h-4 w-4/5 ${bar}`} />
+                  <div className={`h-3.5 w-16 ${bar}`} />
+                  <div className={`h-5 w-20 ${bar}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="hidden space-y-5 lg:block">
+          <div className={`h-7 w-24 ${bar}`} />
+          <div className="h-11 rounded-xl bg-stone-200/80" />
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className={`h-4 w-32 ${bar}`} />
+          ))}
+        </div>
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
+/** New / edit listing: breadcrumb, title, section tabs and the first section cards. */
+export function ListingFormSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading listing form">
+      <div>
+        <div className={`h-3.5 w-32 ${bar}`} />
+        <div className={`mt-4 h-9 w-48 ${bar}`} />
+        <div className="mt-8 flex gap-7 border-b border-stone-200 pb-4">
+          {[16, 24, 32, 26, 36, 18].map((w, i) => (
+            <div key={i} className={`h-4 shrink-0 ${bar}`} style={{ width: `${w * 4}px` }} />
+          ))}
+        </div>
+        <div className="mt-8 space-y-6">
+          {[1, 3].map((fields, i) => (
+            <div key={i} className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
+              <div className={`h-6 w-40 ${bar}`} />
+              <div className={`mt-2 h-3.5 w-72 max-w-full ${bar}`} />
+              <div className="mt-7 space-y-6">
+                {Array.from({ length: fields }, (_, f) => (
+                  <div key={f}>
+                    <div className={`h-4 w-28 ${bar}`} />
+                    <div className={`mt-3 ${i === 0 ? 'h-36' : 'h-12'} max-w-2xl rounded-xl bg-stone-200/80`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </DashboardPageSkeleton>
   );
 }
@@ -204,7 +270,8 @@ const isProductForm = (p, base) => p === `${base}/add` || (p.startsWith(`${base}
 export function skeletonFor(pathname) {
   const p = pathname.replace(/\/$/, '');
   if (p === '/admin') return AdminOverviewSkeleton;
-  if (isProductForm(p, '/admin/products') || isProductForm(p, '/seller/products')) return ProductFormSkeleton;
+  if (isProductForm(p, '/admin/products')) return ProductFormSkeleton;
+  if (p === '/seller/listings/new' || (p.startsWith('/seller/listings/') && p.endsWith('/edit'))) return ListingFormSkeleton;
   if (p === '/admin/products') return AdminProductsSkeleton;
   if (p === '/admin/users') return AdminUsersSkeleton;
   if (p.startsWith('/admin/users/')) return AdminUserSkeleton;
@@ -212,7 +279,7 @@ export function skeletonFor(pathname) {
   if (p === '/admin/payouts') return AdminPayoutsSkeleton;
   if (p === '/admin/messages') return AdminMessagesSkeleton;
   if (p === '/seller/dashboard') return SellerDashboardSkeleton;
-  if (p === '/seller/products') return SellerProductsSkeleton;
+  if (p === '/seller/listings') return SellerListingsSkeleton;
   if (p === '/seller/sales') return SellerSalesSkeleton;
   if (p === '/seller/payouts') return SellerPayoutsSkeleton;
   return null;

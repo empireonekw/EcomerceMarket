@@ -7,6 +7,7 @@ import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, for
 import { ActivityLog, EarningsPanel, ProductMonthlyPanel } from '@/components/dashboard/SellerAnalytics';
 import { getAdminUserDetail } from '@/lib/data/admin-users';
 import { getMonthlyEarnings, getProductMonthlyEarnings, getSellerActivity } from '@/lib/data/seller-analytics';
+import { listingStatus } from '@/lib/listing';
 import { formatPrice } from '@/lib/utils';
 
 export const metadata = { title: 'User details' };
@@ -151,10 +152,7 @@ export default async function AdminUserPage({ params }) {
                           {usd(p.price)} · {p.salesCount} sale{p.salesCount === 1 ? '' : 's'} · Added {date(p.createdAt)}
                         </p>
                       </div>
-                      <StatusBadge
-                        status={p.status === 'approved' && !p.isPublished ? 'cancelled' : p.status}
-                        label={{ pending: 'In review', approved: p.isPublished ? 'Live' : 'Hidden', rejected: 'Rejected' }[p.status]}
-                      />
+                      <StatusBadge status={listingStatus(p).tone} label={listingStatus(p).label} />
                     </li>
                   ))}
                 </PagedList>

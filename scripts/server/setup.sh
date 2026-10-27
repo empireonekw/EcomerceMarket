@@ -156,7 +156,7 @@ server {
     ssl_certificate     $CERT_DIR/fullchain.pem;
     ssl_certificate_key $CERT_DIR/privkey.pem;
 
-    client_max_body_size 10m;
+    client_max_body_size 600m; # seller uploads: videos up to 100 MB, PDF/ZIP up to 500 MB (lib/listing.js)
 
     location / {
         proxy_pass http://127.0.0.1:$PORT;

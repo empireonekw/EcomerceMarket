@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/dashboard/Toaster';
 import { slugify, formatPrice } from '@/lib/utils';
-import { isAllowedImageUrl } from '@/lib/image-hosts';
-import { splitSale, commissionPercent, NO_PLATFORM_FEE } from '@/lib/commission';
+import { isAllowedImageUrl, isLocalMediaPath } from '@/lib/image-hosts';
+import { downloadHint } from '@/lib/listing';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -27,27 +27,7 @@ const toCents = (dollars) => Math.round(Number.parseFloat(dollars) * 100);
 const toDollars = (cents) => (cents == null ? '' : (cents / 100).toFixed(2).replace(/\.00$/, ''));
 const parseTags = (s) => [...new Set(s.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean))];
 
-/** Recognises common file hosts and suggests a direct-download form where one exists. */
-function downloadHint(url) {
-  if (!isHttpsUrl(url)) return null;
-  const { hostname, searchParams } = new URL(url);
-  if (hostname.endsWith('dropbox.com')) {
-    return searchParams.get('dl') === '1'
-      ? { text: 'Dropbox direct-download link detected.' }
-      : { text: 'Dropbox link — switch to a direct download (?dl=1) so buyers get the file, not a preview page.', fix: () => {
-          const u = new URL(url);
-          u.searchParams.set('dl', '1');
-          return u.toString();
-        } };
-  }
-  if (hostname === 'drive.google.com') {
-    return { text: 'Google Drive link — make sure sharing is set to “Anyone with the link”.' };
-  }
-  return null;
-}
-
-/** @param {{ seller?: boolean }} opts sellers must supply a cover and an https PDF link (no storage keys). */
-function validate(v, { seller = false } = {}) {
+function validate(v) {
   const e = {};
   if (!v.title.trim()) e.title = 'Title is required.';
   else if (v.title.length > 140) e.title = 'Keep the title under 140 characters.';
@@ -63,17 +43,15 @@ function validate(v, { seller = false } = {}) {
     else if (MONEY_RE.test(v.price) && Number(v.compareAtPrice) <= Number(v.price)) e.compareAtPrice = 'Must be higher than the price.';
   }
 
-  if (!v.coverImage && seller) e.coverImage = 'Add a cover image so buyers can see your product.';
   if (v.coverImage) {
-    if (!isHttpsUrl(v.coverImage)) e.coverImage = 'Must be an https:// image URL.';
+    if (!isHttpsUrl(v.coverImage) && !isLocalMediaPath(v.coverImage)) e.coverImage = 'Must be an https:// image URL.';
     else if (!isAllowedImageUrl(v.coverImage)) {
-      e.coverImage = `Host “${new URL(v.coverImage).hostname}” isn’t allowed for images. Add it to lib/image-hosts.js or use an allowed host.`;
+      e.coverImage = `Host “${new URL(v.coverImage, 'https://x').hostname}” isn’t allowed for images. Add it to lib/image-hosts.js or use an allowed host.`;
     }
   }
 
-  if (!v.downloadUrl.trim()) e.downloadUrl = seller ? 'Add the link to your PDF file.' : 'A download URL is required.';
+  if (!v.downloadUrl.trim()) e.downloadUrl = 'A download URL is required.';
   else if (v.downloadUrl.startsWith('http://')) e.downloadUrl = 'Use a secure https:// link.';
-  else if (seller && !isHttpsUrl(v.downloadUrl)) e.downloadUrl = 'Enter an https:// link to your PDF (Google Drive, Dropbox or direct host).';
   else if (!isHttpsUrl(v.downloadUrl) && !(v.deliveryType === 'file' && STORAGE_KEY_RE.test(v.downloadUrl))) {
     e.downloadUrl = v.deliveryType === 'external' ? 'Access links must be https:// URLs.' : 'Enter an https:// link or a storage key like products/file.zip.';
   }
@@ -128,47 +106,16 @@ function Section({ title, description, children }) {
 // Form
 // ---------------------------------------------------------------------------
 
-/** Seller sidebar: review notice + live split of the price (platform commission vs. seller earnings). */
-function SellerEarnings({ priceCents }) {
-  const split = priceCents == null ? null : splitSale(priceCents);
-  const row = (label, value, strong) => (
-    <div className={`flex justify-between ${strong ? 'border-t border-stone-200 pt-2 font-medium' : 'text-stone-600'}`}>
-      <dt>{label}</dt>
-      <dd className="tabular-nums">{value}</dd>
-    </div>
-  );
-  return (
-    <Section title="Your earnings" description="New products are reviewed by our team before going live.">
-      <dl className="space-y-2 text-sm">
-        {row('Price', split ? formatPrice(priceCents) : '—')}
-        {NO_PLATFORM_FEE ? row('Platform fee', 'None') : row(`Platform fee (${commissionPercent()})`, split ? `−${formatPrice(split.commission)}` : '—')}
-        {row('You earn per sale', split ? formatPrice(split.sellerEarning) : '—', true)}
-      </dl>
-    </Section>
-  );
-}
-
-// Where each dashboard area submits and returns to. Seller edits go back to review.
-const VARIANTS = {
-  admin: { createUrl: '/api/products', updateUrl: (id) => `/api/products/${id}`, doneUrl: '/admin/products', createdToast: 'Product created', submitLabel: 'Create product' },
-  seller: {
-    createUrl: '/api/seller/products',
-    updateUrl: (id) => `/api/seller/products/${id}`,
-    doneUrl: '/seller/products',
-    createdToast: 'Submitted for review',
-    submitLabel: 'Submit for review',
-  },
-};
+const DONE_URL = '/admin/products';
 
 /**
- * @param {{ mode: 'create' | 'edit', variant?: 'admin' | 'seller', categories: Array<{ _id, name, slug }>, product?: object }} props
+ * Admin product form (sellers use components/seller/ListingForm.jsx).
+ * @param {{ mode: 'create' | 'edit', categories: Array<{ _id, name, slug }>, product?: object }} props
  */
-export default function ProductForm({ mode, variant = 'admin', categories, product }) {
+export default function ProductForm({ mode, categories, product }) {
   const router = useRouter();
   const toast = useToast();
   const isEdit = mode === 'edit';
-  const isSeller = variant === 'seller';
-  const config = VARIANTS[variant];
 
   const [values, setValues] = useState(() => ({
     title: product?.title ?? '',
@@ -194,7 +141,7 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
   const [saving, setSaving] = useState(false);
   const [previewBroken, setPreviewBroken] = useState(false);
 
-  const errors = useMemo(() => ({ ...validate(values, { seller: isSeller }), ...serverErrors }), [values, serverErrors, isSeller]);
+  const errors = useMemo(() => ({ ...validate(values), ...serverErrors }), [values, serverErrors]);
   const show = (key) => (touched[key] || submitted ? errors[key] : undefined);
 
   function update(key, value) {
@@ -220,14 +167,14 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
   async function onSubmit(e) {
     e.preventDefault();
     setSubmitted(true);
-    const clientErrors = validate(values, { seller: isSeller });
+    const clientErrors = validate(values);
     if (Object.keys(clientErrors).length) {
       toast.error('Please fix the highlighted fields');
       document.getElementById(Object.keys(clientErrors)[0])?.focus();
       return;
     }
 
-    const shared = {
+    const payload = {
       title: values.title.trim(),
       category: values.category,
       price: toCents(values.price),
@@ -237,23 +184,17 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
       shortDescription: values.shortDescription.trim() || null,
       description: values.description.trim(),
       tags: parseTags(values.tags),
+      slug: values.slug || undefined,
+      deliveryType: values.deliveryType,
+      downloadUrl: values.downloadUrl.trim(),
+      isPublished: values.isPublished,
+      isFeatured: values.isFeatured,
     };
-    // Sellers never send slug/visibility/delivery type — the server decides those for them.
-    const payload = isSeller
-      ? { ...shared, pdfFileUrl: values.downloadUrl.trim() }
-      : {
-          ...shared,
-          slug: values.slug || undefined,
-          deliveryType: values.deliveryType,
-          downloadUrl: values.downloadUrl.trim(),
-          isPublished: values.isPublished,
-          isFeatured: values.isFeatured,
-        };
     if (!isEdit) for (const k of Object.keys(payload)) if (payload[k] === null) delete payload[k];
 
     setSaving(true);
     try {
-      const res = await fetch(isEdit ? config.updateUrl(product._id) : config.createUrl, {
+      const res = await fetch(isEdit ? `/api/products/${product._id}` : '/api/products', {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -272,11 +213,8 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
         return;
       }
 
-      toast.success(
-        isEdit ? (isSeller ? 'Changes submitted for review' : 'Changes saved') : config.createdToast,
-        isSeller ? `“${data.title}” will go live once an admin approves it.` : `“${data.title}” · /products/${data.slug}`,
-      );
-      router.push(config.doneUrl);
+      toast.success(isEdit ? 'Changes saved' : 'Product created', `“${data.title}” · /products/${data.slug}`);
+      router.push(DONE_URL);
       router.refresh();
     } catch {
       toast.error('Network error', 'Check your connection and try again.');
@@ -299,7 +237,6 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             <input {...bind('title')} maxLength={140} placeholder="e.g. Ultimate Notion Budget Planner" className={inputCls(show('title'))} />
           </Field>
 
-          {!isSeller && (
           <Field
             id="slug"
             label="URL slug"
@@ -331,7 +268,6 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
               )}
             </div>
           </Field>
-          )}
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="category" label="Category" error={show('category')}>
@@ -374,8 +310,8 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
         <Section title="Media & delivery" description="The cover buyers see, and the file they receive after paying.">
           <Field
             id="coverImage"
-            label={isSeller ? 'Header cover image URL' : 'Cover image URL'}
-            optional={!isSeller}
+            label="Cover image URL"
+            optional
             error={show('coverImage')}
             hint="https link to a 4:3 image (e.g. Unsplash, S3, R2)."
           >
@@ -393,7 +329,6 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             )}
           </div>
 
-          {!isSeller && (
           <fieldset>
             <legend className="text-sm font-medium">Delivery type</legend>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -423,17 +358,12 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
               ))}
             </div>
           </fieldset>
-          )}
 
           <Field
             id="downloadUrl"
-            label={isSeller ? 'Downloadable PDF document link' : values.deliveryType === 'external' ? 'Secure access URL' : 'Secure file download URL'}
+            label={values.deliveryType === 'external' ? 'Secure access URL' : 'Secure file download URL'}
             error={show('downloadUrl')}
-            hint={
-              isSeller
-                ? 'https link to your PDF (Google Drive, Dropbox or direct host). Buyers only ever receive signed, expiring links.'
-                : 'Private: only revealed through signed, expiring links after purchase.'
-            }
+            hint="Private: only revealed through signed, expiring links after purchase."
           >
             <input {...bind('downloadUrl')} placeholder="https://www.dropbox.com/s/…?dl=1" className={inputCls(show('downloadUrl'))} autoComplete="off" />
           </Field>
@@ -478,9 +408,6 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
 
       {/* ---------- Sidebar: visibility, preview, actions ---------- */}
       <aside className="space-y-6 xl:sticky xl:top-10">
-        {isSeller ? (
-          <SellerEarnings priceCents={priceOk ? toCents(values.price) : null} />
-        ) : (
         <Section title="Visibility">
           {[
             { key: 'isPublished', label: 'Published', text: 'Visible in the store and purchasable.' },
@@ -501,7 +428,6 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             </label>
           ))}
         </Section>
-        )}
 
         <div className="rounded-2xl border border-stone-200 bg-white p-3">
           <p className="px-1 pb-2 text-xs font-medium uppercase tracking-wide text-stone-400">Card preview</p>
@@ -527,9 +453,9 @@ export default function ProductForm({ mode, variant = 'admin', categories, produ
             className="btn btn-lg btn-primary"
           >
             {saving && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-            {saving ? (isEdit ? 'Saving…' : 'Submitting…') : isEdit ? (isSeller ? 'Save & send for review' : 'Save changes') : config.submitLabel}
+            {saving ? (isEdit ? 'Saving…' : 'Creating…') : isEdit ? 'Save changes' : 'Create product'}
           </button>
-          <Link href={config.doneUrl} className="flex h-11 items-center justify-center rounded-full text-sm font-medium text-stone-600 hover:bg-stone-100">
+          <Link href={DONE_URL} className="flex h-11 items-center justify-center rounded-full text-sm font-medium text-stone-600 hover:bg-stone-100">
             Cancel
           </Link>
         </div>
