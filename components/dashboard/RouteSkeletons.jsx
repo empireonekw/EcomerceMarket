@@ -79,6 +79,34 @@ export function AdminUserSkeleton() {
   );
 }
 
+/** Categories: form card on the left, table on the right. */
+export function AdminCategoriesSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading categories">
+      <HeaderSkeleton />
+      <div className="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
+        <div className="space-y-5 rounded-2xl border border-stone-200 bg-white p-6">
+          <div className={`h-6 w-44 ${bar}`} />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i}>
+              <div className={`h-3.5 w-20 ${bar}`} />
+              <div className={`mt-2 ${i === 4 ? 'h-24' : 'h-11'} rounded-xl bg-stone-200/80`} />
+            </div>
+          ))}
+          <div className="h-10 w-40 rounded-full bg-stone-200/80" />
+        </div>
+        <div>
+          <div className="mb-3 flex justify-between">
+            <div className="h-10 w-52 rounded-full bg-stone-200/80" />
+            <div className="h-10 w-64 rounded-full bg-stone-200/80" />
+          </div>
+          <TableSkeleton rows={8} cols={4} thumb={false} />
+        </div>
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
 export function AdminOrdersSkeleton() {
   return (
     <DashboardPageSkeleton label="Loading orders">
@@ -315,6 +343,7 @@ export function skeletonFor(pathname) {
   if (p === '/admin/products') return AdminProductsSkeleton;
   if (p === '/admin/users') return AdminUsersSkeleton;
   if (p.startsWith('/admin/users/')) return AdminUserSkeleton;
+  if (p === '/admin/categories') return AdminCategoriesSkeleton;
   if (p === '/admin/orders') return AdminOrdersSkeleton;
   if (p === '/admin/payouts') return AdminPayoutsSkeleton;
   if (p === '/admin/messages') return AdminMessagesSkeleton;

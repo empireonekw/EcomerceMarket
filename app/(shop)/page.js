@@ -7,7 +7,7 @@ import CategoryIcon from '@/components/CategoryIcon';
 import Reviews from '@/components/home/Reviews';
 import SectionHeading from '@/components/home/SectionHeading';
 import TalkToSellers from '@/components/home/TalkToSellers';
-import { getProducts } from '@/lib/data/products';
+import { getHeroProducts, getProducts, getStorefrontStats } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 
 // ISR: served as static HTML from the cache, regenerated at most every 5 minutes
@@ -17,11 +17,17 @@ export const revalidate = 300;
 export default async function HomePage() {
   // Same data function that powers GET /api/products — Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, categories] = await Promise.all([getProducts({ sort: 'newest', limit: 6 }), getCategories()]);
+  const [{ items: latest }, allCategories, heroProducts, stats] = await Promise.all([
+    getProducts({ sort: 'newest', limit: 6 }),
+    getCategories(),
+    getHeroProducts(12),
+    getStorefrontStats(),
+  ]);
+  const categories = allCategories.filter((c) => !c.parent); // main categories; counts include their sub-categories
 
   return (
     <>
-      <HeroShowcase />
+      <HeroShowcase products={heroProducts} stats={stats} />
 
       {/* ---------------- Shop by category ---------------- */}
       {categories.length > 0 && (
@@ -40,7 +46,7 @@ export default async function HomePage() {
                   <span className="headline mt-8 text-2xl">{c.name}</span>
                   {c.description && <span className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-stone-500">{c.description}</span>}
                   <span className="mt-auto flex items-center justify-between pt-6 text-sm text-stone-600">
-                    {c.productCount} {c.productCount === 1 ? 'product' : 'products'}
+                    {c.totalCount} {c.totalCount === 1 ? 'product' : 'products'}
                     <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 group-hover:text-black" />
                   </span>
                 </Link>

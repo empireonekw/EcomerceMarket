@@ -236,14 +236,15 @@ function UploadingTile({ upload, video = false }) {
 function CategoryPicker({ categories, value, onChange, error }) {
   const id = useId();
   const selected = categories.find((c) => c.slug === value);
-  const [query, setQuery] = useState(selected?.name ?? '');
+  const label = (c) => c.path ?? c.name; // "Templates › Notion" for sub-categories
+  const [query, setQuery] = useState(selected ? label(selected) : '');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const matches = categories.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()) || query === selected?.name);
+  const matches = categories.filter((c) => label(c).toLowerCase().includes(query.trim().toLowerCase()) || (selected && query === label(selected)));
 
   function pick(c) {
     onChange(c.slug);
-    setQuery(c.name);
+    setQuery(label(c));
     setOpen(false);
   }
 
@@ -302,7 +303,7 @@ function CategoryPicker({ categories, value, onChange, error }) {
                 onMouseEnter={() => setActive(i)}
                 className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm ${i === active ? 'bg-stone-100' : ''}`}
               >
-                {c.name}
+                {label(c)}
                 {c.slug === value && <span className="text-xs font-medium text-brand-600">Selected</span>}
               </li>
             ))
