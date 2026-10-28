@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Search, Star, Tag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Headset, Search, Star, Tag } from 'lucide-react';
 import { FOLDERS, actionsFor, inboxTime } from '@/lib/messaging';
 import { siteConfig } from '@/lib/site';
 import EmptyInbox from '@/components/messages/EmptyInbox';
@@ -240,6 +240,13 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
     return result.ok ? {} : { error: result.error };
   }
 
+  /** Opens (creating if needed) the user's chat with the Sellpify team. */
+  async function openSupport() {
+    const { ok, data } = await inboxApi('/api/messages/support', { method: 'POST' });
+    if (!ok) return flash('error', data.error || 'Couldn’t open the support chat.');
+    go({ folder: 'site', label: null, page: 1, q: '', c: data.conversationId });
+  }
+
   const items = list?.items ?? [];
   const allChecked = items.length > 0 && items.every((c) => selected.has(c.id));
   const someChecked = items.some((c) => selected.has(c.id));
@@ -304,6 +311,12 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
               );
             })}
           </ul>
+          <div className="px-3 pb-2 md:mt-4 md:px-0">
+            <button type="button" onClick={openSupport} className="flex w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium hover:border-black">
+              <Headset size={16} aria-hidden="true" />
+              Chat with {siteConfig.name} support
+            </button>
+          </div>
           {settings.labels.length > 0 && (
             <div className="border-t border-stone-200 px-3 py-2 md:mt-4 md:px-0 md:pt-4">
               <p className="hidden px-5 pb-2 text-xs font-semibold uppercase tracking-wide text-stone-500 md:block">Labels</p>

@@ -22,7 +22,7 @@ const AREAS = {
       { href: '/admin/users', label: 'Users', icon: Users, match: (p) => p.startsWith('/admin/users') },
       { href: '/admin/orders', label: 'Orders & Sales', icon: Receipt, match: (p) => p.startsWith('/admin/orders') },
       { href: '/admin/payouts', label: 'Seller Payouts', icon: Banknote, match: (p) => p.startsWith('/admin/payouts') },
-      { href: '/admin/messages', label: 'Messages', icon: Mail, match: (p) => p.startsWith('/admin/messages') },
+      { href: '/admin/messages', label: 'Messages', icon: Mail, match: (p) => p.startsWith('/admin/messages'), badge: 'unread' },
     ],
   },
   seller: {
