@@ -19,6 +19,8 @@
 
   /* Auth-page colour fields (components/auth/AuthBackground.jsx). Slow and subtle; disabled by reduced motion. */
   --animate-drift: drift 22s ease-in-out infinite alternate;
+  /* Hero glass cards (components/home/HeroShowcase.jsx): a slow hover in place. */
+  --animate-float: float 7s ease-in-out infinite;
 
   /* Hero gallery (components/home/HeroShowcase.jsx): the track holds two identical copies, so -50% = one seamless loop. */
   --animate-marquee-x: marquee-x 60s linear infinite;
@@ -36,6 +38,11 @@
   @keyframes drift {
     to {
       transform: translate3d(40px, -30px, 0) scale(1.12);
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translate3d(0, -10px, 0);
     }
   }
   @keyframes badge-pop {
