@@ -264,6 +264,46 @@ export function SellerPayoutsSkeleton() {
   );
 }
 
+/** Inbox: header with search, folder column, toolbar and conversation rows (full-bleed like the page). */
+export function SellerMessagesSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading messages">
+      <div className="-mx-4 -my-6 min-h-dvh sm:-mx-6 lg:-mx-10 lg:-my-10">
+        <div className="flex items-center gap-6 border-b border-stone-200 px-4 py-5 sm:px-8">
+          <div className={`h-8 w-36 ${bar}`} />
+          <div className="ml-auto hidden h-12 w-full max-w-xl rounded-full bg-stone-200/80 sm:block" />
+          <div className={`h-5 w-36 ${bar}`} />
+        </div>
+        <div className="flex">
+          <div className="hidden w-64 shrink-0 space-y-5 border-r border-stone-200 px-9 py-8 md:block lg:w-72">
+            {[14, 18, 32, 26, 12, 8, 16, 12, 28].map((w, i) => (
+              <div key={i} className={`h-4 ${bar}`} style={{ width: `${w * 4}px` }} />
+            ))}
+          </div>
+          <div className="flex-1">
+            <div className="flex h-16 items-center gap-6 border-b border-stone-200 px-5">
+              <div className="size-5 rounded bg-stone-200/80" />
+              {[24, 24, 20, 14, 16, 12].map((w, i) => (
+                <div key={i} className={`h-4 ${bar}`} style={{ width: `${w * 4}px` }} />
+              ))}
+            </div>
+            {Array.from({ length: 6 }, (_, i) => (
+              <div key={i} className="flex items-center gap-4 border-b border-stone-200 px-5 py-4">
+                <div className="size-5 rounded bg-stone-200/80" />
+                <div className="size-10 rounded-full bg-stone-200/80" />
+                <div className="flex-1 space-y-2">
+                  <div className={`h-3.5 w-40 ${bar}`} />
+                  <div className={`h-3 w-3/4 ${bar}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
 const isProductForm = (p, base) => p === `${base}/add` || (p.startsWith(`${base}/`) && p.endsWith('/edit'));
 
 /** The skeleton of the dashboard page at `pathname`, or null when there isn't one. */
@@ -282,5 +322,6 @@ export function skeletonFor(pathname) {
   if (p === '/seller/listings') return SellerListingsSkeleton;
   if (p === '/seller/sales') return SellerSalesSkeleton;
   if (p === '/seller/payouts') return SellerPayoutsSkeleton;
+  if (p === '/seller/messages') return SellerMessagesSkeleton;
   return null;
 }

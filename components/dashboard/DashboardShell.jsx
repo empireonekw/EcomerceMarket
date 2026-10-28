@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Banknote, LayoutDashboard, Mail, Menu, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import { ArrowUpRight, Banknote, LayoutDashboard, Mail, Menu, MessageSquare, Package, Plus, Receipt, Store, Users } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
 import SignOutButton from '@/components/SignOutButton';
+import { useMessaging } from '@/components/messages/MessagingProvider';
 import { siteConfig } from '@/lib/site';
 
 // Navigation per dashboard area. Defined here (client module) because icons are components.
@@ -29,6 +30,7 @@ const AREAS = {
     nav: [
       { href: '/seller/dashboard', label: 'Dashboard', icon: LayoutDashboard, match: (p) => p === '/seller/dashboard' },
       { href: '/seller/listings', label: 'Listings', icon: Package, match: (p) => p.startsWith('/seller/listings') },
+      { href: '/seller/messages', label: 'Messages', icon: MessageSquare, match: (p) => p.startsWith('/seller/messages'), badge: 'unread' },
       { href: '/seller/sales', label: 'Sales History', icon: Receipt, match: (p) => p.startsWith('/seller/sales') },
       { href: '/seller/payouts', label: 'Payouts & Bank Details', icon: Banknote, match: (p) => p.startsWith('/seller/payouts') },
       { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },
@@ -51,6 +53,7 @@ function Brand({ area, onNavigate }) {
 }
 
 function SidebarBody({ pathname, area, user, onNavigate }) {
+  const { unread } = useMessaging();
   return (
     <div className="flex h-full flex-col gap-6 p-4">
       <div className="px-4 pt-3">
@@ -58,8 +61,9 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
       </div>
       <nav aria-label={`${area.label} navigation`} className="flex-1">
         <ul className="space-y-1">
-          {area.nav.map(({ href, label, icon: Icon, match }) => {
+          {area.nav.map(({ href, label, icon: Icon, match, badge }) => {
             const active = match(pathname);
+            const count = badge === 'unread' ? unread : 0;
             return (
               <li key={href}>
                 <Link
@@ -71,7 +75,14 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
                   }`}
                 >
                   <Icon {...ICON} className="shrink-0" />
-                  {label}
+                  <span className="flex-1">{label}</span>
+                  {count > 0 && (
+                    <span className="min-w-5 rounded-full bg-brand-600 px-1.5 py-0.5 text-center text-[11px] font-semibold tabular-nums leading-none text-white">
+                      <span className="sr-only">, </span>
+                      {count > 99 ? '99+' : count}
+                      <span className="sr-only"> unread</span>
+                    </span>
+                  )}
                 </Link>
               </li>
             );

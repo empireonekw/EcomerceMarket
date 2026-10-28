@@ -1,5 +1,6 @@
 import DashboardShell from '@/components/dashboard/DashboardShell';
 import { ToastProvider } from '@/components/dashboard/Toaster';
+import { MessagingProvider } from '@/components/messages/MessagingProvider';
 import { requireSellerStore } from '@/lib/auth';
 
 /**
@@ -11,9 +12,12 @@ export default async function SellerWorkspaceLayout({ children }) {
 
   return (
     <ToastProvider>
-      <DashboardShell area="seller" user={seller}>
-        {children}
-      </DashboardShell>
+      {/* Live inbox: unread badge in the sidebar + real-time Messages page. */}
+      <MessagingProvider>
+        <DashboardShell area="seller" user={seller}>
+          {children}
+        </DashboardShell>
+      </MessagingProvider>
     </ToastProvider>
   );
 }

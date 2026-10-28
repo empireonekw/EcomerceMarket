@@ -2,7 +2,8 @@
  * PM2 config for sellpify.com on 13.140.168.178 (next to the rankkw sites).
  *
  * Its own app name and port, so it never touches the other sites on the server.
- * It listens on 127.0.0.1 only: the public reaches it through nginx.
+ * It listens on 127.0.0.1 only: the public reaches it through nginx (which must pass WebSocket upgrades on
+ * /socket.io/ for live messaging — see README).
  *
  *   pm2 logs sellpify           # live logs
  *
@@ -14,8 +15,8 @@ module.exports = {
   apps: [
     {
       name: 'sellpify',
-      script: 'node_modules/next/dist/bin/next',
-      args: `start -p ${PORT} -H 127.0.0.1`,
+      // Custom server: Next.js + Socket.IO (live messaging) on one port.
+      script: 'server.js',
       // One process: lib/rate-limit.js keeps its counters in memory, so more workers would each count separately.
       exec_mode: 'fork',
       instances: 1,
@@ -29,6 +30,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: String(PORT),
+        HOST: '127.0.0.1',
       },
     },
   ],

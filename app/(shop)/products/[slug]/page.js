@@ -6,7 +6,8 @@ import ProductGrid from '@/components/ProductGrid';
 import RichText from '@/components/RichText';
 import AddToCartButton from '@/components/AddToCartButton';
 import BuyNowButton from '@/components/BuyNowButton';
-import { getProductBySlug, getRelatedProducts } from '@/lib/data/products';
+import MessageSellerButton from '@/components/messages/MessageSellerButton';
+import { getProductBySlug, getRelatedProducts, getShopSummary } from '@/lib/data/products';
 import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { LICENSES, labelOf } from '@/lib/listing';
 import { stripRichText } from '@/lib/rich-text';
@@ -69,7 +70,7 @@ export default async function ProductPage({ params }) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product, 3);
+  const [related, shop] = await Promise.all([getRelatedProducts(product, 3), getShopSummary(product.sellerId)]);
   const fileSize = formatFileSize(product.fileSize);
   const discount =
     product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
@@ -209,6 +210,35 @@ export default async function ProductPage({ params }) {
               </div>
             )}
           </dl>
+
+          {/* ---------- Shop + Message seller ---------- */}
+          {shop ? (
+            <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-4">
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="grid size-11 shrink-0 place-items-center rounded-full bg-stone-100 text-base font-semibold uppercase text-stone-700">
+                  {shop.name.charAt(0)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-stone-500">Sold by</p>
+                  <p className="truncate font-medium">{shop.name}</p>
+                </div>
+                <span className="shrink-0 text-xs text-stone-500">
+                  {shop.listings} {shop.listings === 1 ? 'listing' : 'listings'}
+                </span>
+              </div>
+              {shop.description && <p className="mt-3 line-clamp-2 text-sm text-stone-600">{shop.description}</p>}
+              <div className="mt-4">
+                <MessageSellerButton product={{ id: product._id, slug: product.slug, title: product.title, coverImage: product.coverImage }} shop={{ id: shop.id, name: shop.name }} />
+              </div>
+            </div>
+          ) : (
+            <p className="mt-6 text-sm text-stone-500">
+              Sold by {siteConfig.name}. Questions?{' '}
+              <Link href="/contact" className="font-medium text-ink underline underline-offset-2">
+                Contact us
+              </Link>
+            </p>
+          )}
         </div>
       </div>
 

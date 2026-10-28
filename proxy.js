@@ -18,5 +18,5 @@ export function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/profile/:path*', '/seller/:path*'],
+  matcher: ['/admin/:path*', '/profile/:path*', '/seller/:path*', '/messages/:path*'],
 };
