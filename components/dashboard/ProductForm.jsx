@@ -277,7 +277,7 @@ export default function ProductForm({ mode, categories, product }) {
                 </option>
                 {categories.map((c) => (
                   <option key={c._id} value={c.slug}>
-                    {c.name}
+                    {c.path ?? c.name}
                   </option>
                 ))}
               </select>

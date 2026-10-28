@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Banknote, LayoutDashboard, Mail, Menu, MessageSquare, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import { ArrowUpRight, Banknote, FolderTree, LayoutDashboard, Mail, Menu, MessageSquare, Package, Plus, Receipt, Store, Users } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
 import SignOutButton from '@/components/SignOutButton';
 import { useMessaging } from '@/components/messages/MessagingProvider';
@@ -18,6 +18,7 @@ const AREAS = {
       { href: '/admin', label: 'Dashboard Overview', icon: LayoutDashboard, match: (p) => p === '/admin' },
       { href: '/admin/products', label: 'Products Management', icon: Package, match: (p) => p.startsWith('/admin/products') && p !== '/admin/products/add' },
       { href: '/admin/products/add', label: 'Add New Product', icon: Plus, match: (p) => p === '/admin/products/add' },
+      { href: '/admin/categories', label: 'Categories', icon: FolderTree, match: (p) => p.startsWith('/admin/categories') },
       { href: '/admin/users', label: 'Users', icon: Users, match: (p) => p.startsWith('/admin/users') },
       { href: '/admin/orders', label: 'Orders & Sales', icon: Receipt, match: (p) => p.startsWith('/admin/orders') },
       { href: '/admin/payouts', label: 'Seller Payouts', icon: Banknote, match: (p) => p.startsWith('/admin/payouts') },

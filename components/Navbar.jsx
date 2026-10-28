@@ -52,7 +52,7 @@ function AnnouncementBar() {
  * mobile menu) are small client islands, so the shell renders instantly and pages stay static.
  */
 export default async function Navbar() {
-  const categories = await loadCategories();
+  const categories = (await loadCategories()).filter((c) => !c.parent); // main categories only
 
   return (
     <>

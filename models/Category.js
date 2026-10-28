@@ -19,6 +19,8 @@ const categorySchema = new Schema(
       trim: true,
     },
     description: { type: String, trim: true, maxlength: 300 },
+    // Hierarchy: null = main category; otherwise the parent (main › sub › inner, see lib/category-tree.js).
+    parent: { type: Schema.Types.ObjectId, ref: 'Category', default: null },
     sortOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },
@@ -27,6 +29,7 @@ const categorySchema = new Schema(
 
 // Navigation / filter lists: active categories in display order.
 categorySchema.index({ isActive: 1, sortOrder: 1, name: 1 });
+categorySchema.index({ parent: 1 }); // children of a category (moving them up when it's deleted)
 
 categorySchema.pre('validate', function ensureSlug() {
   if (!this.slug && this.name) this.slug = slugify(this.name);
