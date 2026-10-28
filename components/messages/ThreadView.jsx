@@ -42,12 +42,29 @@ function ProductChip({ product, className = '' }) {
 }
 
 function Bubble({ message, otherName }) {
-  if (message.system) {
+  if (message.system && !message.team) {
+    // Automatic notice (listing approved, rejected…)
     return (
       <div className="mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white px-5 py-4 text-[15px] leading-relaxed">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500">{siteConfig.name}</p>
+        <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500">{siteConfig.name} · Notice</p>
         <p className="whitespace-pre-wrap break-words">{message.body}</p>
         <p className="mt-2 text-xs text-stone-400">{clock(message.at)}</p>
+      </div>
+    );
+  }
+  if (message.system) {
+    // A reply from the support team
+    return (
+      <div className="flex items-end justify-start gap-2">
+        <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-semibold text-white">
+          {siteConfig.name.charAt(0)}
+        </span>
+        <div className="flex max-w-[85%] flex-col items-start gap-1.5 sm:max-w-[70%]">
+          <div className="whitespace-pre-wrap break-words rounded-2xl rounded-bl-md border border-brand-100 bg-brand-50 px-4 py-2.5 text-[15px] leading-relaxed text-ink">{message.body}</div>
+          <p className="px-1 text-xs text-stone-400">
+            {siteConfig.name} team · {clock(message.at)}
+          </p>
+        </div>
       </div>
     );
   }
@@ -202,8 +219,8 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
   }
 
   const conv = state.conversation;
-  const name = conv?.kind === 'system' ? siteConfig.name : conv?.other?.name ?? '';
-  const canReply = conv?.kind === 'direct' && !conv?.spam;
+  const name = conv?.kind === 'system' ? `${siteConfig.name} support` : conv?.other?.name ?? '';
+  const canReply = Boolean(conv) && !conv.spam;
 
   const iconBtn = 'grid size-10 place-items-center rounded-full text-stone-700 hover:bg-stone-200/60 hover:text-black';
   let lastDay = null;
@@ -219,13 +236,13 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
         </button>
         {conv && (
           <>
-            <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="flex min-w-[11rem] flex-1 items-center gap-3">
               <Initial name={name} className="size-9 text-sm" />
               <div className="min-w-0">
                 <p className="truncate text-[15px] font-semibold">{name}</p>
                 <p className="truncate text-xs text-stone-500">
                   {conv.kind === 'system'
-                    ? 'Marketplace notices'
+                    ? 'Notices and chat with our team'
                     : conv.side === 'seller'
                       ? conv.buyerIsCustomer
                         ? 'Customer · has bought from your shop'
@@ -350,7 +367,7 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
             ) : (
               conv && (
                 <p className="border-t border-stone-200 bg-white px-6 py-4 text-center text-sm text-stone-500">
-                  {conv.kind === 'system' ? 'Notices from the marketplace can’t be replied to.' : 'This conversation is in Spam. Move it to your Inbox to reply.'}
+                  This conversation is in Spam. Move it to your Inbox to reply.
                 </p>
               )
             )}

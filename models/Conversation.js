@@ -26,7 +26,9 @@ const participantStateSchema = new Schema(
 /**
  * A message thread.
  *  - direct: one thread per (buyer, seller) pair; `product` is the listing it was last about.
- *  - system: notices from the marketplace itself ("From Sellpify"). The recipient sits in `seller`, `buyer` is empty.
+ *  - system: the user's thread with the marketplace ("From Sellpify"): listing notices plus a two-way support chat
+ *    with the admin team. The user sits in `seller`, `buyer` is empty. `support` marks threads with a real chat
+ *    (a message from the user or an admin), which are the ones admins see under /admin/messages.
  */
 const conversationSchema = new Schema(
   {
@@ -44,6 +46,12 @@ const conversationSchema = new Schema(
     buyerState: { type: participantStateSchema, default: () => ({}) },
     sellerState: { type: participantStateSchema, default: () => ({}) },
     autoRepliedAt: { type: Date }, // seller's away message: sent at most once a day per thread
+    support: { type: Boolean, default: false },
+    // The admin team's shared view of a support chat.
+    supportState: {
+      unread: { type: Boolean, default: false },
+      status: { type: String, enum: ['open', 'resolved'], default: 'open' },
+    },
   },
   { timestamps: true, versionKey: false },
 );
@@ -51,6 +59,8 @@ const conversationSchema = new Schema(
 // Inbox lists: newest activity first, per side.
 conversationSchema.index({ buyer: 1, 'lastMessage.at': -1 });
 conversationSchema.index({ seller: 1, 'lastMessage.at': -1 });
+// Admin support inbox: chats by status, newest activity first.
+conversationSchema.index({ kind: 1, support: 1, 'supportState.status': 1, 'lastMessage.at': -1 });
 // One direct thread per buyer/seller pair, one system thread per user.
 conversationSchema.index({ buyer: 1, seller: 1 }, { unique: true, partialFilterExpression: { kind: 'direct' } });
 conversationSchema.index({ seller: 1 }, { unique: true, partialFilterExpression: { kind: 'system' }, name: 'system_thread_per_user' });

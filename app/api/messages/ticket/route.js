@@ -13,5 +13,5 @@ export async function POST(request) {
   if (!user) return unauthorized();
   if (!realtimeEnabled()) return json({ live: false });
   if (!rateLimit(`socket-ticket:${user.id}`, { limit: 30, windowMs: 60 * 1000 }).ok) return json({ error: 'Too many requests.' }, 429);
-  return json({ live: true, ticket: createSocketTicket(user.id), userId: user.id });
+  return json({ live: true, ticket: createSocketTicket(user), userId: user.id });
 }

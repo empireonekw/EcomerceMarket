@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useMessaging } from '@/components/messages/MessagingProvider';
 
-/** Navbar messages icon with a live unread badge. Sellers land in their dashboard inbox. Signed-in users only. */
+/** Navbar messages icon (next to the account icon) with a live unread badge. Sellers land in their dashboard inbox; guests log in first. */
 export default function InboxLink() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { unread } = useMessaging();
-  if (!user) return null;
+  if (loading) return <span aria-hidden="true" className="size-10 shrink-0" />; // same footprint, no layout shift
 
-  const href = user.role === 'seller' && user.storeName ? '/seller/messages' : '/messages';
+  const href = !user ? '/login?next=%2Fmessages' : user.role === 'seller' && user.storeName ? '/seller/messages' : '/messages';
   return (
     <Link
       href={href}

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Clock, DollarSign, Package, ShoppingBag, Wallet } from 'lucide-react';
+import { ArrowLeft, Clock, DollarSign, MessageSquare, Package, ShoppingBag, Wallet } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import PagedList from '@/components/dashboard/PagedList';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
@@ -60,7 +60,11 @@ export default async function AdminUserPage({ params }) {
           </p>
         </div>
         {u.role !== 'admin' && (
-          <div className="sm:ml-auto">
+          <div className="flex flex-wrap gap-2 sm:ml-auto">
+            <Link href={`/admin/messages?user=${u.id}`} className="btn btn-md btn-outline">
+              <MessageSquare size={16} strokeWidth={1.75} aria-hidden="true" />
+              Message
+            </Link>
             <DeleteUserButton id={u.id} name={u.name} role={u.role} size="md" redirectTo="/admin/users" />
           </div>
         )}

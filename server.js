@@ -10,6 +10,7 @@
  * Behind nginx, /socket.io/ needs the WebSocket upgrade headers (README → Live messaging).
  */
 import { createServer } from 'node:http';
+import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
 
 const dev = process.argv.includes('--dev');
@@ -18,7 +19,10 @@ const { default: next } = await import('next');
 const port = Number(process.env.PORT) || 3000;
 const hostname = process.env.HOST || undefined;
 
-const app = next({ dev, hostname: hostname ?? 'localhost', port });
+// An absolute project dir: with a relative one, Turbopack's watcher doesn't skip the build folder, so every write to
+// its dev log counts as a code change and the browser reloads in a loop.
+const dir = fileURLToPath(new URL('.', import.meta.url));
+const app = next({ dev, dir, hostname: hostname ?? 'localhost', port });
 const handle = app.getRequestHandler();
 await app.prepare();
 const upgradeNext = app.getUpgradeHandler();
@@ -41,15 +45,16 @@ server.on('upgrade', (req, socket, head) => {
 
 // A socket proves who it is with a one-time ticket from POST /api/messages/ticket.
 io.use((socket, nextFn) => {
-  const userId = globalThis.__realtimeHooks?.authenticate(socket.handshake.auth?.ticket);
-  if (!userId) return nextFn(new Error('unauthorized'));
-  socket.data.userId = userId;
+  const identity = globalThis.__realtimeHooks?.authenticate(socket.handshake.auth?.ticket);
+  if (!identity) return nextFn(new Error('unauthorized'));
+  socket.data.userId = identity.userId;
+  socket.data.rooms = identity.rooms ?? [];
   nextFn();
 });
 
 io.on('connection', (socket) => {
   const { userId } = socket.data;
-  socket.join(`user:${userId}`);
+  socket.join([`user:${userId}`, ...socket.data.rooms]);
 
   // "…is typing": relayed only to the other participant of a thread this user belongs to. Relays are chained so a
   // slow membership lookup can't deliver "stopped typing" before the "typing" that came first.

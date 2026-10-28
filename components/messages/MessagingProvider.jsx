@@ -10,14 +10,16 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
  * synthetic `poll` event so open views can refetch.
  *
  * Events: message:new { conversation, message } · inbox:changed · inbox:unread { count } · typing { conversationId, typing }
- * plus local ones: resync (socket reconnected — refetch everything) and poll (fallback tick).
+ * · support:new { threadId } (admins) plus local ones: resync (socket reconnected — refetch everything) and poll (fallback tick).
+ *
+ * The admin portal counts its support inbox instead: unreadUrl="/api/admin/support/unread" unreadEvent="support:unread".
  */
 const MessagingContext = createContext({ unread: 0, live: false, enabled: false, subscribe: () => () => {}, sendTyping: () => {}, refreshUnread: () => {} });
 
 const POLL_MS = 20_000;
 const RETRY_MS = 5_000;
 
-export function MessagingProvider({ enabled = true, children }) {
+export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/unread', unreadEvent = 'inbox:unread', children }) {
   const [unread, setUnread] = useState(0);
   const [live, setLive] = useState(false);
   const listeners = useRef(new Map()); // event → Set<fn>
@@ -35,12 +37,12 @@ export function MessagingProvider({ enabled = true, children }) {
 
   const refreshUnread = useCallback(async () => {
     try {
-      const res = await fetch('/api/messages/unread', { cache: 'no-store' });
+      const res = await fetch(unreadUrl, { cache: 'no-store' });
       if (res.ok) setUnread((await res.json()).count ?? 0);
     } catch {
       // offline: keep the last count
     }
-  }, []);
+  }, [unreadUrl]);
 
   // Socket connection (skipped entirely when the server has no live messaging).
   useEffect(() => {
@@ -92,8 +94,8 @@ export function MessagingProvider({ enabled = true, children }) {
           retryTimer = setTimeout(() => !cancelled && socket.connect(), RETRY_MS);
         }
       });
-      socket.on('inbox:unread', ({ count }) => setUnread(count ?? 0));
-      for (const event of ['message:new', 'inbox:changed', 'typing']) socket.on(event, (p) => dispatch(event, p));
+      socket.on(unreadEvent, ({ count }) => setUnread(count ?? 0));
+      for (const event of ['message:new', 'inbox:changed', 'typing', 'support:new']) socket.on(event, (p) => dispatch(event, p));
     })();
 
     return () => {
@@ -103,7 +105,7 @@ export function MessagingProvider({ enabled = true, children }) {
       socketRef.current = null;
       setLive(false);
     };
-  }, [enabled, dispatch, refreshUnread]);
+  }, [enabled, unreadEvent, dispatch, refreshUnread]);
 
   // Polling fallback while there's no live connection.
   useEffect(() => {

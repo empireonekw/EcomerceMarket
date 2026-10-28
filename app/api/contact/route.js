@@ -2,6 +2,7 @@ import { getRequestUser, isSameOrigin } from '@/lib/auth';
 import { json, forbidden, readJson, errorResponse } from '@/lib/api';
 import { clientIp, rateLimit } from '@/lib/rate-limit';
 import { createContactMessage } from '@/lib/data/contact';
+import { postToSupportFromUser } from '@/lib/data/messages';
 
 /** POST /api/contact — { name, email, message, website? } from the /contact form. Open to guests. */
 export async function POST(request) {
@@ -17,6 +18,8 @@ export async function POST(request) {
 
     const user = await getRequestUser(request);
     await createContactMessage(body, { userId: user?.id });
+    // Signed-in senders also get it in their support chat, so the team can answer there (Messages → From Sellpify).
+    if (user) await postToSupportFromUser(user.id, body.message);
     return json({ ok: true }, 201);
   } catch (err) {
     return errorResponse(err, 'POST /api/contact');
