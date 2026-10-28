@@ -16,7 +16,8 @@ export const revalidate = 300;
 export default async function HomePage() {
   // Same data function that powers GET /api/products — Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, categories] = await Promise.all([getProducts({ sort: 'newest', limit: 6 }), getCategories()]);
+  const [{ items: latest }, allCategories] = await Promise.all([getProducts({ sort: 'newest', limit: 6 }), getCategories()]);
+  const categories = allCategories.filter((c) => !c.parent); // main categories; counts include their sub-categories
 
   return (
     <>
@@ -39,7 +40,7 @@ export default async function HomePage() {
                   <span className="headline mt-8 text-2xl">{c.name}</span>
                   {c.description && <span className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-stone-500">{c.description}</span>}
                   <span className="mt-auto flex items-center justify-between pt-6 text-sm text-stone-600">
-                    {c.productCount} {c.productCount === 1 ? 'product' : 'products'}
+                    {c.totalCount} {c.totalCount === 1 ? 'product' : 'products'}
                     <ArrowRight size={16} strokeWidth={1.75} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 group-hover:text-black" />
                   </span>
                 </Link>

@@ -44,6 +44,10 @@ export default async function ProductsPage({ searchParams }) {
   };
 
   const activeCategory = categories.find((c) => c.slug === query.category);
+  const mainCategories = categories.filter((c) => !c.parent);
+  // Sub-category chips: everything under the selected category's main category.
+  const activeRoot = activeCategory && (activeCategory.ancestors[0] ?? activeCategory._id);
+  const subCategories = activeRoot ? categories.filter((c) => c.ancestors.includes(activeRoot)) : [];
   const heading = query.q ? `Results for “${query.q}”` : activeCategory?.name ?? 'All products';
 
   return (
@@ -69,8 +73,8 @@ export default async function ProductsPage({ searchParams }) {
           <Chip href={href({ category: undefined })} active={!query.category}>
             All
           </Chip>
-          {categories.map((c) => (
-            <Chip key={c._id} href={href({ category: c.slug })} active={c.slug === query.category}>
+          {mainCategories.map((c) => (
+            <Chip key={c._id} href={href({ category: c.slug })} active={c._id === activeRoot}>
               {c.name}
             </Chip>
           ))}
@@ -84,6 +88,16 @@ export default async function ProductsPage({ searchParams }) {
           ))}
         </nav>
       </div>
+
+      {subCategories.length > 0 && (
+        <nav aria-label="Sub-categories" className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+          {subCategories.map((c) => (
+            <Chip key={c._id} href={href({ category: c.slug })} active={c.slug === query.category}>
+              {c.depth > 1 ? `› ${c.name}` : c.name}
+            </Chip>
+          ))}
+        </nav>
+      )}
 
       <div className="mt-8">
         <ProductGrid products={items} preloadCount={pagination.page === 1 ? 3 : 0} />

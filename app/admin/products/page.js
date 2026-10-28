@@ -56,7 +56,7 @@ export default async function AdminProductsPage({ searchParams }) {
           <option value="">All categories</option>
           {categories.map((c) => (
             <option key={c._id} value={c._id}>
-              {c.name}
+              {c.path ?? c.name}
             </option>
           ))}
         </select>
