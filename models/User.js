@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { WALLET_OPTIONS } from '../lib/validation.js';
+import { MESSAGE_LIMITS, WALLET_OPTIONS } from '../lib/validation.js';
 
 const { Schema } = mongoose;
 
@@ -66,6 +66,14 @@ const userSchema = new Schema(
     tokenVersion: { type: Number, default: 0 },
     lastLoginAt: { type: Date },
     seller: { type: sellerSchema }, // present for seller accounts (created at seller sign-up)
+    // Inbox preferences (lib/data/messages.js): the user's own labels and an optional away message.
+    messaging: {
+      labels: { type: [String], default: undefined },
+      autoReply: {
+        enabled: { type: Boolean, default: false },
+        message: { type: String, trim: true, maxlength: MESSAGE_LIMITS.autoReply },
+      },
+    },
   },
   {
     timestamps: true,

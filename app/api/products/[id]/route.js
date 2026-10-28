@@ -3,6 +3,8 @@ import { refreshStorefront } from '@/lib/revalidate';
 import { getProductBySlug, getProductById } from '@/lib/data/products';
 import { updateProduct, deleteProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
+import { sendSystemMessage } from '@/lib/data/messages';
+import { siteConfig } from '@/lib/site';
 
 const OBJECT_ID = /^[a-f0-9]{24}$/i;
 const MAX_BODY_BYTES = 64 * 1024;
@@ -45,6 +47,12 @@ export async function PUT(request, { params }) {
     const { id } = await params;
     const { product, previousSlug } = await updateProduct(id, payload);
     refreshStorefront(previousSlug, product.slug);
+    // Moderation decisions reach the seller's inbox ("From Sellpify").
+    if (product.sellerId && payload?.status === 'approved') {
+      await sendSystemMessage(product.sellerId, `Good news — your listing “${product.title}” was approved and is now live on ${siteConfig.name}.`);
+    } else if (product.sellerId && payload?.status === 'rejected') {
+      await sendSystemMessage(product.sellerId, `Your listing “${product.title}” wasn’t approved. Please review our listing guidelines, update it and submit it again. Questions? Reply through the contact page.`);
+    }
     return NextResponse.json(product);
   } catch (err) {
     if (err instanceof InputError) {

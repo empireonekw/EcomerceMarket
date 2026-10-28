@@ -199,6 +199,32 @@ Listing photos (up to 20), videos (up to 2) and the PDF/ZIP buyers receive are u
 Every PDF/ZIP is checked by its file signature, not just its name. Buyers' files are never linked directly: `/api/downloads`
 streams them after verifying the order. Sellers can deliver a link (Canva, Notion, Figma, Drive) instead of a file.
 
+## Live messaging
+
+Buyers message a shop from any of its product pages ("Message seller"); sellers answer in **Shop Manager → Messages**
+(`/seller/messages`), everyone else in `/messages`. The inbox works like Etsy's: Inbox, Starred, From potential buyers,
+From Sellpify (listing approved/rejected notices), Sent, All, Unread, Spam and Recycling bin, plus search, labels,
+bulk actions (archive, report, mark read/unread, delete) and an away auto-reply under **Reply preferences**.
+
+- **Data:** `models/Conversation.js` (one thread per buyer + shop, each side's folder state kept separately) and
+  `models/Message.js`; all reads/writes in `lib/data/messages.js`, folders/toolbar config in `lib/messaging.js`.
+- **Real time:** `server.js` runs Next.js and Socket.IO on one port (`npm run dev` / `npm start` use it). Browsers get a
+  one-time ticket from `POST /api/messages/ticket`, then receive new messages, unread counts and typing indicators.
+  Without `server.js` (`npm run dev:next`, Vercel) the inbox falls back to polling every 20 s.
+- **Reports** move the thread to Spam and land in `/admin/messages` for the team.
+- **nginx** must pass WebSocket upgrades for live updates:
+
+  ```nginx
+  location /socket.io/ {
+    proxy_pass http://127.0.0.1:4810;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_read_timeout 120s;
+  }
+  ```
+
 ## Performance
 
 - **Region:** the MongoDB cluster is in AWS Mumbai (`ap-south-1`), so `vercel.json` pins Vercel Functions to

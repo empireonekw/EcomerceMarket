@@ -22,12 +22,14 @@ function accountLinks(user) {
     if (!user.storeName) {
       return [
         { href: '/seller/onboarding', label: 'Finish shop setup' },
+        { href: '/messages', label: 'Messages' },
         { href: '/profile', label: 'Account settings' },
       ];
     }
     return [
       { href: '/seller/dashboard', label: 'Seller dashboard' },
       { href: '/seller/listings', label: 'Listings' },
+      { href: '/seller/messages', label: 'Messages' },
       { href: '/seller/sales', label: 'Sales history' },
       { href: '/seller/payouts', label: 'Payouts' },
       { href: '/seller/dashboard#shop', label: 'Shop settings' },
@@ -39,12 +41,14 @@ function accountLinks(user) {
       { href: '/admin', label: 'Admin dashboard' },
       { href: '/admin/users', label: 'Users' },
       { href: '/admin/orders', label: 'Orders & sales' },
+      { href: '/messages', label: 'Messages' },
       { href: '/profile', label: 'Account settings' },
     ];
   }
   return [
     { href: '/profile', label: 'My profile' },
     { href: '/profile?tab=downloads', label: 'My purchases' },
+    { href: '/messages', label: 'Messages' },
   ];
 }
 

@@ -6,6 +6,7 @@ import FeatureMarquee from '@/components/home/FeatureMarquee';
 import CategoryIcon from '@/components/CategoryIcon';
 import Reviews from '@/components/home/Reviews';
 import SectionHeading from '@/components/home/SectionHeading';
+import TalkToSellers from '@/components/home/TalkToSellers';
 import { getHeroProducts, getProducts, getStorefrontStats } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 
@@ -69,6 +70,9 @@ export default async function HomePage() {
           <ProductGrid products={latest} emptyMessage="No products yet — run `npm run seed`." />
         </div>
       </section>
+
+      {/* ---------------- Message sellers ---------------- */}
+      <TalkToSellers />
 
       {/* ---------------- Reviews ---------------- */}
       <Reviews />
