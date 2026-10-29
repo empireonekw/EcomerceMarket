@@ -9,6 +9,15 @@ import { useAuth } from '@/context/AuthContext';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { formatTaxRate } from '@/lib/pricing';
 
+/** A policy linked under the pay button (opens in a new tab so the buyer doesn't leave checkout). */
+function PolicyLink({ href, children }) {
+  return (
+    <Link href={href} target="_blank" className="underline underline-offset-2 hover:text-ink">
+      {children}
+    </Link>
+  );
+}
+
 function Spinner() {
   return <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />;
 }
@@ -151,6 +160,12 @@ export default function CheckoutForm({ demoMode = false }) {
           )}
         </button>
         <p className="mt-3 text-center text-xs text-stone-500">Instant delivery · Secure checkout · Lifetime access</p>
+        {/* What payment providers look for at checkout: the policies that apply, linked before the buyer pays. */}
+        <p className="mt-3 text-center text-xs leading-relaxed text-stone-500">
+          By placing your order you agree to our <PolicyLink href="/terms">Terms of Service</PolicyLink> and{' '}
+          <PolicyLink href="/privacy">Privacy Policy</PolicyLink>, and to our <PolicyLink href="/legal/payment-policy">Payment</PolicyLink>,{' '}
+          <PolicyLink href="/legal/delivery-policy">Delivery</PolicyLink> and <PolicyLink href="/legal/refund-policy">Refund</PolicyLink> policies.
+        </p>
       </form>
 
       {/* ---------- Summary ---------- */}

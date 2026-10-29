@@ -22,6 +22,7 @@ const payoutSchema = new Schema(
       walletProvider: String,
       walletNumber: String,
     },
+    destinationEnc: { type: String }, // the destination encrypted (lib/field-encryption.js); replaces `destination`
     reference: { type: String, trim: true, maxlength: 120 }, // bank/wallet transaction ID entered by the admin
     processedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     paidAt: { type: Date },

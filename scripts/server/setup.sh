@@ -140,6 +140,17 @@ fi
 if [ "$HTTPS_ONLY" = 1 ]; then LISTEN="listen 443 ssl;"; else LISTEN="listen 80;
     listen 443 ssl;"; fi
 
+# The visitor's real IP: trust CF-Connecting-IP only from Cloudflare's own ranges (fetched fresh), so nobody can fake
+# it by calling the server directly. Login rate limits use it (X-Real-IP, lib/rate-limit.js).
+CF_REALIP=""
+for list in ips-v4 ips-v6; do
+  for range in $(curl -fsS --max-time 10 "https://www.cloudflare.com/$list" 2>/dev/null); do
+    CF_REALIP="$CF_REALIP    set_real_ip_from $range;
+"
+  done
+done
+[ -n "$CF_REALIP" ] || warn "Could not fetch Cloudflare's IP ranges; visitor IPs will be Cloudflare's until you re-run this script."
+
 cat > "$CONF_DIR/$DOMAIN.conf" <<EOF
 # $DOMAIN -> Next.js on 127.0.0.1:$PORT (written by scripts/server/setup.sh)
 server {
@@ -155,14 +166,37 @@ server {
     server_name $DOMAIN;
     ssl_certificate     $CERT_DIR/fullchain.pem;
     ssl_certificate_key $CERT_DIR/privkey.pem;
+    # Modern TLS only (Cloudflare → server hop). Browsers → Cloudflare: set "Minimum TLS Version" to 1.2 there.
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:${APP}_ssl:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+    server_tokens off;
+
+$CF_REALIP    real_ip_header CF-Connecting-IP;
 
     client_max_body_size 600m; # seller uploads: videos up to 100 MB, PDF/ZIP up to 500 MB (lib/listing.js)
+
+    # Live messaging (Socket.IO, server.js): WebSocket upgrade.
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:$PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 120s;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:$PORT;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Real-IP \$remote_addr; # the real visitor IP (real_ip_header above), never client-supplied
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;

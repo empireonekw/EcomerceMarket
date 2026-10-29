@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Mail } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
-import { siteConfig } from '@/lib/site';
+import { siteConfig, gmailCompose } from '@/lib/site';
 
 /** A body block: a string is a paragraph, an array of strings is a bullet list, anything else renders as-is. */
 function Block({ children }) {
@@ -65,7 +65,7 @@ export default function LegalPage({ title, updated, intro, sections, eyebrow = '
             <p className="font-medium">Questions about this page?</p>
             <p className="mt-0.5 text-sm text-stone-600">
               Email{' '}
-              <a href={`mailto:${siteConfig.supportEmail}`} className="font-medium text-brand-600 hover:underline">
+              <a {...gmailCompose(siteConfig.supportEmail)} className="font-medium text-brand-600 hover:underline">
                 {siteConfig.supportEmail}
               </a>{' '}
               — we reply within 1–2 business days.

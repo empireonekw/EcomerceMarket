@@ -5,6 +5,7 @@ import NavSearch from '@/components/nav/NavSearch';
 import CartToast from '@/components/CartToast';
 import CartBadge from '@/components/CartBadge';
 import Logo from '@/components/Logo';
+import FloatingHeader from '@/components/nav/FloatingHeader';
 import UserMenu from '@/components/UserMenu';
 import InboxLink from '@/components/messages/InboxLink';
 import { getCategories } from '@/lib/data/categories';
@@ -57,7 +58,8 @@ export default async function Navbar() {
   return (
     <>
       <AnnouncementBar />
-      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
+      {/* Flush bar over the hero, floating pill once you scroll past it (FloatingHeader). */}
+      <FloatingHeader>
         {/* 3 columns on desktop so the centre nav stays centred regardless of logo/utility widths. */}
         <div className="container-page relative flex items-center justify-between gap-4 py-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6">
           <Logo />
@@ -73,7 +75,7 @@ export default async function Navbar() {
           </div>
         </div>
         <CartToast />
-      </header>
+      </FloatingHeader>
     </>
   );
 }

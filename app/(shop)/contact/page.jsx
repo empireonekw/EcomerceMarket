@@ -3,7 +3,7 @@ import { Clock, Mail, Receipt, Store } from 'lucide-react';
 import ContactForm from '@/components/ContactForm';
 import PageIntro from '@/components/PageIntro';
 import { getCurrentUser } from '@/lib/auth';
-import { siteConfig } from '@/lib/site';
+import { siteConfig, gmailCompose } from '@/lib/site';
 
 export const metadata = {
   title: 'Contact Us',
@@ -35,7 +35,7 @@ export default async function ContactPage() {
             </span>
             <h2 className="headline mt-5 text-2xl">Email support</h2>
             <p className="mt-1.5 text-sm text-stone-600">Prefer email? Write to us directly.</p>
-            <a href={`mailto:${siteConfig.supportEmail}`} className="mt-4 inline-block break-all text-lg font-medium text-brand-600 hover:underline hover:underline-offset-4">
+            <a {...gmailCompose(siteConfig.supportEmail)} className="mt-4 inline-block break-all text-lg font-medium text-brand-600 hover:underline hover:underline-offset-4">
               {siteConfig.supportEmail}
             </a>
             <p className="mt-5 flex items-center gap-2 border-t border-stone-100 pt-5 text-sm text-stone-600">

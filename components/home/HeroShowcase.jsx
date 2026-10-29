@@ -23,7 +23,7 @@ export default function HeroShowcase() {
   const sideSizes = '(min-width: 1280px) 220px, 18vw';
 
   return (
-    <section aria-labelledby="hero-title" className="relative isolate overflow-hidden border-b border-stone-200 bg-paper">
+    <section data-hero aria-labelledby="hero-title" className="relative isolate overflow-hidden border-b border-stone-200 bg-paper">
       {/* ---------- Background: optional photo, else a faint journal grid fading out towards the edges ---------- */}
       {HERO_BACKGROUND ? (
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">

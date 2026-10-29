@@ -23,7 +23,9 @@ const sellerSchema = new Schema(
   {
     storeName: { type: String, trim: true, maxlength: 60 }, // set during shop setup; absent = setup not finished
     storeDescription: { type: String, trim: true, maxlength: 500 },
-    bankDetails: { type: bankDetailsSchema, select: false }, // bank account and/or EasyPaisa / JazzCash wallet
+    bankDetails: { type: bankDetailsSchema, select: false }, // bank account and/or EasyPaisa / JazzCash wallet (legacy, plain)
+    // The same details encrypted (AES-256-GCM, lib/field-encryption.js). Replaces bankDetails once DATA_ENCRYPTION_KEY is set.
+    bankDetailsEnc: { type: String, select: false },
     totalEarnings: { type: Number, default: 0, min: 0 }, // lifetime 90% share
     pendingPayout: { type: Number, default: 0, min: 0 }, // earned, not yet paid out
     paidPayout: { type: Number, default: 0, min: 0 }, // paid out so far
@@ -93,7 +95,7 @@ const userSchema = new Schema(
  * (rather than 'seller +seller.bankDetails') avoids MongoDB parent/child projection collisions.
  */
 export const SELLER_WITH_BANK =
-  'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.storeSetupAt seller.bankDetails';
+  'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.storeSetupAt seller.bankDetails seller.bankDetailsEnc';
 
 // Admin dashboards list users by role, newest first.
 userSchema.index({ role: 1, createdAt: -1 });

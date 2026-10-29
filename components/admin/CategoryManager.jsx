@@ -9,7 +9,16 @@ import { siteConfig } from '@/lib/site';
 import { CATEGORY_TYPES, categoryHref, categorySlug, categoryTypeLabel, MAX_CATEGORY_LEVELS, orderTree, subtreeLevels } from '@/lib/category-tree';
 
 const siteHost = siteConfig.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-const EMPTY = { name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
+const EMPTY = { main: '', sub: '', inner: '', name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
+const LEVELS = [
+  { key: 'main', label: 'Main category', placeholder: 'e.g. Templates', help: 'Type a new main category, or an existing one to add under it.' },
+  { key: 'sub', label: 'Sub category', placeholder: 'e.g. Business', help: 'Optional. Leave empty to add just the main category.' },
+  { key: 'inner', label: 'Inner category', placeholder: 'e.g. Invoices', help: 'Optional. The most specific level — the best match for search engines.' },
+];
+const lower = (s) => s.trim().toLowerCase();
+const optionalFields = (v) => ({ description: v.description, type: v.type, metaTitle: v.metaTitle, metaDescription: v.metaDescription });
+/** The deepest name typed in the add form (the category being created). */
+const deepest = (v) => [v.inner, v.sub, v.main].map((n) => n.trim()).find(Boolean) ?? '';
 const inputCls = (err) =>
   `mt-1.5 w-full rounded-xl border bg-white px-3.5 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
@@ -81,6 +90,16 @@ export default function CategoryManager({ categories }) {
     return tree.filter((c) => c._id !== editingId && !c.ancestors.includes(editingId) && c.depth + levels <= MAX_CATEGORY_LEVELS - 1);
   }, [tree, editingId]);
 
+  // Suggestions for the add form: existing main categories, then the subs / inners under what's typed above.
+  const suggestions = useMemo(() => {
+    const mains = tree.filter((c) => c.depth === 0);
+    const main = mains.find((c) => lower(c.name) === lower(values.main));
+    const subs = main ? tree.filter((c) => c.parent === main._id) : [];
+    const sub = subs.find((c) => lower(c.name) === lower(values.sub));
+    const inners = sub ? tree.filter((c) => c.parent === sub._id) : [];
+    return { main: mains, sub: subs, inner: inners, matched: { main, sub } };
+  }, [tree, values.main, values.sub]);
+
   function resetForm() {
     setEditingId(null);
     setValues(EMPTY);
@@ -91,6 +110,7 @@ export default function CategoryManager({ categories }) {
   function startEdit(c) {
     setEditingId(c._id);
     setValues({
+      ...EMPTY,
       name: c.name,
       slug: c.slug,
       parent: c.parent ?? '',
@@ -108,7 +128,8 @@ export default function CategoryManager({ categories }) {
   function update(key, value) {
     setValues((v) => {
       const next = { ...v, [key]: value };
-      if (key === 'name' && !slugTouched) next.slug = categorySlug(value);
+      if (!slugTouched && key === 'name') next.slug = categorySlug(value);
+      if (!slugTouched && ['main', 'sub', 'inner'].includes(key)) next.slug = categorySlug(deepest(next));
       return next;
     });
     if (errors[key]) setErrors(({ [key]: _, ...rest }) => rest);
@@ -117,8 +138,11 @@ export default function CategoryManager({ categories }) {
   async function onSubmit(e) {
     e.preventDefault();
     const found = {};
-    if (!values.name.trim()) found.name = 'Enter a name.';
-    if (!categorySlug(values.slug || values.name)) found.slug = 'Enter a slug (letters, numbers and hyphens).';
+    const name = editingId ? values.name : deepest(values);
+    if (editingId && !values.name.trim()) found.name = 'Enter a name.';
+    if (!editingId && !values.main.trim()) found.main = 'Enter a main category.';
+    if (!editingId && values.inner.trim() && !values.sub.trim()) found.sub = 'Enter a sub category before the inner category.';
+    if (name && !categorySlug(values.slug || name)) found.slug = 'Enter a slug (letters, numbers and hyphens).';
     setErrors(found);
     if (Object.keys(found).length) return document.getElementById(`cat-${Object.keys(found)[0]}`)?.focus();
 
@@ -127,7 +151,11 @@ export default function CategoryManager({ categories }) {
       const res = await fetch(editingId ? `/api/admin/categories/${editingId}` : '/api/admin/categories', {
         method: editingId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, slug: categorySlug(values.slug || values.name), parent: values.parent || null }),
+        body: JSON.stringify(
+          editingId
+            ? { name: values.name, slug: categorySlug(values.slug || values.name), parent: values.parent || null, ...optionalFields(values) }
+            : { main: values.main, sub: values.sub, inner: values.inner, slug: categorySlug(values.slug || name), ...optionalFields(values) },
+        ),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -135,7 +163,7 @@ export default function CategoryManager({ categories }) {
         toast.error(editingId ? 'Category not updated' : 'Category not added', data.error);
         return;
       }
-      toast.success(editingId ? `“${data.name}” updated` : `“${data.name}” added`);
+      toast.success(editingId ? `“${data.name}” updated` : `“${data.path ?? data.name}” added`);
       resetForm();
       startRefresh(() => router.refresh());
     } catch {
@@ -222,23 +250,61 @@ export default function CategoryManager({ categories }) {
           </p>
         )}
         <form onSubmit={onSubmit} noValidate className="mt-5 space-y-5">
-          <div>
-            <label htmlFor="cat-name" className="text-sm font-medium">
-              Name <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="cat-name"
-              value={values.name}
-              maxLength={60}
-              onChange={(e) => update('name', e.target.value)}
-              aria-invalid={Boolean(errors.name) || undefined}
-              aria-describedby="cat-name-help"
-              className={`${inputCls(errors.name)} h-11`}
-            />
-            <FieldHelp id="cat-name-help" error={errors.name}>
-              The name is how it appears on your site.
-            </FieldHelp>
-          </div>
+          {editingId ? (
+            <div>
+              <label htmlFor="cat-name" className="text-sm font-medium">
+                Name <span className="text-red-600">*</span>
+              </label>
+              <input
+                id="cat-name"
+                value={values.name}
+                maxLength={60}
+                onChange={(e) => update('name', e.target.value)}
+                aria-invalid={Boolean(errors.name) || undefined}
+                aria-describedby="cat-name-help"
+                className={`${inputCls(errors.name)} h-11`}
+              />
+              <FieldHelp id="cat-name-help" error={errors.name}>
+                The name is how it appears on your site.
+              </FieldHelp>
+            </div>
+          ) : (
+            <fieldset className="space-y-4">
+              <legend className="sr-only">Category path</legend>
+              {LEVELS.map((level, i) => {
+                const disabled = i > 0 && !values[LEVELS[i - 1].key].trim();
+                const exists = i < 2 && suggestions.matched[level.key];
+                return (
+                  <div key={level.key}>
+                    <label htmlFor={`cat-${level.key}`} className="text-sm font-medium">
+                      {level.label} {i === 0 ? <span className="text-red-600">*</span> : <span className="font-normal text-stone-400">(optional)</span>}
+                    </label>
+                    <input
+                      id={`cat-${level.key}`}
+                      list={`cat-${level.key}-options`}
+                      value={values[level.key]}
+                      maxLength={60}
+                      disabled={disabled}
+                      placeholder={level.placeholder}
+                      autoComplete="off"
+                      onChange={(e) => update(level.key, e.target.value)}
+                      aria-invalid={Boolean(errors[level.key]) || undefined}
+                      aria-describedby={`cat-${level.key}-help`}
+                      className={`${inputCls(errors[level.key])} h-11 disabled:cursor-not-allowed disabled:bg-stone-50`}
+                    />
+                    <datalist id={`cat-${level.key}-options`}>
+                      {suggestions[level.key].map((c) => (
+                        <option key={c._id} value={c.name} />
+                      ))}
+                    </datalist>
+                    <FieldHelp id={`cat-${level.key}-help`} error={errors[level.key]}>
+                      {exists && values[LEVELS[i + 1].key].trim() ? `Existing “${exists.name}” — the new category goes under it.` : level.help}
+                    </FieldHelp>
+                  </div>
+                );
+              })}
+            </fieldset>
+          )}
 
           <div>
             <label htmlFor="cat-slug" className="text-sm font-medium">
@@ -258,34 +324,37 @@ export default function CategoryManager({ categories }) {
               className={`${inputCls(errors.slug)} h-11 font-mono text-[13px]`}
             />
             <FieldHelp id="cat-slug-help" error={errors.slug}>
-              The URL-friendly version of the name: lowercase letters, numbers and hyphens. Filled in from the name until you edit it.
+              The URL-friendly version of the {editingId ? 'name' : 'deepest category you typed'}: lowercase letters, numbers and hyphens. Filled in
+              automatically until you edit it.
               {editingId && ' Changing it changes the category’s link.'}
             </FieldHelp>
           </div>
 
-          <div>
-            <label htmlFor="cat-parent" className="text-sm font-medium">
-              Parent Category
-            </label>
-            <select
-              id="cat-parent"
-              value={values.parent}
-              onChange={(e) => update('parent', e.target.value)}
-              aria-invalid={Boolean(errors.parent) || undefined}
-              aria-describedby="cat-parent-help"
-              className={`${inputCls(errors.parent)} h-11`}
-            >
-              <option value="">None</option>
-              {parentOptions.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {`${'— '.repeat(c.depth)}${c.name}`}
-                </option>
-              ))}
-            </select>
-            <FieldHelp id="cat-parent-help" error={errors.parent}>
-              Choose a parent to make this a sub-category (up to {MAX_CATEGORY_LEVELS} levels: main › sub › inner). “None” makes it a main category.
-            </FieldHelp>
-          </div>
+          {editingId && (
+            <div>
+              <label htmlFor="cat-parent" className="text-sm font-medium">
+                Parent Category
+              </label>
+              <select
+                id="cat-parent"
+                value={values.parent}
+                onChange={(e) => update('parent', e.target.value)}
+                aria-invalid={Boolean(errors.parent) || undefined}
+                aria-describedby="cat-parent-help"
+                className={`${inputCls(errors.parent)} h-11`}
+              >
+                <option value="">None</option>
+                {parentOptions.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {`${'— '.repeat(c.depth)}${c.name}`}
+                  </option>
+                ))}
+              </select>
+              <FieldHelp id="cat-parent-help" error={errors.parent}>
+                Choose a parent to make this a sub-category (up to {MAX_CATEGORY_LEVELS} levels: main › sub › inner). “None” makes it a main category.
+              </FieldHelp>
+            </div>
+          )}
 
           <div>
             <label htmlFor="cat-description" className="text-sm font-medium">
@@ -326,10 +395,16 @@ export default function CategoryManager({ categories }) {
             <p className="break-all rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-600">
               {siteHost}
               {categoryHref({
-                slugPath: [
-                  ...(byId.get(values.parent)?.slugPath ? [byId.get(values.parent).slugPath] : []),
-                  categorySlug(values.slug || values.name) || 'slug',
-                ].join('/'),
+                slugPath: editingId
+                  ? [
+                      ...(byId.get(values.parent)?.slugPath ? [byId.get(values.parent).slugPath] : []),
+                      categorySlug(values.slug || values.name) || 'slug',
+                    ].join('/')
+                  : [values.main, values.sub, values.inner]
+                      .map((n) => n.trim())
+                      .filter(Boolean)
+                      .map((n, i, all) => (i === all.length - 1 ? categorySlug(values.slug || n) : categorySlug(n)))
+                      .join('/') || 'slug',
               })}
             </p>
             <div>
@@ -340,7 +415,7 @@ export default function CategoryManager({ categories }) {
                 id="cat-metaTitle"
                 value={values.metaTitle}
                 maxLength={70}
-                placeholder={values.name || 'Defaults to the name'}
+                placeholder={(editingId ? values.name : deepest(values)) || 'Defaults to the name'}
                 onChange={(e) => update('metaTitle', e.target.value)}
                 aria-invalid={Boolean(errors.metaTitle) || undefined}
                 className={`${inputCls(errors.metaTitle)} h-11`}
