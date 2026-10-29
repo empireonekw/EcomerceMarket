@@ -1,8 +1,10 @@
-import { Inter } from 'next/font/google';
+import { Fraunces, Inter } from 'next/font/google';
 import { siteConfig } from '@/lib/site';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
+// Editorial serif for the homepage hero headline (variable font: every weight, plus optical sizing for large text).
+const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-fraunces', axes: ['opsz'] });
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -25,7 +27,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body className="flex min-h-dvh flex-col font-sans">
         <a
           href="#main"

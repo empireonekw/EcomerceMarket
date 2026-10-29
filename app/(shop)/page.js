@@ -7,7 +7,7 @@ import CategoryIcon from '@/components/CategoryIcon';
 import Reviews from '@/components/home/Reviews';
 import SectionHeading from '@/components/home/SectionHeading';
 import TalkToSellers from '@/components/home/TalkToSellers';
-import { getHeroProducts, getProducts, getStorefrontStats } from '@/lib/data/products';
+import { getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 
 // ISR: served as static HTML from the cache, regenerated at most every 5 minutes
@@ -17,17 +17,12 @@ export const revalidate = 300;
 export default async function HomePage() {
   // Same data function that powers GET /api/products — Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, allCategories, heroProducts, stats] = await Promise.all([
-    getProducts({ sort: 'newest', limit: 6 }),
-    getCategories(),
-    getHeroProducts(12),
-    getStorefrontStats(),
-  ]);
+  const [{ items: latest }, allCategories] = await Promise.all([getProducts({ sort: 'newest', limit: 6 }), getCategories()]);
   const categories = allCategories.filter((c) => !c.parent); // main categories; counts include their sub-categories
 
   return (
     <>
-      <HeroShowcase products={heroProducts} stats={stats} />
+      <HeroShowcase />
 
       {/* ---------------- Shop by category ---------------- */}
       {categories.length > 0 && (
