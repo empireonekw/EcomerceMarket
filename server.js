@@ -6,12 +6,14 @@
  *
  * PORT (default 3000) and HOST (default all interfaces) come from the environment.
  * This file holds no app logic: authentication and database lookups come from the hooks lib/realtime.js
- * installs on globalThis.__realtimeHooks, and the app pushes events through globalThis.__io.
+ * installs on globalThis.__realtimeHooks, and the app pushes events through globalThis.__io. It also feeds the
+ * in-memory request monitor behind Admin → System Health (lib/monitor-store.js).
  * Behind nginx, /socket.io/ needs the WebSocket upgrade headers (README → Live messaging).
  */
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
+import { recordError, recordRequest, startEventLoopMonitor } from './lib/monitor-store.js';
 
 const dev = process.argv.includes('--dev');
 process.env.NODE_ENV ??= dev ? 'development' : 'production'; // before Next loads
@@ -27,7 +29,23 @@ const handle = app.getRequestHandler();
 await app.prepare();
 const upgradeNext = app.getUpgradeHandler();
 
-const server = createServer((req, res) => handle(req, res));
+// Admin → System Health (lib/monitor-store.js): every request's status and time, every logged error, event-loop lag.
+startEventLoopMonitor();
+const logError = console.error.bind(console);
+console.error = (...args) => {
+  try {
+    recordError(args);
+  } catch {
+    // never let monitoring break logging
+  }
+  logError(...args);
+};
+
+const server = createServer((req, res) => {
+  const started = performance.now();
+  res.on('finish', () => recordRequest({ path: req.url, status: res.statusCode, ms: Math.round(performance.now() - started), headers: req.headers }));
+  handle(req, res);
+});
 
 const io = new Server(server, {
   path: '/socket.io',

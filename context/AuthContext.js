@@ -62,15 +62,15 @@ export function AuthProvider({ children }) {
   }, [refresh]);
 
   /** @returns {{ ok: true, user } | { ok: false, error: string, fields?: object }} */
-  const login = useCallback(async (email, password) => {
-    const { ok, data } = await postJson('/api/auth/login', { email, password });
+  const login = useCallback(async (email, password, captchaToken) => {
+    const { ok, data } = await postJson('/api/auth/login', { email, password, captchaToken });
     if (!ok) return { ok: false, error: data.error || 'Sign-in failed.', fields: data.fields };
     setUser(data.user);
     return { ok: true, user: data.user };
   }, []);
 
-  const signup = useCallback(async ({ name, email, password, acceptTerms, accountType = 'customer' }) => {
-    const { ok, data } = await postJson('/api/auth/signup', { name, email, password, acceptTerms, accountType });
+  const signup = useCallback(async ({ name, email, password, acceptTerms, accountType = 'customer', captchaToken }) => {
+    const { ok, data } = await postJson('/api/auth/signup', { name, email, password, acceptTerms, accountType, captchaToken });
     if (!ok) return { ok: false, error: data.error || 'Sign-up failed.', fields: data.fields };
     return { ok: true, user: data.user };
   }, []);

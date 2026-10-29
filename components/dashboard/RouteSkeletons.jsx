@@ -332,6 +332,20 @@ export function SellerMessagesSkeleton() {
   );
 }
 
+/** System Health: summary tiles, the flow diagram and the side panel. */
+export function AdminSystemSkeleton() {
+  return (
+    <DashboardPageSkeleton label="Loading system health">
+      <HeaderSkeleton />
+      <StatsSkeleton count={6} />
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="h-[44rem] rounded-2xl border border-stone-200 bg-white" />
+        <PanelSkeleton rows={5} />
+      </div>
+    </DashboardPageSkeleton>
+  );
+}
+
 const isProductForm = (p, base) => p === `${base}/add` || (p.startsWith(`${base}/`) && p.endsWith('/edit'));
 
 /** The skeleton of the dashboard page at `pathname`, or null when there isn't one. */
@@ -347,6 +361,7 @@ export function skeletonFor(pathname) {
   if (p === '/admin/orders') return AdminOrdersSkeleton;
   if (p === '/admin/payouts') return AdminPayoutsSkeleton;
   if (p === '/admin/messages') return AdminMessagesSkeleton;
+  if (p === '/admin/system') return AdminSystemSkeleton;
   if (p === '/seller/dashboard') return SellerDashboardSkeleton;
   if (p === '/seller/listings') return SellerListingsSkeleton;
   if (p === '/seller/sales') return SellerSalesSkeleton;

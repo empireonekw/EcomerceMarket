@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateName, validateEmail, validatePassword } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, PasswordChecklist, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
+import Recaptcha, { recaptchaEnabled } from '@/components/auth/Recaptcha';
 
 function validate(v) {
   const e = {
@@ -34,6 +35,9 @@ export default function SignupForm({ next, accountType = 'customer' }) {
   const [serverErrors, setServerErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [pending, setPending] = useState(false);
+  const [captcha, setCaptcha] = useState(null); // reCAPTCHA token (single-use)
+  const [captchaError, setCaptchaError] = useState(null);
+  const captchaRef = useRef(null);
 
   const errors = { ...validate(values), ...serverErrors };
   const show = (k) => (touched[k] || submitted ? errors[k] : undefined);
@@ -58,6 +62,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
       document.getElementById(Object.keys(found)[0])?.focus();
       return;
     }
+    if (recaptchaEnabled && !captcha) return setCaptchaError('Please confirm you’re not a robot.');
 
     setPending(true);
     const result = await signup({
@@ -66,10 +71,14 @@ export default function SignupForm({ next, accountType = 'customer' }) {
       password: values.password,
       acceptTerms: values.acceptTerms,
       accountType,
+      captchaToken: captcha,
     }).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
     if (!result.ok) {
-      setServerErrors(result.fields ?? {});
-      setFormError(result.error);
+      const { captcha: captchaMessage, ...fields } = result.fields ?? {};
+      setServerErrors(fields);
+      setFormError(captchaMessage ? null : result.error);
+      setCaptchaError(captchaMessage ?? null);
+      captchaRef.current?.reset(); // each token works once
       setPending(false);
       return;
     }
@@ -155,6 +164,15 @@ export default function SignupForm({ next, accountType = 'customer' }) {
         </label>
         <FieldError id="acceptTerms-error">{show('acceptTerms')}</FieldError>
       </div>
+
+      <Recaptcha
+        ref={captchaRef}
+        error={captchaError}
+        onChange={(token) => {
+          setCaptcha(token);
+          if (token) setCaptchaError(null);
+        }}
+      />
 
       <div className="pt-1">
         <SubmitButton pending={pending} pendingLabel={copy.pending}>
