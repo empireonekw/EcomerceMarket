@@ -14,6 +14,22 @@ npm run dev
 
 Environment variables live in `.env.local` (gitignored). Template: `.env.example`.
 
+### Local development against the live database
+
+The live database is MongoDB on the server (127.0.0.1 only, not reachable from outside). `npm run dev`
+(`scripts/dev.js`) opens an SSH tunnel to it by itself when `.env.development.local` (gitignored, dev only) has:
+
+```
+DEV_DB_TUNNEL=root@13.140.168.178
+DEV_DB_TUNNEL_KEY=~/.ssh/sellpify_dev_tunnel
+MONGODB_URI=mongodb://sellpify:<password>@127.0.0.1:27020/ecommerrceweb?authSource=ecommerrceweb&directConnection=true
+DEMO_CHECKOUT=false
+```
+
+The key may only forward to MongoDB: its line in the server's `/root/.ssh/authorized_keys` starts with
+`restrict,port-forwarding,permitopen="127.0.0.1:27017"`. Without `DEV_DB_TUNNEL`, `npm run dev` just runs
+`node server.js --dev` with `.env.local`. It is the live data: test orders, users and products appear on sellpify.com.
+
 ## Structure
 
 ```
