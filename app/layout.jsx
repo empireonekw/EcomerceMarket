@@ -1,15 +1,34 @@
 import { Fraunces, Inter } from 'next/font/google';
+
 import { siteConfig } from '@/lib/site';
+
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
 // Editorial serif for the homepage hero headline (variable font: every weight, plus optical sizing for large text).
-const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-fraunces', axes: ['opsz'], style: ['normal', 'italic'] });
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-fraunces',
+  axes: ['opsz'],
+  style: ['normal', 'italic'],
+});
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: { default: `${siteConfig.name} — Digital Products, Physical Goods & Services`, template: `%s | ${siteConfig.name}` },
+  title: {
+    default: `${siteConfig.name} — Templates, E-books, Software & Vectors`,
+    template: `%s | ${siteConfig.name}`,
+  },
   description: siteConfig.description,
+  verification: {
+    google: '0i7FeCq6qfqS25NS3eUoaN-dCwcAQJYTkPnj1u_Wzl0',
+  },
   openGraph: {
     type: 'website',
     siteName: siteConfig.name,
@@ -35,7 +54,6 @@ export default function RootLayout({ children }) {
         >
           Skip to content
         </a>
-        {/* Each area brings its own chrome: app/(shop)/layout.jsx (storefront) and app/admin/layout.js (portal). */}
         {children}
       </body>
     </html>
