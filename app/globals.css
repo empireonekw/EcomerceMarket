@@ -77,13 +77,6 @@
       border-radius: 44% 56% 62% 38% / 58% 42% 58% 42%;
     }
   }
-  /* Admin → System Health: dashes moving along an arrow while requests flow through it. */
-  --animate-flow: flow 0.9s linear infinite;
-  @keyframes flow {
-    to {
-      stroke-dashoffset: -16;
-    }
-  }
   @keyframes marquee-x {
     to {
       transform: translate3d(-50%, 0, 0);
