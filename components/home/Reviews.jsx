@@ -73,7 +73,11 @@ const SAMPLES = {
 
 /** Homepage "Loved by buyers": real reviews when there are any, otherwise the samples above. */
 export default async function Reviews() {
-  const real = await getFeaturedReviews(6);
+  // A database hiccup shows the sample reviews instead of breaking the homepage.
+  const real = await getFeaturedReviews(6).catch((err) => {
+    console.error('[home] reviews unavailable', err);
+    return { items: [] };
+  });
   const reviews = real.items.length > 0 ? real : SAMPLES;
 
   return (
