@@ -3,6 +3,7 @@ import { refreshStorefront } from '@/lib/revalidate';
 import { getProductBySlug, getProductById } from '@/lib/data/products';
 import { updateProduct, deleteProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
+import { ensureCategoryPath } from '@/lib/data/admin-categories';
 import { sendSystemMessage } from '@/lib/data/messages';
 import { siteConfig } from '@/lib/site';
 
@@ -45,6 +46,8 @@ export async function PUT(request, { params }) {
 
   try {
     const { id } = await params;
+    // Admin form sends typed names (Main / Sub / Inner); missing categories are created on the fly.
+    if (payload?.categoryPath) payload.category = (await ensureCategoryPath(payload.categoryPath)).id;
     const { product, previousSlug } = await updateProduct(id, payload);
     refreshStorefront(previousSlug, product.slug);
     // Moderation decisions reach the seller's inbox ("From Sellpify").

@@ -3,6 +3,7 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { getProducts } from '@/lib/data/products';
 import { createProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
+import { ensureCategoryPath } from '@/lib/data/admin-categories';
 import { parseProductQuery } from '@/lib/utils';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -46,6 +47,8 @@ export async function POST(request) {
   }
 
   try {
+    // Admin form sends typed names (Main / Sub / Inner); missing categories are created on the fly.
+    if (payload?.categoryPath) payload.category = (await ensureCategoryPath(payload.categoryPath)).id;
     const product = await createProduct(payload);
 
     // Refresh cached storefront views that list products / category counts.

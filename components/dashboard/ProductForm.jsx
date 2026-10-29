@@ -33,7 +33,8 @@ function validate(v) {
   else if (v.title.length > 140) e.title = 'Keep the title under 140 characters.';
 
   if (v.slug && !SLUG_RE.test(v.slug)) e.slug = 'Use lowercase letters, numbers and single hyphens only.';
-  if (!v.category) e.category = 'Choose a category.';
+  if (!v.categoryMain.trim()) e.categoryMain = 'Enter a main category.';
+  if (v.categoryInner.trim() && !v.categorySub.trim()) e.categorySub = 'Enter a sub-category before the inner category.';
 
   if (v.price === '') e.price = 'Price is required (use 0 for a free product).';
   else if (!MONEY_RE.test(v.price)) e.price = 'Enter a valid amount, e.g. 19 or 19.99.';
@@ -117,22 +118,28 @@ export default function ProductForm({ mode, categories, product }) {
   const toast = useToast();
   const isEdit = mode === 'edit';
 
-  const [values, setValues] = useState(() => ({
-    title: product?.title ?? '',
-    slug: product?.slug ?? '',
-    category: product?.category?.slug ?? '',
-    price: toDollars(product?.price),
-    compareAtPrice: toDollars(product?.compareAtPrice),
-    coverImage: product?.coverImage ?? '',
-    deliveryType: product?.deliveryType ?? 'file',
-    downloadUrl: product?.downloadUrl ?? '',
-    fileFormat: product?.fileFormat ?? '',
-    shortDescription: product?.shortDescription ?? '',
-    description: product?.description ?? '',
-    tags: (product?.tags ?? []).join(', '),
-    isPublished: product?.isPublished ?? true,
-    isFeatured: product?.isFeatured ?? false,
-  }));
+  const [values, setValues] = useState(() => {
+    // Main / Sub / Inner as names, from the product's current category path ("Digital › Templates › Résumé").
+    const [categoryMain = '', categorySub = '', categoryInner = ''] = categories.find((c) => c._id === product?.category?._id)?.path?.split(' › ') ?? [];
+    return {
+      title: product?.title ?? '',
+      slug: product?.slug ?? '',
+      categoryMain,
+      categorySub,
+      categoryInner,
+      price: toDollars(product?.price),
+      compareAtPrice: toDollars(product?.compareAtPrice),
+      coverImage: product?.coverImage ?? '',
+      deliveryType: product?.deliveryType ?? 'file',
+      downloadUrl: product?.downloadUrl ?? '',
+      fileFormat: product?.fileFormat ?? '',
+      shortDescription: product?.shortDescription ?? '',
+      description: product?.description ?? '',
+      tags: (product?.tags ?? []).join(', '),
+      isPublished: product?.isPublished ?? true,
+      isFeatured: product?.isFeatured ?? false,
+    };
+  });
   // New products: slug follows the title until the admin edits it. Existing products keep their URL.
   const [slugTouched, setSlugTouched] = useState(isEdit);
   const [touched, setTouched] = useState({});
@@ -151,6 +158,7 @@ export default function ProductForm({ mode, categories, product }) {
       return next;
     });
     if (serverErrors[key]) setServerErrors(({ [key]: _, ...rest }) => rest);
+    if (key.startsWith('category') && serverErrors.category) setServerErrors(({ category: _, ...rest }) => rest);
     if (key === 'coverImage') setPreviewBroken(false);
   }
 
@@ -176,7 +184,8 @@ export default function ProductForm({ mode, categories, product }) {
 
     const payload = {
       title: values.title.trim(),
-      category: values.category,
+      // Typed names; the server reuses matching categories and creates new ones (SEO pages at /main/sub/inner).
+      categoryPath: { main: values.categoryMain, sub: values.categorySub, inner: values.categoryInner },
       price: toCents(values.price),
       compareAtPrice: values.compareAtPrice === '' ? null : toCents(values.compareAtPrice),
       coverImage: values.coverImage.trim() || null,
@@ -226,7 +235,17 @@ export default function ProductForm({ mode, categories, product }) {
   const hint = downloadHint(values.downloadUrl);
   const coverOk = values.coverImage && !errors.coverImage && !previewBroken;
   const priceOk = MONEY_RE.test(values.price);
-  const categoryName = categories.find((c) => c.slug === values.category)?.name;
+  const categoryName = [values.categoryInner, values.categorySub, values.categoryMain].map((n) => n.trim()).find(Boolean);
+  // Suggestions for each level: existing categories under the parent typed so far (names match case-insensitively).
+  const named = (name, parentId) => categories.find((c) => (c.parent ?? null) === parentId && c.name.toLowerCase() === name.trim().toLowerCase());
+  const mainCat = named(values.categoryMain, null);
+  const subCat = mainCat && named(values.categorySub, mainCat._id);
+  const suggestions = [
+    categories.filter((c) => !c.parent),
+    mainCat ? categories.filter((c) => c.parent === mainCat._id) : [],
+    subCat ? categories.filter((c) => c.parent === subCat._id) : [],
+  ];
+  const categoryUrl = [values.categoryMain, values.categorySub, values.categoryInner].map((n) => slugify(n)).filter(Boolean).join('/');
 
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-6 xl:grid-cols-[1fr_20rem] xl:items-start">
@@ -269,19 +288,35 @@ export default function ProductForm({ mode, categories, product }) {
             </div>
           </Field>
 
+          <fieldset>
+            <legend className="text-sm font-medium">Category</legend>
+            <p className="mt-0.5 text-xs text-stone-500">
+              Type your own names — pick a suggestion or enter a new one and it is created when you save. Sub and inner are optional.
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {[
+                ['categoryMain', 'Main category', 'e.g. Digital Products'],
+                ['categorySub', 'Sub-category', 'e.g. Templates'],
+                ['categoryInner', 'Inner category', 'e.g. Résumé Templates'],
+              ].map(([key, label, placeholder], level) => (
+                <Field key={key} id={key} label={label} error={show(key)}>
+                  <input {...bind(key)} list={`${key}-options`} maxLength={60} autoComplete="off" placeholder={placeholder} className={inputCls(show(key))} />
+                  <datalist id={`${key}-options`}>
+                    {suggestions[level].map((c) => (
+                      <option key={c._id} value={c.name} />
+                    ))}
+                  </datalist>
+                </Field>
+              ))}
+            </div>
+            {serverErrors.category ? (
+              <p className="mt-1.5 text-xs font-medium text-red-600">{serverErrors.category}</p>
+            ) : (
+              categoryUrl && <p className="mt-2 break-all font-mono text-xs text-stone-500">Category page: /{categoryUrl}</p>
+            )}
+          </fieldset>
+
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field id="category" label="Category" error={show('category')}>
-              <select {...bind('category')} className={inputCls(show('category'))}>
-                <option value="" disabled>
-                  Select a category…
-                </option>
-                {categories.map((c) => (
-                  <option key={c._id} value={c.slug}>
-                    {c.path ?? c.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
             <Field id="fileFormat" label="File format" optional hint="Shown to buyers, e.g. “PDF + EPUB” or “Figma”.">
               <input {...bind('fileFormat')} maxLength={40} placeholder="ZIP (SVG, AI, EPS)" className={inputCls()} />
             </Field>

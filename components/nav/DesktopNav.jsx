@@ -6,14 +6,18 @@ import { usePathname } from 'next/navigation';
 import CategoryIcon from '@/components/CategoryIcon';
 import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
+import { categoryHref } from '@/lib/category-tree';
 
-/** Pill link; the active page sits on a soft stone pill. */
+// Same pastel order as the homepage category panels.
+const TINTS = ['bg-brand-50', 'bg-tint-mint', 'bg-tint-butter', 'bg-tint-sky', 'bg-tint-blush', 'bg-tint-sage'];
+
+/** Pill link; the active page sits on a white pill (the bar is paper-toned). */
 function NavLink({ href, active, children, className = '' }) {
   return (
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      className={`rounded-full px-3.5 py-2 text-sm transition-colors ${active ? 'bg-stone-100 text-black' : 'text-stone-600 hover:bg-stone-100 hover:text-black'} ${className}`}
+      className={`rounded-full px-3.5 py-2 text-sm transition-colors ${active ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(20,20,20,0.06)] ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white/80 hover:text-black'} ${className}`}
     >
       {children}
     </Link>
@@ -67,7 +71,7 @@ function ShopMenu({ categories, active }) {
         aria-expanded={open}
         aria-controls={panelId}
         aria-label="Shop categories"
-        className="-ml-0.5 grid size-6 place-items-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-black"
+        className="-ml-0.5 grid size-6 place-items-center rounded-full text-stone-500 transition-colors hover:bg-white hover:text-black"
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" className={`size-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="currentColor">
           <path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z" />
@@ -83,10 +87,10 @@ function ShopMenu({ categories, active }) {
       >
         <div className="w-[34rem] rounded-2xl border border-stone-200 bg-white p-3 shadow-xl">
           <ul className="grid grid-cols-2 gap-1">
-            {categories.map((c) => (
+            {categories.map((c, i) => (
               <li key={c.slug}>
-                <Link href={`/products?category=${c.slug}`} className="group/item flex gap-3 rounded-xl p-3 transition-colors hover:bg-stone-50">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-stone-100 text-black transition-colors group-hover/item:bg-brand-600 group-hover/item:text-white">
+                <Link href={categoryHref(c)} className="group/item flex gap-3 rounded-xl p-3 transition-colors hover:bg-stone-50">
+                  <span className={`grid size-10 shrink-0 place-items-center rounded-full text-gray-900 transition-colors group-hover/item:bg-gray-900 group-hover/item:text-white ${TINTS[i % TINTS.length]}`}>
                     <CategoryIcon slug={c.slug} className="size-5" />
                   </span>
                   <span className="min-w-0">

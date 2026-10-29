@@ -12,7 +12,7 @@ export default function CartBadge() {
       onClick={openCart}
       aria-haspopup="dialog"
       aria-expanded={isOpen}
-      className="relative grid size-10 shrink-0 place-items-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 hover:text-black"
+      className="relative grid size-10 shrink-0 place-items-center rounded-full text-stone-700 transition-colors hover:bg-white hover:text-black"
       aria-label={count ? `Open cart, ${count} ${count === 1 ? 'item' : 'items'}` : 'Open cart, empty'}
     >
       {/* Shopping bag */}

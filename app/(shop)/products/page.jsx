@@ -1,41 +1,35 @@
 import Link from 'next/link';
+import { permanentRedirect } from 'next/navigation';
+import FilterChip from '@/components/FilterChip';
 import ProductGrid from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
-import { getProducts } from '@/lib/data/products';
+import { categoryHref } from '@/lib/category-tree';
+import { findCategory, getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 import { parseProductQuery, PRODUCT_SORTS } from '@/lib/utils';
 
 export async function generateMetadata({ searchParams }) {
-  const { q, category } = parseProductQuery(await searchParams);
+  const { q } = parseProductQuery(await searchParams);
   if (q) return { title: `Search: ${q}`, robots: { index: false } };
-  if (category) {
-    const categories = await getCategories();
-    const match = categories.find((c) => c.slug === category);
-    if (match) return { title: match.name, description: match.description };
-  }
   return { title: 'Browse products' };
-}
-
-function Chip({ href, active, children }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? 'true' : undefined}
-      className={`whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-        active ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'
-      }`}
-    >
-      {children}
-    </Link>
-  );
 }
 
 export default async function ProductsPage({ searchParams }) {
   const query = parseProductQuery(await searchParams);
+
+  // Old /products?category=… links: categories now live at /main/sub/inner.
+  if (query.category) {
+    const category = await findCategory(query.category);
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries({ q: query.q, tag: query.tag, sort: query.sort === 'newest' ? undefined : query.sort })) if (v) qs.set(k, v);
+    const target = category ? categoryHref(category) : '/products';
+    permanentRedirect(qs.size ? `${target}?${qs}` : target);
+  }
+
   const [{ items, pagination }, categories] = await Promise.all([getProducts(query), getCategories()]);
 
   // Params carried across filter/sort/page links (page itself is reset on filter change).
-  const base = { q: query.q, category: query.category, tag: query.tag, sort: query.sort === 'newest' ? undefined : query.sort };
+  const base = { q: query.q, tag: query.tag, sort: query.sort === 'newest' ? undefined : query.sort };
   const href = (overrides) => {
     const qs = new URLSearchParams();
     for (const [k, v] of Object.entries({ ...base, ...overrides })) if (v) qs.set(k, v);
@@ -43,12 +37,8 @@ export default async function ProductsPage({ searchParams }) {
     return s ? `/products?${s}` : '/products';
   };
 
-  const activeCategory = categories.find((c) => c.slug === query.category);
   const mainCategories = categories.filter((c) => !c.parent);
-  // Sub-category chips: everything under the selected category's main category.
-  const activeRoot = activeCategory && (activeCategory.ancestors[0] ?? activeCategory._id);
-  const subCategories = activeRoot ? categories.filter((c) => c.ancestors.includes(activeRoot)) : [];
-  const heading = query.q ? `Results for “${query.q}”` : activeCategory?.name ?? 'All products';
+  const heading = query.q ? `Results for “${query.q}”` : 'All products';
 
   return (
     <div className="container-page py-12 sm:py-16">
@@ -70,34 +60,24 @@ export default async function ProductsPage({ searchParams }) {
 
       <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <nav aria-label="Categories" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          <Chip href={href({ category: undefined })} active={!query.category}>
+          <FilterChip href="/products" active>
             All
-          </Chip>
+          </FilterChip>
           {mainCategories.map((c) => (
-            <Chip key={c._id} href={href({ category: c.slug })} active={c._id === activeRoot}>
+            <FilterChip key={c._id} href={categoryHref(c)}>
               {c.name}
-            </Chip>
+            </FilterChip>
           ))}
         </nav>
 
         <nav aria-label="Sort" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
-            <Chip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
+            <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
               {label}
-            </Chip>
+            </FilterChip>
           ))}
         </nav>
       </div>
-
-      {subCategories.length > 0 && (
-        <nav aria-label="Sub-categories" className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          {subCategories.map((c) => (
-            <Chip key={c._id} href={href({ category: c.slug })} active={c.slug === query.category}>
-              {c.depth > 1 ? `› ${c.name}` : c.name}
-            </Chip>
-          ))}
-        </nav>
-      )}
 
       <div className="mt-8">
         <ProductGrid products={items} preloadCount={pagination.page === 1 ? 3 : 0} />

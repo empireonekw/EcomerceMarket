@@ -12,6 +12,7 @@ import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_
 import { LICENSES, labelOf } from '@/lib/listing';
 import { stripRichText } from '@/lib/rich-text';
 import { siteConfig } from '@/lib/site';
+import { categoryHref } from '@/lib/category-tree';
 
 // ISR: rendered on first visit, served from cache, refreshed at most every 5 minutes.
 export const revalidate = 300;
@@ -103,7 +104,7 @@ export default async function ProductPage({ params }) {
             <>
               <li aria-hidden="true">/</li>
               <li>
-                <Link href={`/products?category=${product.category.slug}`} className="hover:text-ink">
+                <Link href={categoryHref(product.category)} className="hover:text-ink">
                   {product.category.name}
                 </Link>
               </li>
@@ -141,7 +142,7 @@ export default async function ProductPage({ params }) {
         <div className="lg:sticky lg:top-24 lg:self-start">
           {product.category && (
             <Link
-              href={`/products?category=${product.category.slug}`}
+              href={categoryHref(product.category)}
               className="inline-flex rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
             >
               {product.category.name}
@@ -272,7 +273,7 @@ export default async function ProductPage({ params }) {
             <h2 id="related-heading" className="headline text-3xl">
               You might also like
             </h2>
-            <Link href={`/products?category=${product.category?.slug}`} className="btn btn-md btn-outline">
+            <Link href={product.category ? categoryHref(product.category) : '/products'} className="btn btn-md btn-outline">
               View all
             </Link>
           </div>

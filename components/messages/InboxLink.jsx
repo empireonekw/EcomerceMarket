@@ -15,7 +15,7 @@ export default function InboxLink() {
     <Link
       href={href}
       aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}
-      className="relative grid size-10 shrink-0 place-items-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 hover:text-black"
+      className="relative grid size-10 shrink-0 place-items-center rounded-full text-stone-700 transition-colors hover:bg-white hover:text-black"
     >
       {/* Speech bubble */}
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinejoin="round" strokeLinecap="round">

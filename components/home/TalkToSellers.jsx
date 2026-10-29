@@ -11,9 +11,10 @@ const STEPS = [
 export default function TalkToSellers() {
   return (
     <section className="container-page pt-20 sm:pt-28" aria-labelledby="talk-heading">
-      <div className="grid gap-10 rounded-3xl bg-stone-100 p-6 sm:p-10 lg:grid-cols-[1fr_1.4fr] lg:items-center lg:p-14">
+      <div className="grid gap-10 rounded-3xl bg-brand-50 p-6 sm:p-10 lg:grid-cols-[1fr_1.4fr] lg:items-center lg:p-14">
         <div>
-          <h2 id="talk-heading" className="headline text-3xl sm:text-5xl">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-brand-700">Direct messages</p>
+          <h2 id="talk-heading" className="font-serif text-3xl font-normal tracking-tight text-gray-900 sm:text-5xl">
             Questions? Ask the creator.
           </h2>
           <p className="mt-3 text-lg text-stone-600">Every shop has a direct line. Message a seller from any of their products and chat in real time.</p>
@@ -21,7 +22,7 @@ export default function TalkToSellers() {
             <Link href="/products" className="btn btn-lg btn-dark">
               Browse products
             </Link>
-            <Link href="/messages" className="btn btn-lg btn-outline">
+            <Link href="/messages" className="btn btn-lg btn-outline border-brand-100">
               <MessageSquare size={18} aria-hidden="true" />
               My messages
             </Link>
