@@ -120,7 +120,7 @@ export default function ProductForm({ mode, categories, product }) {
   const [values, setValues] = useState(() => ({
     title: product?.title ?? '',
     slug: product?.slug ?? '',
-    category: product?.category?.slug ?? '',
+    category: product?.category?._id ?? '',
     price: toDollars(product?.price),
     compareAtPrice: toDollars(product?.compareAtPrice),
     coverImage: product?.coverImage ?? '',
@@ -226,7 +226,7 @@ export default function ProductForm({ mode, categories, product }) {
   const hint = downloadHint(values.downloadUrl);
   const coverOk = values.coverImage && !errors.coverImage && !previewBroken;
   const priceOk = MONEY_RE.test(values.price);
-  const categoryName = categories.find((c) => c.slug === values.category)?.name;
+  const categoryName = categories.find((c) => c._id === values.category)?.name;
 
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-6 xl:grid-cols-[1fr_20rem] xl:items-start">
@@ -276,7 +276,7 @@ export default function ProductForm({ mode, categories, product }) {
                   Select a category…
                 </option>
                 {categories.map((c) => (
-                  <option key={c._id} value={c.slug}>
+                  <option key={c._id} value={c._id}>
                     {c.path ?? c.name}
                   </option>
                 ))}

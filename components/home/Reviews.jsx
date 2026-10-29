@@ -84,6 +84,7 @@ export default async function Reviews() {
     <section className="container-page pt-20 sm:pt-28" aria-labelledby="reviews-heading">
       <SectionHeading
         id="reviews-heading"
+        eyebrow="Reviews"
         title="Loved by buyers"
         description={
           <>

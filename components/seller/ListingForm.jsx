@@ -28,6 +28,7 @@ import {
   validateListing,
 } from '@/lib/listing';
 import { uploadFile } from '@/lib/upload-client';
+import { categoryTypeLabel, searchCategories } from '@/lib/category-tree';
 import { formatPrice } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -64,7 +65,7 @@ function initialValues(listing) {
   return {
     images: listing?.images?.length ? listing.images : listing?.coverImage ? [listing.coverImage] : [],
     videos: listing?.videos ?? [],
-    category: listing?.category?.slug ?? '',
+    category: listing?.category?._id ?? '',
     title: listing?.title ?? '',
     description: listing?.description ?? '',
     shortDescription: listing?.shortDescription ?? '',
@@ -232,35 +233,105 @@ function UploadingTile({ upload, video = false }) {
   );
 }
 
-/** "Type to search" category picker (combobox + listbox). */
+/**
+ * Step-by-step category choice: main category → its sub-categories → their inner categories. The listing's category
+ * is only set once the most specific level is chosen (a category without children). Stores the id; mirrors a pick
+ * made with the search below.
+ */
+function CategoryStepper({ categories, value, onChange, error }) {
+  const byId = useMemo(() => new Map(categories.map((c) => [c._id, c])), [categories]);
+  const childrenOf = (id) => categories.filter((c) => (c.parent ?? null) === id);
+  const [draft, setDraft] = useState([]); // chosen ids while the pick is still incomplete
+  const selected = byId.get(value);
+  const chain = selected ? [...selected.ancestors, selected._id] : draft;
+
+  function choose(level, id) {
+    const next = [...chain.slice(0, level), ...(id ? [id] : [])];
+    setDraft(next);
+    onChange(id && childrenOf(id).length === 0 ? id : '');
+  }
+
+  const levels = [
+    { label: 'Main category', options: childrenOf(null) },
+    { label: 'Sub-category', options: chain[0] ? childrenOf(chain[0]) : [] },
+    { label: 'Inner category', options: chain[1] ? childrenOf(chain[1]) : [] },
+  ].filter((l, i) => i === 0 || l.options.length > 0);
+
+  return (
+    <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
+      {levels.map((level, i) => (
+        <div key={level.label}>
+          <label htmlFor={i === 0 ? 'category' : `category-${i}`} className="mb-1.5 block text-xs font-medium text-stone-500">
+            {level.label}
+          </label>
+          <div className="relative">
+            <select
+              id={i === 0 ? 'category' : `category-${i}`}
+              value={chain[i] ?? ''}
+              onChange={(e) => choose(i, e.target.value)}
+              aria-invalid={(i === levels.length - 1 && Boolean(error)) || undefined}
+              aria-describedby={error ? 'category-error' : undefined}
+              className={`${inputCls(i === levels.length - 1 && error)} h-12 appearance-none pr-10`}
+            >
+              <option value="">Choose…</option>
+              {level.options.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-500" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Etsy-style category search: type anything (typos are fine — "rsuem" finds "Résumé Templates"), then pick a result.
+ * Each result shows its parent path and what can be listed there (Digital / Physical or digital). Stores the id.
+ */
 function CategoryPicker({ categories, value, onChange, error }) {
   const id = useId();
-  const selected = categories.find((c) => c.slug === value);
-  const label = (c) => c.path ?? c.name; // "Templates › Notion" for sub-categories
-  const [query, setQuery] = useState(selected ? label(selected) : '');
+  const selected = categories.find((c) => c._id === value);
+  const [query, setQuery] = useState(selected?.name ?? '');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const matches = categories.filter((c) => label(c).toLowerCase().includes(query.trim().toLowerCase()) || (selected && query === label(selected)));
+  const typed = selected && query === selected.name ? '' : query; // showing the picked name ≠ searching for it
+  const matches = searchCategories(typed, categories, 12);
+  const parentPath = (c) => c.path.split(' › ').slice(0, -1).join(' › ');
+
+  useEffect(() => {
+    if (selected) setQuery(selected.name);
+  }, [selected]);
 
   function pick(c) {
-    onChange(c.slug);
-    setQuery(label(c));
+    onChange(c._id);
+    setQuery(c.name);
     setOpen(false);
+  }
+  function clear() {
+    onChange('');
+    setQuery('');
+    setOpen(true);
+    document.getElementById('category-search')?.focus();
   }
 
   return (
     <div className="relative max-w-xl">
       <input
-        id="category"
+        id="category-search"
         role="combobox"
         aria-expanded={open}
         aria-controls={`${id}-list`}
         aria-autocomplete="list"
-        aria-activedescendant={open && matches[active] ? `${id}-${matches[active].slug}` : undefined}
+        aria-activedescendant={open && matches[active] ? `${id}-${matches[active]._id}` : undefined}
         aria-invalid={Boolean(error) || undefined}
-        aria-describedby={error ? 'category-error' : undefined}
+        aria-describedby={error ? 'category-error' : selected ? `${id}-path` : undefined}
         autoComplete="off"
-        placeholder="Type to search"
+        spellCheck={false}
+        placeholder="Or search, e.g. résumé, crochet, logo design"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -276,35 +347,52 @@ function CategoryPicker({ categories, value, onChange, error }) {
           else if (e.key === 'Enter' && open && matches[active]) (e.preventDefault(), pick(matches[active]));
           else if (e.key === 'Escape') setOpen(false);
         }}
-        className={inputCls(error)}
+        className={`${inputCls(error)} pr-12`}
       />
-      <ChevronDown
-        size={18}
-        strokeWidth={1.75}
-        aria-hidden="true"
-        className="pointer-events-none absolute right-4 top-8 -translate-y-1/2 text-stone-500"
-      />
+      {query ? (
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={clear}
+          aria-label="Clear category"
+          className="absolute right-2.5 top-8 grid size-8 -translate-y-1/2 place-items-center rounded-full text-stone-600 hover:bg-stone-100 hover:text-black"
+        >
+          <X size={18} strokeWidth={2} aria-hidden="true" />
+        </button>
+      ) : (
+        <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute right-4 top-8 -translate-y-1/2 text-stone-500" />
+      )}
+      {selected && !open && parentPath(selected) && (
+        <p id={`${id}-path`} className="mt-1.5 text-xs text-stone-500">
+          in {parentPath(selected)}
+        </p>
+      )}
       {open && (
         <ul
           id={`${id}-list`}
           role="listbox"
-          className="absolute inset-x-0 top-full z-30 mt-1 max-h-64 overflow-auto rounded-xl border border-stone-200 bg-white p-1 shadow-lift"
+          className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-auto rounded-xl border border-stone-200 bg-white p-1.5 shadow-lift"
         >
           {matches.length === 0 ? (
-            <li className="px-3 py-2.5 text-sm text-stone-500">No matching category</li>
+            <li className="px-4 py-3 text-sm text-stone-500">No matching category — try another word.</li>
           ) : (
             matches.map((c, i) => (
               <li
-                key={c.slug}
-                id={`${id}-${c.slug}`}
+                key={c._id}
+                id={`${id}-${c._id}`}
                 role="option"
-                aria-selected={c.slug === value}
+                aria-selected={c._id === value}
                 onMouseDown={(e) => (e.preventDefault(), pick(c))}
                 onMouseEnter={() => setActive(i)}
-                className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm ${i === active ? 'bg-stone-100' : ''}`}
+                className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg px-4 py-3 ${i === active ? 'bg-stone-100' : ''}`}
               >
-                {label(c)}
-                {c.slug === value && <span className="text-xs font-medium text-brand-600">Selected</span>}
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] text-black">{c.name}</span>
+                  {parentPath(c) && <span className="block truncate text-xs text-stone-500">{parentPath(c)}</span>}
+                </span>
+                <span className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-xs font-medium text-stone-700">
+                  {categoryTypeLabel(c.type)}
+                </span>
               </li>
             ))
           )}
@@ -542,7 +630,7 @@ export default function ListingForm({ categories, listing, uploads }) {
   const priceCents = toCents(values.price);
   const split = Number.isInteger(priceCents) ? splitSale(priceCents) : null;
   const hint = downloadHint(values.linkUrl);
-  const categoryName = categories.find((c) => c.slug === values.category)?.name;
+  const categoryName = categories.find((c) => c._id === values.category)?.name;
   const tagsLeft = LISTING_LIMITS.tags - values.tags.length;
   const status = isEdit ? listingStatus(listing) : null;
 
@@ -820,12 +908,24 @@ export default function ListingForm({ categories, listing, uploads }) {
               <Label htmlFor="category" required>
                 Category
               </Label>
-              <CategoryPicker
+              <Help>Choose the main category, then a sub-category, then the inner category that fits best.</Help>
+              <CategoryStepper
                 categories={categories}
                 value={values.category}
-                onChange={(slug) => (update('category', slug), touch('category'))}
+                onChange={(id) => (update('category', id), touch('category'))}
                 error={show('category')}
               />
+              <div className="mt-3">
+                <label htmlFor="category-search" className="sr-only">
+                  Search categories
+                </label>
+                <CategoryPicker
+                  categories={categories}
+                  value={values.category}
+                  onChange={(id) => (update('category', id), touch('category'))}
+                  error={show('category')}
+                />
+              </div>
               <ErrorText id="category-error">{show('category')}</ErrorText>
             </div>
 

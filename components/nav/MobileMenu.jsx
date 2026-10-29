@@ -7,6 +7,7 @@ import NavSearch from '@/components/nav/NavSearch';
 import { MobileAuthLinks } from '@/components/UserMenu';
 import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
+import { categoryHref } from '@/lib/category-tree';
 
 /** Hamburger toggle + slide-down panel for screens below `lg`. */
 export default function MobileMenu({ categories }) {
@@ -28,7 +29,7 @@ export default function MobileMenu({ categories }) {
   }, [open]);
 
   const linkCls = (active) =>
-    `flex items-center justify-between rounded-full px-4 py-2.5 text-[15px] transition-colors ${active ? 'bg-stone-100 text-black' : 'text-stone-600 hover:bg-stone-100 hover:text-black'}`;
+    `flex items-center justify-between rounded-full px-4 py-2.5 text-[15px] transition-colors ${active ? 'bg-white text-gray-900 ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white hover:text-black'}`;
 
   return (
     <div ref={rootRef} className="lg:hidden">
@@ -37,7 +38,7 @@ export default function MobileMenu({ categories }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="mobile-menu"
-        className="grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 hover:text-black"
+        className="grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-white hover:text-black"
       >
         <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
         <svg aria-hidden="true" viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round">
@@ -48,7 +49,7 @@ export default function MobileMenu({ categories }) {
       <div
         id="mobile-menu"
         inert={!open}
-        className={`absolute inset-x-0 top-full origin-top border-b border-stone-200 bg-white shadow-lg transition-[opacity,translate,visibility] duration-200 ${
+        className={`absolute inset-x-0 top-full origin-top border-b border-stone-200 bg-paper shadow-lg transition-[opacity,translate,visibility] duration-200 ${
           open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
         }`}
       >
@@ -65,7 +66,7 @@ export default function MobileMenu({ categories }) {
                     <ul className="mb-1 ml-3 border-l border-stone-200 pl-2">
                       {categories.map((c) => (
                         <li key={c.slug}>
-                          <Link href={`/products?category=${c.slug}`} className="flex items-center rounded-full px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-50 hover:text-black">
+                          <Link href={categoryHref(c)} className="flex items-center rounded-full px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-50 hover:text-black">
                             {c.name}
                           </Link>
                         </li>
