@@ -3,7 +3,7 @@ import { BadgeCheck, Clock, Download, Infinity as InfinityIcon, Lock, Mail, MapP
 import Logo from '@/components/Logo';
 import { categoryHref } from '@/lib/category-tree';
 import { getCategories } from '@/lib/data/categories';
-import { siteConfig } from '@/lib/site';
+import { siteConfig, gmailCompose } from '@/lib/site';
 
 const TRUST = [
   { icon: Download, title: 'Instant delivery', text: 'Download links the moment payment clears.' },
@@ -49,6 +49,9 @@ const LINK_GROUPS = [
       { label: 'Terms of Service', href: '/terms' },
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Refund Policy', href: '/legal/refund-policy' },
+      { label: 'Payment Policy', href: '/legal/payment-policy' },
+      { label: 'Delivery Policy', href: '/legal/delivery-policy' },
+      { label: 'Cancellation Policy', href: '/legal/cancellation-policy' },
       { label: 'Cookie Policy', href: '/legal/cookie-policy' },
       { label: 'Acceptable Use', href: '/legal/acceptable-use' },
       { label: 'Copyright & DMCA', href: '/legal/copyright' },
@@ -100,8 +103,8 @@ const SOCIAL_ICONS = {
 
 /**
  * Site footer: a wave out of the white page into a warm beige block — call to action and trust points beside four
- * link columns (Shop, Discover, Company, Legal) with a contact + social panel under them, then the brand line and a
- * slim legal bar. Pure server markup (no client JS).
+ * link columns (Shop, Discover, Company, Legal), then the brand line beside the contact + social panel, and a slim
+ * legal bar. Pure server markup (no client JS).
  */
 export default async function Footer() {
   const shop = await shopLinks();
@@ -117,7 +120,8 @@ export default async function Footer() {
 
       <div className="-mt-px bg-beige">
         <div className="container-page pb-10 pt-10 sm:pt-14">
-          <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
+          {/* Two rows on desktop: CTA | link columns, then brand | contact panel — so the brand lines up with the panel. */}
+          <div className="grid gap-14 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-12">
             {/* ---------- Call to action + trust points ---------- */}
             <div className="lg:col-span-5">
               <h2 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-balance sm:text-5xl">Have something worth selling?</h2>
@@ -146,8 +150,8 @@ export default async function Footer() {
               </ul>
             </div>
 
+            {/* ---------- Link columns ---------- */}
             <div className="lg:col-span-7">
-              {/* ---------- Link columns ---------- */}
               <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
                 {groups.map((group) => (
                   <nav key={group.title} aria-label={group.title}>
@@ -164,15 +168,23 @@ export default async function Footer() {
                   </nav>
                 ))}
               </div>
+            </div>
 
-              {/* ---------- Contact + social ---------- */}
-              <div className="mt-12 grid gap-8 rounded-2xl bg-white/60 p-6 sm:grid-cols-2 sm:p-8">
+            {/* ---------- Brand line (last on phones, beside the contact panel on desktop) ---------- */}
+            <div className="max-w-sm max-lg:order-last lg:col-span-5 lg:self-center">
+              <Logo />
+              <p className="mt-3 text-sm leading-relaxed text-stone-600">{siteConfig.description}</p>
+            </div>
+
+            {/* ---------- Contact + social ---------- */}
+            <div className="lg:col-span-7">
+              <div className="grid gap-8 rounded-2xl bg-white/60 p-6 sm:grid-cols-2 sm:p-8">
                 <div>
                   <p className="font-serif text-xl tracking-tight">Get in touch</p>
                   <ul className="mt-4 space-y-3 text-[15px] text-stone-700">
                     <li className="flex items-center gap-3">
                       <Mail size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-stone-500" />
-                      <a href={`mailto:${supportEmail}`} className="hover:text-black hover:underline hover:underline-offset-4">
+                      <a {...gmailCompose(supportEmail)} className="hover:text-black hover:underline hover:underline-offset-4">
                         {supportEmail}
                       </a>
                     </li>
@@ -217,12 +229,6 @@ export default async function Footer() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* ---------- Brand line ---------- */}
-          <div className="mt-16 max-w-sm">
-            <Logo />
-            <p className="mt-3 text-sm leading-relaxed text-stone-600">{siteConfig.description}</p>
           </div>
 
           {/* ---------- Legal bar ---------- */}

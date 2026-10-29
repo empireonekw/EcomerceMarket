@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Building2, Download, Mail, ShieldCheck, Infinity as InfinityIcon } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
 import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
-import { siteConfig } from '@/lib/site';
+import { siteConfig, gmailCompose } from '@/lib/site';
 
 const sellerShare = commissionPercent(1 - COMMISSION_RATE);
 
@@ -79,7 +79,7 @@ export default function AboutPage() {
               <div className="min-w-0">
                 <dt className="text-sm text-stone-500">Support</dt>
                 <dd className="mt-0.5 text-base font-medium">
-                  <a href={`mailto:${siteConfig.supportEmail}`} className="break-all text-black hover:text-brand-600 hover:underline">
+                  <a {...gmailCompose(siteConfig.supportEmail)} className="break-all text-black hover:text-brand-600 hover:underline">
                     {siteConfig.supportEmail}
                   </a>
                 </dd>

@@ -49,7 +49,8 @@ export default function MobileMenu({ categories }) {
       <div
         id="mobile-menu"
         inert={!open}
-        className={`absolute inset-x-0 top-full origin-top border-b border-stone-200 bg-paper shadow-lg transition-[opacity,translate,visibility] duration-200 ${
+        // Under the floating pill header (FloatingHeader) it becomes a rounded card with a small gap.
+        className={`absolute inset-x-0 top-full origin-top border-b border-stone-200 bg-paper shadow-lg transition-[opacity,translate,visibility] duration-200 group-data-[floating]/header:mt-2 group-data-[floating]/header:overflow-hidden group-data-[floating]/header:rounded-3xl group-data-[floating]/header:border ${
           open ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
         }`}
       >

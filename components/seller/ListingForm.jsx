@@ -28,7 +28,7 @@ import {
   validateListing,
 } from '@/lib/listing';
 import { uploadFile } from '@/lib/upload-client';
-import { categoryTypeLabel, searchCategories } from '@/lib/category-tree';
+import { searchCategories } from '@/lib/category-tree';
 import { formatPrice } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -234,8 +234,9 @@ function UploadingTile({ upload, video = false }) {
 }
 
 /**
- * Etsy-style category search: type anything (typos are fine — "rsuem" finds "Résumé Templates"), then pick a result.
- * Each result shows its parent path and what can be listed there (Digital / Physical or digital). Stores the id.
+ * Category search: type anything (typos are fine — "rsuem" finds "Résumé Templates"), then pick a result. Sellers see
+ * plain category names; the main › sub › inner structure is the admin's (it only shapes category pages and SEO).
+ * A name used in two places gets its parent in brackets so the two can be told apart. Stores the id.
  */
 function CategoryPicker({ categories, value, onChange, error }) {
   const id = useId();
@@ -244,8 +245,11 @@ function CategoryPicker({ categories, value, onChange, error }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const typed = selected && query === selected.name ? '' : query; // showing the picked name ≠ searching for it
-  const matches = searchCategories(typed, categories, 12);
-  const parentPath = (c) => c.path.split(' › ').slice(0, -1).join(' › ');
+  const matches = typed.trim() ? searchCategories(typed, categories, 12) : [...categories].sort((a, b) => a.name.localeCompare(b.name));
+  const label = (c) => {
+    const twin = categories.some((o) => o._id !== c._id && o.name.toLowerCase() === c.name.toLowerCase());
+    return twin && c.path.includes(' › ') ? `${c.name} (${c.path.split(' › ').at(-2)})` : c.name;
+  };
 
   useEffect(() => {
     if (selected) setQuery(selected.name);
@@ -273,7 +277,7 @@ function CategoryPicker({ categories, value, onChange, error }) {
         aria-autocomplete="list"
         aria-activedescendant={open && matches[active] ? `${id}-${matches[active]._id}` : undefined}
         aria-invalid={Boolean(error) || undefined}
-        aria-describedby={error ? 'category-error' : selected ? `${id}-path` : undefined}
+        aria-describedby={error ? 'category-error' : undefined}
         autoComplete="off"
         spellCheck={false}
         placeholder="Type to search, e.g. résumé, crochet, logo"
@@ -307,11 +311,6 @@ function CategoryPicker({ categories, value, onChange, error }) {
       ) : (
         <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute right-4 top-8 -translate-y-1/2 text-stone-500" />
       )}
-      {selected && !open && parentPath(selected) && (
-        <p id={`${id}-path`} className="mt-1.5 text-xs text-stone-500">
-          in {parentPath(selected)}
-        </p>
-      )}
       {open && (
         <ul
           id={`${id}-list`}
@@ -329,15 +328,9 @@ function CategoryPicker({ categories, value, onChange, error }) {
                 aria-selected={c._id === value}
                 onMouseDown={(e) => (e.preventDefault(), pick(c))}
                 onMouseEnter={() => setActive(i)}
-                className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg px-4 py-3 ${i === active ? 'bg-stone-100' : ''}`}
+                className={`cursor-pointer truncate rounded-lg px-4 py-3 text-[15px] text-black ${i === active ? 'bg-stone-100' : ''}`}
               >
-                <span className="min-w-0">
-                  <span className="block truncate text-[15px] text-black">{c.name}</span>
-                  {parentPath(c) && <span className="block truncate text-xs text-stone-500">{parentPath(c)}</span>}
-                </span>
-                <span className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-xs font-medium text-stone-700">
-                  {categoryTypeLabel(c.type)}
-                </span>
+                {label(c)}
               </li>
             ))
           )}

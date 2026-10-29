@@ -16,7 +16,8 @@
     "seed:messaging": "node --env-file=.env.local scripts/seed-messaging-test.js",
     "db:indexes": "node --env-file=.env.local scripts/sync-indexes.js",
     "create-admin": "node --env-file=.env.local scripts/create-admin.js",
-    "migrate:marketplace": "node --env-file=.env.local scripts/migrate-marketplace.js"
+    "migrate:marketplace": "node --env-file=.env.local scripts/migrate-marketplace.js",
+    "encrypt:bank-details": "node --conditions=react-server --env-file=.env.local scripts/encrypt-bank-details.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.1",
@@ -35,5 +36,8 @@
     "@tailwindcss/postcss": "^4.3.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.3.3"
+  },
+  "overrides": {
+    "zod": "^4.6.7"
   }
 }

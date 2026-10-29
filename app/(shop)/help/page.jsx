@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
 import { NO_PLATFORM_FEE } from '@/lib/commission';
-import { siteConfig } from '@/lib/site';
+import { siteConfig, gmailCompose } from '@/lib/site';
 
 export const metadata = {
   title: 'Help & FAQ',
@@ -92,7 +92,7 @@ export default function HelpPage() {
         <p className="font-serif text-2xl tracking-tight text-gray-900">Still need help?</p>
         <p className="mt-2 text-stone-600">
           Email{' '}
-          <a href={`mailto:${supportEmail}`} className="font-medium text-gray-900 underline underline-offset-4">
+          <a {...gmailCompose(supportEmail)} className="font-medium text-gray-900 underline underline-offset-4">
             {supportEmail}
           </a>{' '}
           or send us a message — we reply within 1–2 business days.

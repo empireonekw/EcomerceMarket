@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/mongodb';
 import { setSessionCookies, publicUser, isSameOrigin } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { normalizeEmail } from '@/lib/validation';
+import { ensureOwnerAdmin, isOwnerAdminEmail } from '@/lib/owner-admin';
 import User from '@/models/User';
 
 const noStore = { 'Cache-Control': 'no-store' };
@@ -43,8 +44,10 @@ export async function POST(request) {
 
   try {
     await connectDB();
-    const user = await User.findOne({ email }).select('+password name email role createdAt tokenVersion seller.storeName');
-    const valid = await bcrypt.compare(password, user?.password ?? (await getDummyHash()));
+    // The owner admin signs in with ADMIN_PASSWORD, which also restores the account if it was removed (lib/owner-admin.js).
+    const owner = isOwnerAdminEmail(email) ? await ensureOwnerAdmin(password) : null;
+    const user = owner ?? (await User.findOne({ email }).select('+password name email role createdAt tokenVersion seller.storeName'));
+    const valid = Boolean(owner) || (await bcrypt.compare(password, user?.password ?? (await getDummyHash())));
 
     // One generic message for every failure mode, so the form never reveals which emails exist.
     if (!user || !valid) {
