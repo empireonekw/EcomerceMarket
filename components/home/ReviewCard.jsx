@@ -21,7 +21,7 @@ export default function ReviewCard({ review }) {
     <li
       tabIndex={0}
       aria-label={`${rating}-star review by ${authorName} of ${productTitle}`}
-      className="group h-80 rounded-2xl [perspective:1400px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-500"
+      className="group h-80 rounded-2xl [perspective:1400px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-700"
     >
       <div className="relative h-full transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus:[transform:rotateY(180deg)]">
         {/* ---------- Front: the review ---------- */}
@@ -38,7 +38,7 @@ export default function ReviewCard({ review }) {
 
         {/* ---------- Back: who wrote it ---------- */}
         <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-stone-950 p-7 text-center text-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
-          <span aria-hidden="true" className="grid size-16 place-items-center rounded-full bg-brand-600 text-xl font-medium">
+          <span aria-hidden="true" className="grid size-16 place-items-center rounded-full bg-brand-500 text-xl font-medium text-ink">
             {initials(authorName)}
           </span>
           <p className="headline mt-5 text-2xl leading-tight">{authorName}</p>

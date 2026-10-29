@@ -24,7 +24,7 @@ export default function CartBadge() {
         // key={count} re-mounts the badge so the pop animation replays on every change.
         <span
           key={count}
-          className="absolute right-1 top-1 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-medium leading-none text-white ring-2 ring-white"
+          className="absolute right-1 top-1 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-medium leading-none text-ink ring-2 ring-white"
         >
           {count > 99 ? '99+' : count}
         </span>

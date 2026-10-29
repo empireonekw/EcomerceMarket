@@ -13,7 +13,7 @@ import { formatPrice } from '@/lib/utils';
 export const metadata = { title: 'User details' };
 
 const usd = (cents) => formatPrice(cents, 'USD');
-const date = (d) => (d ? formatDateTime(d).date : '—');
+const date = (d) => (d ? formatDateTime(d).date : '–');
 
 function Details({ rows }) {
   return (
@@ -46,7 +46,7 @@ export default async function AdminUserPage({ params }) {
 
       {/* ---------- Header ---------- */}
       <header className="mb-8 mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-        <span aria-hidden="true" className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-600 text-xl font-medium text-white">
+        <span aria-hidden="true" className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-500 text-xl font-medium text-ink">
           {u.name.charAt(0).toUpperCase()}
         </span>
         <div className="min-w-0">

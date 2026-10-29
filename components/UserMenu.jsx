@@ -72,7 +72,7 @@ function UserIcon() {
 
 export function Avatar({ name, className = 'size-9 text-sm' }) {
   return (
-    <span aria-hidden="true" className={`grid shrink-0 place-items-center rounded-full bg-brand-600 font-medium text-white ${className}`}>
+    <span aria-hidden="true" className={`grid shrink-0 place-items-center rounded-full bg-brand-500 font-medium text-ink ${className}`}>
       {initials(name)}
     </span>
   );

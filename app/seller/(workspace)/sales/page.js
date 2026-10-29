@@ -98,7 +98,7 @@ export default async function SellerSalesPage({ searchParams }) {
                         <span className="block truncate font-medium">{s.product?.title ?? 'Deleted product'}</span>
                       </td>
                       <td className="whitespace-nowrap px-5 py-3">
-                        <span className="font-mono text-xs text-stone-500">#{s.orderNumber ?? '—'}</span>
+                        <span className="font-mono text-xs text-stone-500">#{s.orderNumber ?? '–'}</span>
                         {s.demo && (
                           <span className="ml-2">
                             <ProviderBadge provider="demo" />
@@ -107,7 +107,7 @@ export default async function SellerSalesPage({ searchParams }) {
                       </td>
                       <td className="whitespace-nowrap px-5 py-3 text-stone-600">{s.buyer}</td>
                       <td className="whitespace-nowrap px-5 py-3 text-right">{usd(s.gross)}</td>
-                      {showFees && <td className="whitespace-nowrap px-5 py-3 text-right text-stone-500">{s.commission > 0 ? `−${usd(s.commission)}` : '—'}</td>}
+                      {showFees && <td className="whitespace-nowrap px-5 py-3 text-right text-stone-500">{s.commission > 0 ? `−${usd(s.commission)}` : '–'}</td>}
                       <td className="whitespace-nowrap px-5 py-3 text-right font-medium text-emerald-700">+{usd(s.earnings)}</td>
                     </tr>
                   );

@@ -58,17 +58,17 @@ export default function LegalPage({ title, updated, intro, sections, eyebrow = '
 
       <aside className="mt-16 flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-4">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-600">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">
             <Mail size={18} strokeWidth={1.75} aria-hidden="true" />
           </span>
           <div>
             <p className="font-medium">Questions about this page?</p>
             <p className="mt-0.5 text-sm text-stone-600">
               Email{' '}
-              <a {...gmailCompose(siteConfig.supportEmail)} className="font-medium text-brand-600 hover:underline">
+              <a {...gmailCompose(siteConfig.supportEmail)} className="font-medium text-brand-700 hover:underline">
                 {siteConfig.supportEmail}
-              </a>{' '}
-              — we reply within 1–2 business days.
+              </a>
+              . We reply within 1–2 business days.
             </p>
           </div>
         </div>

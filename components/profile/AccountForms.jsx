@@ -38,7 +38,7 @@ function Success({ children }) {
   );
 }
 
-const card = 'rounded-2xl border border-stone-200 bg-white p-5 sm:p-6';
+const card = 'rounded-2xl border border-stone-200 bg-white p-5 shadow-card sm:p-6';
 
 export function NameForm({ initialName }) {
   const router = useRouter();
@@ -223,7 +223,7 @@ export function SessionControls({ expiresAt }) {
 const DELETE_EFFECTS = {
   customer: [
     'Your profile, sign-in and saved details are removed.',
-    'My Purchases goes away with the account — download anything you want to keep first.',
+    'My Purchases goes away with the account. Download anything you want to keep first.',
     'Your product reviews are removed.',
   ],
   seller: [
@@ -272,13 +272,13 @@ export function DeleteAccount({ role }) {
       setDeleted(true);
       window.location.replace('/'); // full navigation so every page renders signed out
     } catch {
-      setFormError('Network error — please try again.');
+      setFormError('Network error. Please try again.');
       setPending(false);
     }
   }
 
   return (
-    <section className="rounded-2xl border border-red-200 bg-white p-5 sm:p-6">
+    <section className="rounded-2xl border border-red-200 bg-white p-5 shadow-card sm:p-6">
       <h2 className="headline text-2xl">Delete account</h2>
       <p className="mt-0.5 text-sm text-stone-500">Permanently delete your account and personal data. This can’t be undone.</p>
       <button type="button" onClick={open} className="btn btn-md mt-4 border border-red-200 text-red-600 hover:border-red-300 hover:bg-red-50">

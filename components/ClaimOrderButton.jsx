@@ -22,7 +22,7 @@ export default function ClaimOrderButton({ orderId, token }) {
       setState({ status: 'done', message: data.message });
       router.refresh();
     } catch {
-      setState({ status: 'error', message: 'Network error — please try again.' });
+      setState({ status: 'error', message: 'Network error. Please try again.' });
     }
   }
 

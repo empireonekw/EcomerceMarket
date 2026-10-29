@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 const VALUES = [
-  { icon: Download, title: 'Instant delivery', text: 'Every purchase is delivered the moment checkout completes — no waiting, no shipping.' },
+  { icon: Download, title: 'Instant delivery', text: 'Every purchase is delivered the moment checkout completes, no waiting, no shipping.' },
   { icon: ShieldCheck, title: 'Secure by default', text: 'Files are only ever served through signed, expiring links tied to your order.' },
   { icon: InfinityIcon, title: 'Lifetime access', text: 'Your purchases live in your account. Re-download whenever you need them.' },
 ];
@@ -23,7 +23,7 @@ export default function AboutPage() {
       <PageIntro
         eyebrow="About us"
         title="Tools and resources for people who make things."
-        description={`${siteConfig.name} is a curated marketplace for digital products — design templates, practical e-books, developer tools and vector packs — made by independent creators and delivered instantly.`}
+        description={`${siteConfig.name} is a curated marketplace for digital products, design templates, practical e-books, developer tools and vector packs, made by independent creators and delivered instantly.`}
       >
         <Link href="/products" className="btn btn-lg btn-primary">
           Browse products
@@ -59,8 +59,8 @@ export default function AboutPage() {
           </p>
           <p>
             The products are made by independent creators, who own their work and set their own prices. We review every product before it goes live, sell it on
-            the creator’s behalf, and {NO_PLATFORM_FEE ? 'charge no platform fees — creators keep 100% of every sale' : `pay them ${sellerShare} of every sale`}. Every purchase comes with lifetime re-downloads and a clear{' '}
-            <Link href="/terms#refunds" className="text-black underline underline-offset-4 hover:text-brand-600">
+            the creator’s behalf, and {NO_PLATFORM_FEE ? 'charge no platform fees, creators keep 100% of every sale' : `pay them ${sellerShare} of every sale`}. Every purchase comes with lifetime re-downloads and a clear{' '}
+            <Link href="/terms#refunds" className="text-black underline underline-offset-4 hover:text-brand-700">
               refund policy
             </Link>
             .
@@ -68,18 +68,18 @@ export default function AboutPage() {
 
           <dl className="grid gap-4 pt-3 sm:grid-cols-2">
             <div className="flex gap-3 rounded-2xl border border-stone-200 bg-white p-5">
-              <Building2 size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-600" />
+              <Building2 size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-700" />
               <div>
                 <dt className="text-sm text-stone-500">Operated by</dt>
                 <dd className="mt-0.5 text-base font-medium text-black">{siteConfig.operator}</dd>
               </div>
             </div>
             <div className="flex gap-3 rounded-2xl border border-stone-200 bg-white p-5">
-              <Mail size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-600" />
+              <Mail size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-700" />
               <div className="min-w-0">
                 <dt className="text-sm text-stone-500">Support</dt>
                 <dd className="mt-0.5 text-base font-medium">
-                  <a {...gmailCompose(siteConfig.supportEmail)} className="break-all text-black hover:text-brand-600 hover:underline">
+                  <a {...gmailCompose(siteConfig.supportEmail)} className="break-all text-black hover:text-brand-700 hover:underline">
                     {siteConfig.supportEmail}
                   </a>
                 </dd>
@@ -88,10 +88,10 @@ export default function AboutPage() {
           </dl>
           <p className="text-base">
             Questions or feedback? Visit our{' '}
-            <Link href="/contact" className="text-black underline underline-offset-4 hover:text-brand-600">
+            <Link href="/contact" className="text-black underline underline-offset-4 hover:text-brand-700">
               Contact page
-            </Link>{' '}
-            — a real person reads every message.
+            </Link>
+            . A real person reads every message.
           </p>
         </div>
       </section>

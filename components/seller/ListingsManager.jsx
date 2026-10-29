@@ -32,7 +32,7 @@ const SORT_OPTIONS = [
 const DEFAULTS = { status: 'all', q: '', sort: 'newest', featured: '', view: 'grid', stats: '1' };
 
 const BASE = '/seller/listings';
-const usd = (cents) => (cents == null ? '—' : cents === 0 ? 'Free' : formatPrice(cents, 'USD'));
+const usd = (cents) => (cents == null ? '–' : cents === 0 ? 'Free' : formatPrice(cents, 'USD'));
 
 function toUrl(params) {
   const qs = new URLSearchParams();
@@ -132,12 +132,12 @@ export default function ListingsManager({ items, counts, total, pagination, para
       if (action === 'delete') {
         toast.success(
           `${n(data.done + data.archived)} deleted`,
-          data.archived ? `${n(data.archived)} already sold, so they were hidden from the store instead — buyers keep their downloads.` : undefined,
+          data.archived ? `${n(data.archived)} already sold, so they were hidden from the store instead. Buyers keep their downloads.` : undefined,
         );
       } else {
         toast.success(
           `${n(data.done)} ${action === 'activate' ? 'activated' : 'deactivated'}`,
-          data.skipped ? `${n(data.skipped)} skipped — only approved listings can be shown or hidden.` : undefined,
+          data.skipped ? `${n(data.skipped)} skipped. Only approved listings can be shown or hidden.` : undefined,
         );
       }
       dialogRef.current?.close();
@@ -355,7 +355,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
                         </label>
                         {p.shopFeatured && (
                           <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm">
-                            <Pin size={12} strokeWidth={2} aria-hidden="true" className="text-brand-600" />
+                            <Pin size={12} strokeWidth={2} aria-hidden="true" className="text-brand-700" />
                             Featured
                           </span>
                         )}
@@ -442,7 +442,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
                                     {p.title}
                                   </Link>
                                   <p className="flex items-center gap-1.5 text-xs text-stone-500">
-                                    {p.shopFeatured && <Pin size={11} strokeWidth={2} aria-label="Featured" className="text-brand-600" />}
+                                    {p.shopFeatured && <Pin size={11} strokeWidth={2} aria-label="Featured" className="text-brand-700" />}
                                     Updated {formatDateTime(p.updatedAt).date}
                                   </p>
                                 </div>

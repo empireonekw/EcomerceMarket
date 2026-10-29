@@ -16,9 +16,9 @@ const GROUPS = [
   {
     title: 'Buying',
     items: [
-      { q: 'How do I get my files after paying?', a: 'Digital products are ready to download the moment payment clears — from the order confirmation page and any time later from your account.' },
+      { q: 'How do I get my files after paying?', a: 'Digital products are ready to download the moment payment clears, from the order confirmation page and any time later from your account.' },
       { q: 'Can I download again later?', a: 'Yes. Every purchase stays in your account for lifetime re-downloads, even if the seller later removes the product.' },
-      { q: 'Can I ask the seller a question first?', a: 'Yes — open any product and tap “Message seller”. Replies arrive live in your Messages.' },
+      { q: 'Can I ask the seller a question first?', a: 'Yes, open any product and tap “Message seller”. Replies arrive live in your Messages.' },
       { q: 'Is checkout secure?', a: 'Payments are processed by our payment provider over an encrypted connection. We never see or store your full card number.' },
     ],
   },
@@ -33,7 +33,7 @@ const GROUPS = [
     title: 'Selling',
     items: [
       { q: 'How do I start selling?', a: 'Create a seller account, add your first listing and submit it for review. Approved listings go live in their category.', href: '/sell/signup', link: 'Start selling' },
-      { q: 'What does it cost?', a: NO_PLATFORM_FEE ? 'Opening a shop is free and we don’t take a commission — you keep every sale.' : 'Opening a shop is free; a small commission is taken from each sale.' },
+      { q: 'What does it cost?', a: NO_PLATFORM_FEE ? 'Opening a shop is free and we don’t take a commission. You keep every sale.' : 'Opening a shop is free; a small commission is taken from each sale.' },
       { q: 'How are listings reviewed?', a: 'A person checks rights, accuracy, files and category before a listing goes live.', href: '/how-it-works#review-methodology', link: 'Our review methodology' },
       { q: 'How do I get paid?', a: 'Add your bank account or mobile wallet on the Payouts page of your seller dashboard.', href: '/legal/seller-agreement', link: 'Seller Agreement' },
     ],
@@ -95,7 +95,7 @@ export default function HelpPage() {
           <a {...gmailCompose(supportEmail)} className="font-medium text-gray-900 underline underline-offset-4">
             {supportEmail}
           </a>{' '}
-          or send us a message — we reply within 1–2 business days.
+          or send us a message. We reply within 1–2 business days.
         </p>
         <Link href="/contact" className="btn btn-md btn-dark mt-5">
           Contact us

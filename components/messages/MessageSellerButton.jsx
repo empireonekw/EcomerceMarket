@@ -94,7 +94,7 @@ export default function MessageSellerButton({ product, shop, className = 'btn bt
             <div className="mt-6 text-center">
               <CheckCircle2 size={40} className="mx-auto text-emerald-600" aria-hidden="true" />
               <p className="mt-3 font-semibold">Message sent!</p>
-              <p className="mt-1 text-sm text-stone-500">{shop.name} will reply in your Messages — you’ll see it there as soon as it arrives.</p>
+              <p className="mt-1 text-sm text-stone-500">{shop.name} will reply in your Messages. You’ll see it there as soon as it arrives.</p>
               <div className="mt-5 flex justify-center gap-2">
                 <button type="button" onClick={() => dialogRef.current?.close()} className="btn btn-md btn-outline">
                   Keep browsing

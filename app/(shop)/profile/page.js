@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Download, LayoutGrid, MessageSquare, ShoppingBag, Star, UserRound } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { getUserPurchases } from '@/lib/data/orders';
 import { getUserReviewMap } from '@/lib/data/reviews';
@@ -8,15 +9,19 @@ import { Avatar } from '@/components/UserMenu';
 import { DeleteAccount, NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
 import ReviewButton from '@/components/profile/ReviewButton';
 import Pagination from '@/components/Pagination';
+import SignOutButton from '@/components/SignOutButton';
 
 export const metadata = { title: 'My account', robots: { index: false } };
 
 const ROLE_LABELS = { admin: 'Administrator', seller: 'Seller', customer: 'Customer' };
 
 const TABS = [
-  { id: 'profile', label: 'Profile' },
-  { id: 'downloads', label: 'My Purchases' },
+  { id: 'profile', label: 'Profile', icon: UserRound },
+  { id: 'downloads', label: 'My Purchases', icon: ShoppingBag },
 ];
+// The active section: a white pill lifted off the tinted canvas (same as the admin and seller dashboards).
+const ACTIVE = 'bg-white font-medium text-ink shadow-[0_1px_2px_rgba(16,16,16,0.06),0_6px_16px_-8px_rgba(16,16,16,0.18)]';
+const IDLE = 'text-stone-600 hover:bg-black/[0.04] hover:text-ink';
 
 const fmtDate = (d, opts = { dateStyle: 'medium' }) => new Date(d).toLocaleDateString('en-US', opts);
 const fmtDateTime = (d) => new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
@@ -47,7 +52,7 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
     <>
       <ul className="space-y-3">
         {shown.map((p) => (
-          <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center">
+          <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 shadow-card sm:flex-row sm:items-center">
             <div className="flex min-w-0 flex-1 items-center gap-4">
               <Link href={`/products/${p.slug}`} className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100">
                 {p.coverImage && <Image src={p.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
@@ -89,7 +94,7 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
 function ProfileTab({ user, purchaseCount }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[20rem_1fr] lg:items-start">
-      <section className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+      <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-card sm:p-6">
         <h2 className="headline text-2xl">Account details</h2>
         <dl className="mt-4 space-y-3 text-sm">
           {[
@@ -124,9 +129,23 @@ function ProfileTab({ user, purchaseCount }) {
 
 // Sellers and admins don't shop on their account: they get settings only, plus a link to their workspace.
 const WORKSPACES = {
-  admin: { href: '/admin', label: 'Open admin dashboard' },
-  seller: { href: '/seller/dashboard', label: 'Open seller dashboard' },
+  admin: { href: '/admin', label: 'Open admin dashboard', short: 'Admin dashboard' },
+  seller: { href: '/seller/dashboard', label: 'Open seller dashboard', short: 'Seller dashboard' },
 };
+
+function Stat({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-2xl border border-stone-200 bg-white p-3 shadow-card sm:p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="truncate text-xs text-stone-500 sm:text-sm">{label}</p>
+        <span className="hidden size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-700 sm:grid">
+          <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+        </span>
+      </div>
+      <p className="headline mt-1 text-2xl tabular-nums sm:mt-2 sm:text-3xl">{value}</p>
+    </div>
+  );
+}
 
 export default async function ProfilePage({ searchParams }) {
   const { tab: rawTab, page } = await searchParams;
@@ -135,40 +154,84 @@ export default async function ProfilePage({ searchParams }) {
   const isCustomer = user.role === 'customer';
   const tab = isCustomer ? requested : 'profile';
   const [purchases, reviews] = isCustomer ? await Promise.all([getUserPurchases(user.id), getUserReviewMap(user.id)]) : [[], {}];
+  const downloads = purchases.reduce((n, p) => n + (p.downloadCount ?? 0), 0);
+  const item = (active) => `flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition ${active ? ACTIVE : IDLE}`;
 
   return (
-    <div className="container-page py-10 sm:py-14">
-      <header className="flex items-center gap-4">
-        <Avatar name={user.name} className="size-14 text-lg" />
-        <div className="min-w-0">
-          <h1 className="headline truncate text-3xl sm:text-4xl">Hi, {user.name.split(' ')[0]}</h1>
-          <p className="truncate text-sm text-stone-500">
-            {user.email} · Member since {fmtDate(user.createdAt, { month: 'long', year: 'numeric' })}
-          </p>
-        </div>
-      </header>
-
-      {/* Tabs are links (URL state): shareable, back-button friendly, no client JS. Customers only. */}
-      {isCustomer && (
-        <nav aria-label="Account sections" className="mt-10 inline-flex gap-1 rounded-full bg-stone-100 p-1">
-          {TABS.map((t) => (
-            <Link
-              key={t.id}
-              href={t.id === 'profile' ? '/profile' : `/profile?tab=${t.id}`}
-              aria-current={tab === t.id ? 'page' : undefined}
-              className={`rounded-full px-4 py-2 text-sm transition-colors ${tab === t.id ? 'bg-white text-black shadow-sm' : 'text-stone-600 hover:text-black'}`}
-            >
-              {t.label}
-              {t.id === 'downloads' && purchases.length > 0 && (
-                <span className="ml-2 rounded-full bg-black/5 px-2 py-0.5 text-xs text-stone-600">{purchases.length}</span>
+    <div className="bg-canvas">
+      <div className="container-page grid gap-8 py-8 sm:py-12 lg:grid-cols-[15rem_1fr] lg:items-start">
+        {/* Account menu: on the tinted canvas, like the dashboards' sidebar. */}
+        <aside className="lg:sticky lg:top-24">
+          <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-card ring-1 ring-black/[0.04]">
+            <Avatar name={user.name} className="size-10 text-sm" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{user.name}</p>
+              <p className="truncate text-xs text-stone-500">{ROLE_LABELS[user.role] ?? 'Customer'}</p>
+            </div>
+          </div>
+          <nav aria-label="Account sections" className="mt-5">
+            <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">Account</p>
+            {/* Sections are links (URL state): shareable, back-button friendly, no client JS. */}
+            <ul className="flex gap-1 overflow-x-auto lg:flex-col lg:gap-0.5">
+              {(isCustomer ? TABS : TABS.slice(0, 1)).map(({ id, label, icon: Icon }) => (
+                <li key={id} className="shrink-0">
+                  <Link href={id === 'profile' ? '/profile' : `/profile?tab=${id}`} aria-current={tab === id ? 'page' : undefined} className={item(tab === id)}>
+                    <Icon size={18} strokeWidth={1.75} aria-hidden="true" className={tab === id ? 'text-brand-700' : ''} />
+                    <span className="flex-1">{label}</span>
+                    {id === 'downloads' && purchases.length > 0 && (
+                      <span className="rounded-full bg-brand-500 px-1.5 py-0.5 text-[11px] leading-none font-semibold text-ink tabular-nums">{purchases.length}</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+              {isCustomer && (
+                <li className="shrink-0">
+                  <Link href="/messages" className={item(false)}>
+                    <MessageSquare size={18} strokeWidth={1.75} aria-hidden="true" />
+                    <span className="flex-1">Messages</span>
+                  </Link>
+                </li>
               )}
+              {WORKSPACES[user.role] && (
+                <li className="shrink-0">
+                  <Link href={WORKSPACES[user.role].href} className={item(false)}>
+                    <LayoutGrid size={18} strokeWidth={1.75} aria-hidden="true" />
+                    <span className="flex-1">{WORKSPACES[user.role].short}</span>
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </nav>
+          <div className="mt-5 hidden space-y-2 lg:block">
+            <Link href="/products" className="group block rounded-2xl bg-ink p-4 text-white">
+              <p className="text-xs text-stone-400">Find something new</p>
+              <p className="mt-0.5 text-sm font-medium">Browse the marketplace</p>
+              <span className="mt-3 inline-flex rounded-full bg-brand-500 px-3 py-1.5 text-xs font-medium text-ink transition-colors group-hover:bg-brand-600">Shop now</span>
             </Link>
-          ))}
-        </nav>
-      )}
+            <SignOutButton className="w-full rounded-xl px-3 py-2 text-left text-[13.5px] text-stone-600 transition hover:bg-black/[0.04] hover:text-ink" />
+          </div>
+        </aside>
 
-      <div className={isCustomer ? 'mt-8' : 'mt-10'}>
-        {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} page={page} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
+        <div className="min-w-0">
+          <header>
+            <h1 className="truncate font-serif text-3xl font-[420] tracking-[-0.02em] text-ink sm:text-[2.5rem] sm:leading-[1.1]">Hi, {user.name.split(' ')[0]}</h1>
+            <p className="mt-1 truncate text-sm text-stone-500">
+              {user.email} · Member since {fmtDate(user.createdAt, { month: 'long', year: 'numeric' })}
+            </p>
+          </header>
+
+          {isCustomer && (
+            <section aria-label="Your activity" className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+              <Stat icon={ShoppingBag} label="Purchases" value={purchases.length} />
+              <Stat icon={Download} label="Downloads" value={downloads} />
+              <Stat icon={Star} label="Reviews written" value={Object.keys(reviews).length} />
+            </section>
+          )}
+
+          <div className="mt-8">
+            {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} page={page} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
+          </div>
+        </div>
       </div>
     </div>
   );

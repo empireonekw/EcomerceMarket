@@ -11,12 +11,12 @@ export default function SellerSteps({ current }) {
         const active = i === current;
         return (
           <li key={label} aria-current={active ? 'step' : undefined} className="flex items-center gap-3">
-            {i > 0 && <span aria-hidden="true" className={`h-px w-8 ${done || active ? 'bg-brand-600' : 'bg-stone-300'}`} />}
+            {i > 0 && <span aria-hidden="true" className={`h-px w-8 ${done || active ? 'bg-brand-500' : 'bg-stone-300'}`} />}
             <span className="flex items-center gap-2">
               <span
                 aria-hidden="true"
                 className={`grid size-6 place-items-center rounded-full text-xs font-medium ${
-                  done ? 'bg-brand-600 text-white' : active ? 'bg-black text-white' : 'bg-stone-200 text-stone-500'
+                  done ? 'bg-brand-500 text-ink' : active ? 'bg-black text-white' : 'bg-stone-200 text-stone-500'
                 }`}
               >
                 {done ? <Check size={13} strokeWidth={2.5} /> : i + 1}

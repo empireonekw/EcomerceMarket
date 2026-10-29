@@ -72,7 +72,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
       acceptTerms: values.acceptTerms,
       accountType,
       captchaToken: captcha,
-    }).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
+    }).catch(() => ({ ok: false, error: 'Network error. Please try again.' }));
     if (!result.ok) {
       const { captcha: captchaMessage, ...fields } = result.fields ?? {};
       setServerErrors(fields);

@@ -56,7 +56,7 @@ function Bubble({ message, otherName }) {
     // A reply from the support team
     return (
       <div className="flex items-end justify-start gap-2">
-        <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-600 text-xs font-semibold text-white">
+        <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-500 text-xs font-semibold text-ink">
           {siteConfig.name.charAt(0)}
         </span>
         <div className="flex max-w-[85%] flex-col items-start gap-1.5 sm:max-w-[70%]">

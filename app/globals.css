@@ -5,12 +5,33 @@
   /* Editorial serif for display headlines (the homepage hero). Loaded in app/layout.jsx. */
   --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
 
-  /* Brand accent — electric indigo, the single saturated "action" colour (used sparingly). */
-  --color-brand-50: #eeeeff;
-  --color-brand-100: #deddff;
-  --color-brand-500: #6966fd;
-  --color-brand-600: #4d49fc;
-  --color-brand-700: #3c38e0;
+  /* Palette — warm "sunset" scale. Ink text on every fill (never white): contrast stays ≥ 4.5:1.
+     brand  = Honey Bronze (#edae49): buttons, active states, key highlights. 300 is the light sun shade (#f7dc6f).
+              700–900 are deep golds for brand-coloured text, icons and focus rings on light backgrounds.
+     peach  = Burnt Peach (#df7c52): secondary accent (illustrations, gradients, step markers).
+     berry  = Lobster Pink (#d86357): warm accent for badges, gradients and the occasional emphasis. */
+  --color-brand-50: #fdf8ec;
+  --color-brand-100: #fbedca;
+  --color-brand-200: #f8e2a0;
+  --color-brand-300: #f7dc6f;
+  --color-brand-400: #f1c35a;
+  --color-brand-500: #edae49;
+  --color-brand-600: #dc9a2f;
+  --color-brand-700: #925f10;
+  --color-brand-800: #66420c;
+  --color-brand-900: #3e2808;
+  --color-peach-50: #fdf2ec;
+  --color-peach-100: #fadecf;
+  --color-peach-300: #eca383;
+  --color-peach-500: #df7c52;
+  --color-peach-600: #c9653b;
+  --color-peach-700: #8f4220;
+  --color-berry-50: #fcf0ee;
+  --color-berry-100: #f7d6d2;
+  --color-berry-300: #e8978f;
+  --color-berry-500: #d86357;
+  --color-berry-600: #c24b40;
+  --color-berry-700: #8e2f26;
 
   --color-ink: #141414;
   --color-beige: #f3ede2; /* warm neutral for large calm surfaces (footer) */
@@ -26,6 +47,9 @@
 
   /* The one elevation: a soft, wide lift for hovered cards and floating panels. */
   --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.1);
+  /* Dashboards (components/dashboard/DashboardShell.jsx): a warm tinted canvas with white cards lifted off it. */
+  --color-canvas: #f4f3ef;
+  --shadow-card: 0 1px 2px rgba(16, 16, 16, 0.04), 0 8px 24px -14px rgba(16, 16, 16, 0.14);
 
   /* Auth-page colour fields (components/auth/AuthBackground.jsx). Slow and subtle; disabled by reduced motion. */
   --animate-drift: drift 22s ease-in-out infinite alternate;
@@ -129,7 +153,7 @@ html:has(dialog[open]:modal) {
     @apply bg-white text-ink;
   }
   :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-500;
+    @apply outline-2 outline-offset-2 outline-brand-700;
   }
 }
 
@@ -145,7 +169,7 @@ html:has(dialog[open]:modal) {
 
 /*
  * Buttons: always pills. Combine `btn` + one size + one colour, e.g. `btn btn-md btn-primary`.
- *  primary = indigo, the page's main action (use once per view) · dark = strong secondary
+ *  primary = brand yellow (ink text), the page's main action (use once per view) · dark = strong secondary
  *  outline = everything else · soft = a settled state (e.g. "In cart")
  */
 @utility btn {
@@ -161,7 +185,7 @@ html:has(dialog[open]:modal) {
   @apply h-12 px-7 text-base;
 }
 @utility btn-primary {
-  @apply bg-brand-600 text-white hover:bg-brand-700;
+  @apply bg-brand-500 text-ink hover:bg-brand-500;
 }
 @utility btn-dark {
   @apply bg-black text-white hover:bg-stone-800;
@@ -171,4 +195,99 @@ html:has(dialog[open]:modal) {
 }
 @utility btn-soft {
   @apply bg-stone-100 text-black hover:bg-stone-200;
+}
+
+/* Dashboards: every bordered white card on the tinted canvas gets the same soft lift, so all admin and seller pages
+   match without each one restating it. A layer below utilities, so a card's own shadow-* class still wins. */
+@layer components {
+  .dashboard-main :where(.rounded-2xl.border.bg-white, .rounded-xl.border.bg-white) {
+    box-shadow: var(--shadow-card);
+  }
+}
+
+/* Scroll reveal (components/Reveal.jsx): content fades and lifts in as it enters the viewport. */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(28px);
+}
+.reveal-shown {
+  transition:
+    opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+}
+
+/* Homepage FAQ (components/home/Faq.jsx): answers open smoothly. Browsers that can animate to height:auto slide the
+   panel open; every browser fades and lifts the answer in. */
+.faq-item {
+  interpolate-size: allow-keywords;
+}
+.faq-item::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  transition:
+    block-size 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    content-visibility 0.4s allow-discrete;
+}
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+.faq-item[open] .faq-answer {
+  animation: faq-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes faq-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-item::details-content {
+    transition: none;
+  }
+  .faq-item[open] .faq-answer {
+    animation: none;
+  }
+}
+
+/* Homepage "Direct messages" chat mockup: the seller's typing dots. */
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* Homepage "For creators" number (components/home/CreatorNumber.jsx): the gradient drifts across the digits and the
+   dot grid behind it moves slowly. Both are motion-safe only. */
+@keyframes gradient-pan {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+@keyframes dots-drift {
+  to {
+    background-position: 22px 22px;
+  }
+}
+
+/* Homepage sparkles (components/home/Editorial.jsx): a slow, gentle twinkle. */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.75) rotate(20deg);
+  }
 }

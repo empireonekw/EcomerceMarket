@@ -28,7 +28,7 @@ const SECTIONS = [
     heading: 'Accounts',
     body: [
       [
-        'You sign in with your email address and a password. Keep your password private — you’re responsible for activity on your account.',
+        'You sign in with your email address and a password. Keep your password private. You’re responsible for activity on your account.',
         'Shopping accounts and seller accounts are separate, so your purchases and your shop never mix.',
         'Give us accurate details and keep your email address up to date: it’s how we send receipts and reach you about your orders.',
         'You must be old enough to form a binding contract where you live, or have a parent or guardian’s permission.',
@@ -54,7 +54,7 @@ const SECTIONS = [
         'If a seller stops selling a product, or closes their shop, you keep access to everything you already bought.',
         'Checked out as a guest? Your receipt link works the same way, and you can add the order to an account at any time to keep everything in one place.',
       ],
-      `For security, download links are private to your order and refresh each time you open the page, and each item can be downloaded up to ${DOWNLOADS_PER_HOUR} times per hour. This stops shared links from being abused — it never limits how many times you can download over the lifetime of your purchase.`,
+      `For security, download links are private to your order and refresh each time you open the page, and each item can be downloaded up to ${DOWNLOADS_PER_HOUR} times per hour. This stops shared links from being abused. It never limits how many times you can download over the lifetime of your purchase.`,
     ],
   },
   {
@@ -64,7 +64,7 @@ const SECTIONS = [
       'When you buy a product you get a non-exclusive licence to use it as described on its product page. Unless the product page says otherwise:',
       [
         'You may use it in your own personal and client projects.',
-        'You may not resell, share, sublicense or redistribute the original files — on their own or in a bundle, template marketplace or file-sharing site.',
+        'You may not resell, share, sublicense or redistribute the original files, on their own or in a bundle, template marketplace or file-sharing site.',
         'Ownership of the product stays with the seller who made it.',
       ],
     ],

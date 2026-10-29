@@ -59,7 +59,7 @@ export default function LoginForm({ next, registered = false }) {
     if (recaptchaEnabled && !captcha) return setCaptchaError('Please confirm you’re not a robot.');
 
     setPending(true);
-    const result = await login(values.email.trim(), values.password, captcha).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
+    const result = await login(values.email.trim(), values.password, captcha).catch(() => ({ ok: false, error: 'Network error. Please try again.' }));
     if (!result.ok) {
       const { captcha: captchaMessage, ...fields } = result.fields ?? {};
       setFormError(captchaMessage ? null : result.error);

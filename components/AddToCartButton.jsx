@@ -19,11 +19,11 @@ export default function AddToCartButton({ product, compact = false, className = 
       <button
         type="button"
         onClick={openCart}
-        aria-label={compact ? `${product.title} is in your cart — view cart` : undefined}
+        aria-label={compact ? `${product.title} is in your cart. View cart` : undefined}
         className={`${base} btn-soft`}
       >
         <Check {...icon} className="text-emerald-600" />
-        {compact ? 'In cart' : 'In cart — view'}
+        {compact ? 'In cart' : 'In cart · View'}
       </button>
     );
   }

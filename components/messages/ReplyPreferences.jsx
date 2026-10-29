@@ -61,7 +61,7 @@ export default function ReplyPreferences({ settings, onChange }) {
                 <input type="checkbox" role="switch" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="peer sr-only" />
                 <span
                   aria-hidden="true"
-                  className="relative h-6 w-11 shrink-0 rounded-full bg-stone-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-black peer-checked:after:translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-brand-500"
+                  className="relative h-6 w-11 shrink-0 rounded-full bg-stone-300 transition-colors after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:bg-black peer-checked:after:translate-x-5 peer-focus-visible:outline-2 peer-focus-visible:outline-brand-700"
                 />
               </label>
               <label htmlFor={id} className="sr-only">

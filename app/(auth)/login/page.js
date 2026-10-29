@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }) {
   const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : '/signup';
   const intro =
     registered === 'seller'
-      ? { title: 'Your seller account is ready', subtitle: 'Log in to set up your shop — it only takes a minute.' }
+      ? { title: 'Your seller account is ready', subtitle: 'Log in to set up your shop. It only takes a minute.' }
       : registered
         ? { title: 'Welcome aboard', subtitle: `Log in to start shopping on ${siteConfig.name}.` }
         : {

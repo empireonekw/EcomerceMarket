@@ -4,7 +4,7 @@ export function PageHeader({ title, description, actions }) {
   return (
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="headline text-3xl sm:text-4xl">{title}</h1>
+        <h1 className="font-serif text-3xl font-[420] tracking-[-0.02em] text-ink sm:text-[2.5rem] sm:leading-[1.1]">{title}</h1>
         {description && <p className="mt-1 line-clamp-2 max-w-3xl text-sm text-stone-500">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -12,14 +12,33 @@ export function PageHeader({ title, description, actions }) {
   );
 }
 
-/** Metric tile. `icon` is a lucide-react component. */
-export function StatCard({ label, value, sub, icon: Icon, tone = 'neutral' }) {
+/** Metric tile. `icon` is a lucide-react component. `featured`: the page's key number, on a solid brand card. */
+export function StatCard({ label, value, sub, icon: Icon, tone = 'neutral', featured = false }) {
   const tones = {
     neutral: 'bg-stone-100 text-stone-700',
     positive: 'bg-emerald-50 text-emerald-700',
     warning: 'bg-amber-50 text-amber-700',
     info: 'bg-sky-50 text-sky-700',
+    brand: 'bg-brand-50 text-brand-700',
   };
+  if (featured) {
+    return (
+      <div className="relative overflow-hidden rounded-2xl bg-brand-500 p-5 text-ink shadow-[0_20px_40px_-22px_rgba(220,154,47,0.9)]">
+        <span aria-hidden="true" className="absolute -top-10 -right-10 size-36 rounded-full bg-white/25" />
+        <span aria-hidden="true" className="absolute -right-4 -bottom-16 size-32 rounded-full bg-white/15" />
+        <div className="relative flex items-center justify-between">
+          <p className="text-sm font-medium text-ink/70">{label}</p>
+          {Icon && (
+            <span className="grid size-9 place-items-center rounded-xl bg-ink text-brand-500">
+              <Icon size={18} strokeWidth={1.75} aria-hidden="true" />
+            </span>
+          )}
+        </div>
+        <p className="headline relative mt-3 text-4xl tabular-nums">{value}</p>
+        {sub && <p className="relative mt-1 text-sm text-ink/70">{sub}</p>}
+      </div>
+    );
+  }
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-5">
       <div className="flex items-center justify-between">

@@ -73,7 +73,7 @@ const SECTIONS = [
     id: 'sharing',
     heading: 'Who we share it with',
     body: [
-      'We share data only with the service providers we need to run the Marketplace — website hosting, our database provider and our payment provider — and only for that purpose. We may also disclose data when the law requires it.',
+      'We share data only with the service providers we need to run the Marketplace, website hosting, our database provider and our payment provider, and only for that purpose. We may also disclose data when the law requires it.',
     ],
   },
   {

@@ -15,7 +15,7 @@ const checkbox = 'relative z-10 size-4 cursor-pointer rounded border-stone-300 a
 
 /** Items purchased (paid orders with this email, guest checkouts included) and money spent. */
 function Purchases({ p }) {
-  if (!p.items) return <span className="text-stone-400">—</span>;
+  if (!p.items) return <span className="text-stone-400">–</span>;
   return (
     <>
       <p className="font-medium tabular-nums">{plural(p.items, 'item')}</p>
@@ -28,7 +28,7 @@ function Purchases({ p }) {
 
 /** Products sold (one per sale line) and gross revenue; listings live / total underneath. */
 function Selling({ s }) {
-  if (!s) return <span className="text-stone-400">—</span>;
+  if (!s) return <span className="text-stone-400">–</span>;
   return (
     <>
       <p className="font-medium tabular-nums">{plural(s.sales, 'product')} sold</p>

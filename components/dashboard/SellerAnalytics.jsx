@@ -7,7 +7,7 @@ import { formatPrice } from '@/lib/utils';
 // Server-rendered seller analytics, shared by Admin → Users → [seller] and the seller's own workspace.
 
 const usd = (cents) => formatPrice(cents, 'USD');
-const cell = (cents) => (cents ? usd(cents) : <span className="text-stone-300">—</span>);
+const cell = (cents) => (cents ? usd(cents) : <span className="text-stone-300">–</span>);
 
 /** Monthly earnings chart + the same numbers as a table (accessible view; newest month first). */
 export function EarningsPanel({ months, title = 'Monthly earnings' }) {
@@ -44,7 +44,7 @@ export function EarningsPanel({ months, title = 'Monthly earnings' }) {
               {[...months].reverse().map((m) => (
                 <tr key={m.month}>
                   <th scope="row" className="px-5 py-2.5 font-normal text-stone-700">{m.label}</th>
-                  <td className="px-5 py-2.5 text-right">{m.sales || <span className="text-stone-300">—</span>}</td>
+                  <td className="px-5 py-2.5 text-right">{m.sales || <span className="text-stone-300">–</span>}</td>
                   <td className="px-5 py-2.5 text-right">{cell(m.gross)}</td>
                   {showFees && <td className="px-5 py-2.5 text-right text-stone-500">{cell(m.commission)}</td>}
                   <td className="px-5 py-2.5 text-right font-medium">{cell(m.earnings)}</td>

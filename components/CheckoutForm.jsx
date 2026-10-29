@@ -56,7 +56,7 @@ export default function CheckoutForm({ demoMode = false }) {
       if (data.code === 'items_unavailable') data.details.missing.forEach(removeFromCart);
       setError(data.error || 'Something went wrong. Please try again.');
     } catch {
-      setError('Network error — check your connection and try again.');
+      setError('Network error. Check your connection and try again.');
     }
     setStatus('idle');
   }
@@ -66,7 +66,7 @@ export default function CheckoutForm({ demoMode = false }) {
       <div className="grid min-h-[40vh] place-items-center text-center" role="status">
         <div>
           <span className="mx-auto block size-10 animate-spin rounded-full border-4 border-stone-200 border-t-brand-600" />
-          <p className="mt-4 font-medium">Order confirmed — preparing your downloads…</p>
+          <p className="mt-4 font-medium">Order confirmed, preparing your downloads…</p>
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ export default function CheckoutForm({ demoMode = false }) {
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="m5 12 4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Logged in as {user.name} — this purchase will be saved to your account.
+            Logged in as {user.name}. This purchase will be saved to your account.
           </p>
         ) : (
           <p className="mt-1 text-sm text-stone-500">
@@ -136,7 +136,7 @@ export default function CheckoutForm({ demoMode = false }) {
           </p>
         ) : (
           <p className="mt-2 text-sm text-stone-500">
-            {totals.total === 0 ? 'Nothing to pay — these items are free.' : 'Card payments are coming soon.'}
+            {totals.total === 0 ? 'Nothing to pay, these items are free.' : 'Card payments are coming soon.'}
           </p>
         )}
 

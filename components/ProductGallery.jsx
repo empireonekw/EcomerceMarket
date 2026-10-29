@@ -22,13 +22,13 @@ export default function ProductGallery({ images, videos = [], title, coverBlurDa
             playsInline
             preload="metadata"
             className="size-full bg-black object-contain"
-            aria-label={`${title} — video`}
+            aria-label={`${title}: video`}
           />
         ) : current ? (
           <Image
             key={current.url}
             src={current.url}
-            alt={index === 0 ? title : `${title} — photo ${index + 1}`}
+            alt={index === 0 ? title : `${title}: photo ${index + 1}`}
             fill
             preload={index === 0} // the cover is the LCP element
             placeholder="blur"

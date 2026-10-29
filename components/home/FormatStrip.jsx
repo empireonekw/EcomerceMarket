@@ -19,9 +19,9 @@ const FORMATS = [
  */
 export default function FormatStrip() {
   return (
-    <section aria-labelledby="formats-heading" className="border-b border-stone-200 bg-white">
+    <section aria-labelledby="formats-heading" className="bg-white">
       <div className="container-page flex flex-col items-center gap-6 py-10 lg:flex-row lg:gap-10">
-        <h2 id="formats-heading" className="shrink-0 text-sm text-stone-500">
+        <h2 id="formats-heading" className="shrink-0 text-sm font-medium text-stone-600">
           Files and links for the tools you already use
         </h2>
 

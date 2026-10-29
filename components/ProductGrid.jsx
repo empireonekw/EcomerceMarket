@@ -1,7 +1,7 @@
 import ProductCard from '@/components/ProductCard';
 
-// At most three across: large, readable cards (≈400px wide on desktop).
-const GRID = 'grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8';
+// Shop grid of tall (4:5) cards: one across on small phones, two from 480px, three on laptops, four on wide screens.
+const GRID = 'grid grid-cols-1 gap-x-5 gap-y-10 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12 xl:grid-cols-4';
 
 export default function ProductGrid({ products, preloadCount = 0, emptyMessage = 'No products found.' }) {
   if (!products?.length) {
@@ -29,13 +29,13 @@ export function ProductGridSkeleton({ count = 8 }) {
   return (
     <ul className={GRID} aria-busy="true" aria-label="Loading products">
       {Array.from({ length: count }, (_, i) => (
-        <li key={i} className="animate-pulse rounded-3xl border border-stone-200 bg-white p-2.5">
-          <div className="aspect-[4/3] rounded-2xl bg-stone-100" />
-          <div className="px-3 pb-3 pt-4">
-            <div className="h-3 w-1/3 rounded-full bg-stone-100" />
-            <div className="mt-3 h-5 w-4/5 rounded-full bg-stone-100" />
+        <li key={i} className="animate-pulse">
+          <div className="aspect-[4/5] rounded-[1.4rem] bg-stone-100" />
+          <div className="px-1 pt-4">
+            <div className="h-3 w-1/4 rounded-full bg-stone-100" />
+            <div className="mt-3 h-6 w-4/5 rounded-full bg-stone-100" />
             <div className="mt-2.5 h-4 w-full rounded-full bg-stone-100" />
-            <div className="mt-6 flex items-end justify-between">
+            <div className="mt-3.5 flex items-center justify-between border-t border-dashed border-stone-200 pt-3">
               <div className="h-7 w-20 rounded-full bg-stone-100" />
               <div className="h-9 w-20 rounded-full bg-stone-100" />
             </div>

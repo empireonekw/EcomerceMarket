@@ -76,7 +76,7 @@ export default async function CheckoutSuccessPage({ searchParams }) {
         <h1 className="headline mt-6 text-4xl text-balance sm:text-5xl">Thank you! Your files are ready.</h1>
         <p className="mx-auto mt-3 max-w-lg text-stone-600">
           Order <span className="font-medium text-ink">#{orderNumber}</span> for{' '}
-          <span className="font-medium text-ink">{order.buyerEmail}</span>. Bookmark this page — it’s your permanent
+          <span className="font-medium text-ink">{order.buyerEmail}</span>. Bookmark this page. It’s your permanent
           access link.
         </p>
         <div className="mt-5 flex justify-center">

@@ -12,7 +12,7 @@ export default function Error({ error, retry }) {
   return (
     <div className="container-page grid min-h-[60vh] place-items-center py-16 text-center">
       <div className="max-w-md">
-        <p className="text-sm font-medium text-brand-600">Something went wrong</p>
+        <p className="text-sm font-medium text-brand-700">Something went wrong</p>
         <h1 className="mt-2 text-3xl headline">We couldn’t load this page.</h1>
         <p className="mt-3 text-stone-600">
           This is usually temporary. Try again, or head back to the storefront.

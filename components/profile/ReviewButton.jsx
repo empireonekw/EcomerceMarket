@@ -59,7 +59,7 @@ export default function ReviewButton({ productId, productTitle, authorName, exis
       dialogRef.current?.close();
       router.refresh(); // the row switches to "Reviewed"
     } catch {
-      setFormError('Network error — please try again.');
+      setFormError('Network error. Please try again.');
     } finally {
       setPending(false);
     }
@@ -93,11 +93,11 @@ export default function ReviewButton({ productId, productTitle, authorName, exis
             <div className="mt-2 flex items-center gap-3" onMouseLeave={() => setHover(0)}>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <label key={n} onMouseEnter={() => setHover(n)} className="cursor-pointer rounded-md has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-500">
+                  <label key={n} onMouseEnter={() => setHover(n)} className="cursor-pointer rounded-md has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-700">
                     <input type="radio" name={`${id}-rating`} value={n} checked={rating === n} onChange={() => setRating(n)} className="sr-only" />
                     <Star size={28} strokeWidth={1.5} aria-hidden="true" className={n <= shown ? 'fill-amber-400 text-amber-400' : 'fill-stone-100 text-stone-300'} />
                     <span className="sr-only">
-                      {n} star{n === 1 ? '' : 's'} — {LABELS[n]}
+                      {n} star{n === 1 ? '' : 's'}: {LABELS[n]}
                     </span>
                   </label>
                 ))}

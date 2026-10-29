@@ -96,7 +96,7 @@ function NewMessageDialog({ dialogRef, prefillUser, onSent }) {
               </p>
               <p className="truncate text-xs text-stone-500">{user.email}</p>
             </div>
-            <button type="button" onClick={() => setUser(null)} className="text-sm font-medium text-brand-600 hover:underline">
+            <button type="button" onClick={() => setUser(null)} className="text-sm font-medium text-brand-700 hover:underline">
               Change
             </button>
           </div>
@@ -241,7 +241,7 @@ function SupportThread({ threadId, onBack, onChanged }) {
               <p className="truncate text-xs text-stone-500">
                 {user.email}
                 {user.storeName && ` · ${user.storeName}`} ·{' '}
-                <Link href={`/admin/users/${user.id}`} className="text-brand-600 hover:underline">
+                <Link href={`/admin/users/${user.id}`} className="text-brand-700 hover:underline">
                   View user
                 </Link>
               </p>
@@ -285,7 +285,7 @@ function SupportThread({ threadId, onBack, onChanged }) {
                 <div key={m.id} className={`flex items-end gap-2 ${m.fromTeam ? 'justify-end' : 'justify-start'}`}>
                   {!m.fromTeam && <Initial name={user?.name} className="size-8 text-xs" />}
                   <div className={`flex max-w-[80%] flex-col gap-1 sm:max-w-[65%] ${m.fromTeam ? 'items-end' : 'items-start'}`}>
-                    <div className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed ${m.fromTeam ? 'rounded-br-md bg-brand-600 text-white' : 'rounded-bl-md border border-stone-200 bg-white'}`}>
+                    <div className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed ${m.fromTeam ? 'rounded-br-md bg-brand-500 text-ink' : 'rounded-bl-md border border-stone-200 bg-white'}`}>
                       {m.body}
                     </div>
                     <p className="px-1 text-xs text-stone-400">
@@ -473,7 +473,7 @@ export default function SupportInbox({ initialList, prefillUser = null }) {
                     <Initial name={c.user?.name} />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
-                        {c.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-600" />}
+                        {c.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-500" />}
                         <span className={`truncate text-sm ${c.unread ? 'font-bold' : 'font-medium'}`}>{c.user?.name ?? 'Deleted user'}</span>
                         <span className="shrink-0 text-[11px] text-stone-500">{ROLE[c.user?.role] ?? ''}</span>
                         <span className="ml-auto shrink-0 text-xs tabular-nums text-stone-500">{c.lastMessage ? inboxTime(c.lastMessage.at) : ''}</span>

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, DollarSign, Landmark, Package, Receipt, Store, Users } from 'lucide-react';
-import { PageHeader, StatCard, StatusBadge, ProviderBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
+import { PageHeader, StatCard, StatusBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { getDashboardStats } from '@/lib/data/admin';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
@@ -18,11 +18,6 @@ export default async function AdminDashboardPage() {
       <PageHeader
         title="Dashboard Overview"
         description="Users, sellers, sales and catalog at a glance."
-        actions={
-          <Link href="/admin/products/add" className={buttonClasses.primary}>
-            + Add product
-          </Link>
-        }
       />
 
       <section aria-label="Platform overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -35,7 +30,7 @@ export default async function AdminDashboardPage() {
               : `${usd(stats.revenue.last30d)} in the last 30 days`
           }
           icon={DollarSign}
-          tone="positive"
+          featured
         />
         <StatCard
           label="Total Users"

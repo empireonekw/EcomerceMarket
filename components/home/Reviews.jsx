@@ -14,7 +14,7 @@ const SAMPLE_REVIEWS = [
     rating: 5,
     body: 'Clean, consistent icons that dropped straight into our design system. Saved our team days of work on the dashboard redesign.',
     authorName: 'Sarah Mitchell',
-    productTitle: 'Line Icons Pro — 2,400 Icons',
+    productTitle: 'Line Icons Pro: 2,400 Icons',
     purchasedAt: monthsAgo(2),
     createdAt: monthsAgo(1),
   },
@@ -30,7 +30,7 @@ const SAMPLE_REVIEWS = [
   {
     _id: 'sample-3',
     rating: 4,
-    body: 'Beautiful sections and easy to customise. I launched my product page in an afternoon — would love a few more pricing layouts.',
+    body: 'Beautiful sections and easy to customise. I launched my product page in an afternoon. Would love a few more pricing layouts.',
     authorName: 'Priya Sharma',
     productTitle: 'SaaS Landing Page Kit',
     purchasedAt: monthsAgo(2),
@@ -81,7 +81,8 @@ export default async function Reviews() {
   const reviews = real.items.length > 0 ? real : SAMPLES;
 
   return (
-    <section className="container-page pt-20 sm:pt-28" aria-labelledby="reviews-heading">
+    <section className="container-page relative isolate pt-24 sm:pt-32" aria-labelledby="reviews-heading">
+      <span aria-hidden="true" className="pointer-events-none absolute top-12 right-4 -z-10 font-serif text-[12rem] leading-none text-brand-200 select-none sm:right-10 sm:text-[16rem]">“</span>
       <SectionHeading
         id="reviews-heading"
         eyebrow="Reviews"

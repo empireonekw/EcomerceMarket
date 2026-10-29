@@ -50,7 +50,7 @@ export default async function AdminPayoutsPage() {
           icon={DollarSign}
           tone="positive"
         />
-        <StatCard label="Admin Commission Earned" value={usd(totals.commission)} sub={NO_PLATFORM_FEE ? 'From earlier sales — no commission is charged now' : `${commissionPercent()} of seller sales`} icon={BadgePercent} tone="info" />
+        <StatCard label="Admin Commission Earned" value={usd(totals.commission)} sub={NO_PLATFORM_FEE ? 'From earlier sales, no commission is charged now' : `${commissionPercent()} of seller sales`} icon={BadgePercent} tone="info" />
         <StatCard label="Pending Seller Payouts" value={usd(totals.pendingPayouts)} sub={`${queue.length} seller${queue.length === 1 ? '' : 's'} awaiting payment`} icon={Clock} tone="warning" />
         <StatCard label="Paid to Sellers" value={usd(totals.paidPayouts)} sub={`${totals.sellerCount} registered seller${totals.sellerCount === 1 ? '' : 's'}`} icon={Users} />
       </section>

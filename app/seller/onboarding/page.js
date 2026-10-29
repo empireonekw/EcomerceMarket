@@ -33,7 +33,7 @@ export default async function SellerOnboardingPage() {
           <div className="mt-6 rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
             <h1 className="headline text-3xl leading-tight">Set up your shop</h1>
             <p className="mt-1.5 text-sm text-stone-500">
-              Welcome, {seller.name.split(' ')[0]}. This is how buyers will know you — you can change it any time.
+              Welcome, {seller.name.split(' ')[0]}. This is how buyers will know you. You can change it any time.
             </p>
             <div className="mt-6">
               <ShopDetailsForm mode="setup" />

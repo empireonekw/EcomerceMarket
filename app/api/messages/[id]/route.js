@@ -20,7 +20,7 @@ export async function POST(request, { params }) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
   if (!rateLimit(`msg-send:${user.id}`, { limit: 40, windowMs: 60 * 1000 }).ok) {
-    return json({ error: 'Slow down a little — try again in a minute.' }, 429);
+    return json({ error: 'Slow down a little. Try again in a minute.' }, 429);
   }
   try {
     const { id } = await params;

@@ -13,7 +13,7 @@ const EMPTY = { main: '', sub: '', inner: '', name: '', slug: '', parent: '', de
 const LEVELS = [
   { key: 'main', label: 'Main category', placeholder: 'e.g. Templates', help: 'Type a new main category, or an existing one to add under it.' },
   { key: 'sub', label: 'Sub category', placeholder: 'e.g. Business', help: 'Optional. Leave empty to add just the main category.' },
-  { key: 'inner', label: 'Inner category', placeholder: 'e.g. Invoices', help: 'Optional. The most specific level — the best match for search engines.' },
+  { key: 'inner', label: 'Inner category', placeholder: 'e.g. Invoices', help: 'Optional. The most specific level. The best match for search engines.' },
 ];
 const lower = (s) => s.trim().toLowerCase();
 const optionalFields = (v) => ({ description: v.description, type: v.type, metaTitle: v.metaTitle, metaDescription: v.metaDescription });
@@ -298,7 +298,7 @@ export default function CategoryManager({ categories }) {
                       ))}
                     </datalist>
                     <FieldHelp id={`cat-${level.key}-help`} error={errors[level.key]}>
-                      {exists && values[LEVELS[i + 1].key].trim() ? `Existing “${exists.name}” — the new category goes under it.` : level.help}
+                      {exists && values[LEVELS[i + 1].key].trim() ? `Existing “${exists.name}”. The new category goes under it.` : level.help}
                     </FieldHelp>
                   </div>
                 );
@@ -346,7 +346,7 @@ export default function CategoryManager({ categories }) {
                 <option value="">None</option>
                 {parentOptions.map((c) => (
                   <option key={c._id} value={c._id}>
-                    {`${'— '.repeat(c.depth)}${c.name}`}
+                    {`${'– '.repeat(c.depth)}${c.name}`}
                   </option>
                 ))}
               </select>
@@ -536,7 +536,7 @@ export default function CategoryManager({ categories }) {
                 {rows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center text-stone-500">
-                      {query ? `No categories match “${query}”.` : 'No categories yet — add your first one on the left.'}
+                      {query ? `No categories match “${query}”.` : 'No categories yet. Add your first one on the left.'}
                     </td>
                   </tr>
                 ) : (
@@ -573,7 +573,7 @@ export default function CategoryManager({ categories }) {
                               <button
                                 type="button"
                                 onClick={() => startEdit(c)}
-                                className="text-left font-medium text-black hover:text-brand-600 hover:underline"
+                                className="text-left font-medium text-black hover:text-brand-700 hover:underline"
                               >
                                 {query && c.depth > 0 ? c.path : c.name}
                               </button>
@@ -584,7 +584,7 @@ export default function CategoryManager({ categories }) {
                               )}
                               {/* Row actions: shown on hover / keyboard focus (always on touch screens). */}
                               <div className="mt-1 flex items-center gap-1.5 text-xs opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
-                                <button type="button" onClick={() => startEdit(c)} className="font-medium text-brand-600 hover:underline">
+                                <button type="button" onClick={() => startEdit(c)} className="font-medium text-brand-700 hover:underline">
                                   Edit
                                 </button>
                                 <span aria-hidden="true" className="text-stone-300">
@@ -609,7 +609,7 @@ export default function CategoryManager({ categories }) {
                           </div>
                         </td>
                         <td className="max-w-[18rem] px-4 py-3 text-stone-600">
-                          {c.description ? <span className="line-clamp-2">{c.description}</span> : <span className="text-stone-300">—</span>}
+                          {c.description ? <span className="line-clamp-2">{c.description}</span> : <span className="text-stone-300">–</span>}
                         </td>
                         <td className="px-4 py-3">
                           <span className="block font-mono text-xs text-stone-600">{categoryHref(c)}</span>
@@ -619,7 +619,7 @@ export default function CategoryManager({ categories }) {
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {c.count > 0 ? (
-                            <Link href={`/admin/products?category=${c._id}`} className="font-medium text-brand-600 hover:underline">
+                            <Link href={`/admin/products?category=${c._id}`} className="font-medium text-brand-700 hover:underline">
                               {c.count}
                             </Link>
                           ) : (

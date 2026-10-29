@@ -46,7 +46,7 @@ export default function ContactForm({ defaultName = '', defaultEmail = '' }) {
       }
       setSent(true);
     } catch {
-      setFormError('Network error — please try again.');
+      setFormError('Network error. Please try again.');
     } finally {
       setPending(false);
     }

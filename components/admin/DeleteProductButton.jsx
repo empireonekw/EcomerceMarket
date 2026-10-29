@@ -23,7 +23,7 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
 
       dialogRef.current?.close();
       if (data.result === 'archived') {
-        toast.info(`“${title}” was unpublished`, `It has ${data.orderCount} order(s), so it was hidden instead of deleted — buyers keep their downloads.`);
+        toast.info(`“${title}” was unpublished`, `It has ${data.orderCount} order(s), so it was hidden instead of deleted. Buyers keep their downloads.`);
       } else {
         toast.success(`“${title}” deleted`);
       }

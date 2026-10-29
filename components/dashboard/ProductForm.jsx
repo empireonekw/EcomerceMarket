@@ -260,7 +260,7 @@ export default function ProductForm({ mode, categories, product }) {
             id="slug"
             label="URL slug"
             error={show('slug')}
-            hint={isEdit ? 'Changing the slug changes the product URL — old links will stop working.' : 'Generated from the title. Edit it if you like; duplicates get a -2 suffix.'}
+            hint={isEdit ? 'Changing the slug changes the product URL. Old links will stop working.' : 'Generated from the title. Edit it if you like; duplicates get a -2 suffix.'}
           >
             <div className="mt-1.5 flex items-stretch overflow-hidden rounded-xl border border-stone-300 bg-stone-50 focus-within:border-ink">
               <span className="hidden items-center px-3 text-sm text-stone-500 sm:flex">/products/</span>
@@ -291,7 +291,7 @@ export default function ProductForm({ mode, categories, product }) {
           <fieldset>
             <legend className="text-sm font-medium">Category</legend>
             <p className="mt-0.5 text-xs text-stone-500">
-              Type your own names — pick a suggestion or enter a new one and it is created when you save. Sub and inner are optional.
+              Type your own names, pick a suggestion or enter a new one and it is created when you save. Sub and inner are optional.
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {[
@@ -359,7 +359,7 @@ export default function ProductForm({ mode, categories, product }) {
               <img src={values.coverImage} alt="Cover preview" className="size-full object-cover" onError={() => setPreviewBroken(true)} />
             ) : (
               <div className="grid size-full place-items-center p-4 text-center text-xs text-stone-400">
-                {previewBroken ? 'Couldn’t load this image — check the URL.' : 'Image preview appears here'}
+                {previewBroken ? 'Couldn’t load this image. Check the URL.' : 'Image preview appears here'}
               </div>
             )}
           </div>
@@ -477,7 +477,7 @@ export default function ProductForm({ mode, categories, product }) {
           </div>
           <div className="px-1 pt-3">
             <p className="line-clamp-2 font-medium">{values.title || 'Untitled product'}</p>
-            <p className="mt-1 font-medium">{priceOk ? (toCents(values.price) === 0 ? 'Free' : formatPrice(toCents(values.price))) : '—'}</p>
+            <p className="mt-1 font-medium">{priceOk ? (toCents(values.price) === 0 ? 'Free' : formatPrice(toCents(values.price))) : '–'}</p>
           </div>
         </div>
 

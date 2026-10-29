@@ -186,11 +186,11 @@ function LevelChip({ level }) {
 function Summary({ snap }) {
   const { totals, process: proc } = snap;
   const cards = [
-    { label: 'Overall', value: LEVEL[snap.overall]?.label ?? '—', icon: Activity, tone: snap.overall },
+    { label: 'Overall', value: LEVEL[snap.overall]?.label ?? '–', icon: Activity, tone: snap.overall },
     { label: 'Requests / min', value: totals.rpm, icon: Gauge, tone: 'idle' },
     { label: 'Server errors (5 min)', value: totals.serverErrors, icon: XCircle, tone: totals.serverErrors ? 'error' : 'ok' },
     { label: 'Rate-limited (5 min)', value: totals.rateLimited, icon: ShieldAlert, tone: totals.rateLimited ? 'warning' : 'ok' },
-    { label: 'Slowest p95', value: totals.p95 != null ? `${totals.p95} ms` : '—', icon: Clock, tone: totals.p95 > 1500 ? 'warning' : 'idle' },
+    { label: 'Slowest p95', value: totals.p95 != null ? `${totals.p95} ms` : '–', icon: Clock, tone: totals.p95 > 1500 ? 'warning' : 'idle' },
     {
       label: 'Server',
       value: `${proc.rssMb} MB`,
@@ -226,7 +226,7 @@ function ToolButton({ label, onClick, children }) {
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="grid size-8 place-items-center text-stone-600 transition hover:bg-stone-100 hover:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[#4d49fc]"
+      className="grid size-8 place-items-center text-stone-600 transition hover:bg-stone-100 hover:text-ink focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-700"
     >
       {children}
     </button>
@@ -414,8 +414,8 @@ function Diagram({ nodes, totals, selected, onSelect, children }) {
         onMouseLeave={() => setHovered(null)}
         onFocus={() => setHovered(n.id)}
         onBlur={() => setHovered(null)}
-        title={`${n.label} — ${n.detail || n.sub}`}
-        className={`absolute flex items-center gap-2 rounded-xl border bg-white px-2 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#4d49fc] ${
+        title={`${n.label}: ${n.detail || n.sub}`}
+        className={`absolute flex items-center gap-2 rounded-xl border bg-white px-2 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 ${
           isSelected ? 'border-ink ring-2 ring-ink/10' : 'border-stone-200'
         } ${dim(n.id) ? 'opacity-35' : 'opacity-100'} ${dragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
         style={{ left: p.x, top: p.y, width: p.w, height: p.h }}
@@ -566,7 +566,7 @@ function Sparkline({ series }) {
   return (
     <svg viewBox={`0 0 ${series.length * 8} 32`} className="h-8 w-full" aria-label="Requests per minute, last 15 minutes">
       {series.map((v, i) => (
-        <rect key={i} x={i * 8 + 1} y={32 - (v / max) * 30} width={6} height={Math.max(1, (v / max) * 30)} rx={1.5} fill={v ? '#4d49fc' : '#e7e5e4'} />
+        <rect key={i} x={i * 8 + 1} y={32 - (v / max) * 30} width={6} height={Math.max(1, (v / max) * 30)} rx={1.5} fill={v ? '#edae49' : '#e7e5e4'} />
       ))}
     </svg>
   );
@@ -583,8 +583,8 @@ function Details({ node, now, onClose }) {
         ['Server errors 5xx (5 min)', s.last5.serverErrors],
         ['Rate-limited 429 (5 min)', s.last5.rateLimited],
         ['Client errors 4xx (5 min)', s.last5.clientErrors],
-        ['Average response', avg != null ? `${avg} ms` : '—'],
-        ['95% under', s.p95 != null ? `${s.p95} ms` : '—'],
+        ['Average response', avg != null ? `${avg} ms` : '–'],
+        ['95% under', s.p95 != null ? `${s.p95} ms` : '–'],
       ]
     : Object.entries(node.metrics ?? {}).map(([k, v]) => [k === 'pingMs' ? 'Ping' : k === 'connections' ? 'Live connections' : k, k === 'pingMs' ? `${v} ms` : v]);
   const Icon = ICONS[node.id] ?? Activity;
@@ -752,7 +752,7 @@ export default function LiveFlow({ initial }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="flex items-center gap-2 text-sm text-stone-600" role="status">
           <span className={`size-2 rounded-full ${lost ? 'bg-red-500' : 'bg-emerald-500 motion-safe:animate-pulse'}`} aria-hidden="true" />
-          {lost ? 'Connection lost — retrying…' : `Live · updated ${ago(snap.at, now)}`}
+          {lost ? 'Connection lost. Retrying…' : `Live · updated ${ago(snap.at, now)}`}
         </p>
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-stone-600" aria-label="Legend">
           {['ok', 'warning', 'error', 'idle'].map((k) => (

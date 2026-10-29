@@ -1,5 +1,7 @@
+import { Suspense } from 'react';
 import { Fraunces, Inter } from 'next/font/google';
 
+import NavigationProgress from '@/components/NavigationProgress';
 import { siteConfig } from '@/lib/site';
 
 import './globals.css';
@@ -22,7 +24,7 @@ const fraunces = Fraunces({
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — Templates, E-books, Software & Vectors`,
+    default: `${siteConfig.name} | Templates, E-books, Software & Vectors`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -54,6 +56,10 @@ export default function RootLayout({ children }) {
         >
           Skip to content
         </a>
+        {/* Reads the search params, so it sits in its own Suspense boundary and never holds back static pages. */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {children}
       </body>
     </html>

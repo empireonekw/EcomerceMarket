@@ -11,7 +11,7 @@ import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commi
 export const metadata = { title: 'Create a seller account', robots: { index: false } };
 
 const PERKS = [
-  { icon: BadgePercent, label: NO_PLATFORM_FEE ? 'No platform fees — keep 100%' : `Keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale` },
+  { icon: BadgePercent, label: NO_PLATFORM_FEE ? 'No platform fees, keep 100%' : `Keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale` },
   { icon: ShieldCheck, label: 'Protected, instant delivery' },
   { icon: Wallet, label: 'Bank & wallet payouts' },
 ];
@@ -25,7 +25,7 @@ function NotForThisAccount({ user }) {
       subtitle={
         isAdmin
           ? 'Admin accounts manage the marketplace and can’t open a store.'
-          : `You’re signed in as ${user.email}, a shopping account. Seller accounts are separate, so your purchases and your shop never mix — create one with a different email.`
+          : `You’re signed in as ${user.email}, a shopping account. Seller accounts are separate, so your purchases and your shop never mix. Create one with a different email.`
       }
     >
       {isAdmin ? (

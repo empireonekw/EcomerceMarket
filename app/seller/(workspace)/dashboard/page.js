@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, Clock, DollarSign, Plus, ShoppingBag } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShoppingBag } from 'lucide-react';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
-import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
+import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
 import { getMonthlyEarnings } from '@/lib/data/seller-analytics';
@@ -30,7 +30,7 @@ export default async function SellerDashboardPage() {
             <div>
               <p className="font-medium text-amber-900">Add your payout details to get paid</p>
               <p className="mt-0.5 text-sm text-amber-800">
-                You can list and sell right away — we just need a bank account or mobile wallet before we can send your earnings.
+                You can list and sell right away. We just need a bank account or mobile wallet before we can send your earnings.
               </p>
             </div>
           </div>
@@ -42,17 +42,11 @@ export default async function SellerDashboardPage() {
 
       <PageHeader
         title={data.storeName}
-        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees — you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
-        actions={
-          <Link href="/seller/listings/new" className={buttonClasses.primary}>
-            <Plus size={16} strokeWidth={2} aria-hidden="true" />
-            Add a listing
-          </Link>
-        }
+        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees, you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
       />
 
       <section aria-label="Earnings" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={NO_PLATFORM_FEE ? 'Everything you’ve earned, all time' : `Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} tone="positive" />
+        <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={NO_PLATFORM_FEE ? 'Everything you’ve earned, all time' : `Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} featured />
         <StatCard label="Pending Payout" value={usd(data.balances.pendingPayout)} sub="Earned, not yet paid out" icon={Clock} tone="warning" />
         <StatCard label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
         <StatCard label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
@@ -78,8 +72,8 @@ export default async function SellerDashboardPage() {
               <EmptyState title="No listings yet">
                 <Link href="/seller/listings/new" className="font-medium text-ink underline underline-offset-2">
                   Add your first listing
-                </Link>{' '}
-                — it goes live once approved.
+                </Link>
+                . It goes live once approved.
               </EmptyState>
             </div>
           ) : (
@@ -114,8 +108,8 @@ export default async function SellerDashboardPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-right tabular-nums">{p.price == null ? '—' : usd(p.price)}</td>
-                      <td className="px-5 py-3 text-right font-medium tabular-nums">{p.price == null ? '—' : usd(splitSale(p.price).sellerEarning)}</td>
+                      <td className="px-5 py-3 text-right tabular-nums">{p.price == null ? '–' : usd(p.price)}</td>
+                      <td className="px-5 py-3 text-right font-medium tabular-nums">{p.price == null ? '–' : usd(splitSale(p.price).sellerEarning)}</td>
                       <td className="px-5 py-3 text-right tabular-nums">{p.salesCount}</td>
                       <td className="px-5 py-3">
                         <StatusBadge status={listingStatus(p).tone} label={listingStatus(p).label} />

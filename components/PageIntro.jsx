@@ -1,8 +1,8 @@
-/** Pill label with an indigo dot: the eyebrow above page titles (same as the homepage hero). */
+/** Pill label with a brand-yellow dot: the eyebrow above page titles (same as the homepage hero). */
 export function Eyebrow({ children, className = '' }) {
   return (
     <p className={`inline-flex items-center gap-2 rounded-full border border-stone-200 px-3.5 py-1.5 text-sm text-stone-600 ${className}`}>
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-600" />
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-500" />
       {children}
     </p>
   );

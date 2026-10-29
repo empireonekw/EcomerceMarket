@@ -52,7 +52,7 @@ export async function PUT(request, { params }) {
     refreshStorefront(previousSlug, product.slug);
     // Moderation decisions reach the seller's inbox ("From Sellpify").
     if (product.sellerId && payload?.status === 'approved') {
-      await sendSystemMessage(product.sellerId, `Good news — your listing “${product.title}” was approved and is now live on ${siteConfig.name}.`);
+      await sendSystemMessage(product.sellerId, `Good news. Your listing “${product.title}” was approved and is now live on ${siteConfig.name}.`);
     } else if (product.sellerId && payload?.status === 'rejected') {
       await sendSystemMessage(product.sellerId, `Your listing “${product.title}” wasn’t approved. Please review our listing guidelines, update it and submit it again. Questions? Reply through the contact page.`);
     }

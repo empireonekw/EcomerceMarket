@@ -74,7 +74,7 @@ export async function POST(request) {
   } catch (err) {
     if (err?.code === 11000) {
       return NextResponse.json(
-        { error: 'An account with this email already exists.', fields: { email: 'This email is already registered — try logging in.' } },
+        { error: 'An account with this email already exists.', fields: { email: 'This email is already registered. Try logging in.' } },
         { status: 409, headers: noStore },
       );
     }

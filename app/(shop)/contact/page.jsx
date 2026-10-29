@@ -23,19 +23,19 @@ export default async function ContactPage() {
       <PageIntro
         eyebrow="Contact"
         title="We’re here to help."
-        description="Questions about an order, a download, a refund or selling on the marketplace — send us a message and a real person will get back to you."
+        description="Questions about an order, a download, a refund or selling on the marketplace, send us a message and a real person will get back to you."
       />
 
       <div className="mt-12 grid gap-8 sm:mt-16 lg:grid-cols-12 lg:gap-10">
         {/* ---------- Support details ---------- */}
         <aside className="space-y-5 lg:col-span-5">
           <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-7">
-            <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
+            <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-700">
               <Mail size={20} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <h2 className="headline mt-5 text-2xl">Email support</h2>
             <p className="mt-1.5 text-sm text-stone-600">Prefer email? Write to us directly.</p>
-            <a {...gmailCompose(siteConfig.supportEmail)} className="mt-4 inline-block break-all text-lg font-medium text-brand-600 hover:underline hover:underline-offset-4">
+            <a {...gmailCompose(siteConfig.supportEmail)} className="mt-4 inline-block break-all text-lg font-medium text-brand-700 hover:underline hover:underline-offset-4">
               {siteConfig.supportEmail}
             </a>
             <p className="mt-5 flex items-center gap-2 border-t border-stone-100 pt-5 text-sm text-stone-600">

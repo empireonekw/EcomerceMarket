@@ -24,7 +24,7 @@ export default function InboxLink() {
       {unread > 0 && (
         <span
           key={unread}
-          className="absolute right-1 top-1 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-600 px-1 text-[10px] font-medium leading-none text-white ring-2 ring-white"
+          className="absolute right-1 top-1 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-medium leading-none text-ink ring-2 ring-white"
         >
           {unread > 99 ? '99+' : unread}
         </span>

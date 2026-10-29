@@ -226,7 +226,7 @@ function UploadingTile({ upload, video = false }) {
     >
       <p className="truncate text-xs text-stone-600">{upload.name}</p>
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-200">
-        <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${upload.progress}%` }} />
+        <div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${upload.progress}%` }} />
       </div>
       <p className="mt-1 text-[11px] tabular-nums text-stone-500">Uploading… {upload.progress}%</p>
     </li>
@@ -318,7 +318,7 @@ function CategoryPicker({ categories, value, onChange, error }) {
           className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-auto rounded-xl border border-stone-200 bg-white p-1.5 shadow-lift"
         >
           {matches.length === 0 ? (
-            <li className="px-4 py-3 text-sm text-stone-500">No matching category — try another word.</li>
+            <li className="px-4 py-3 text-sm text-stone-500">No matching category. Try another word.</li>
           ) : (
             matches.map((c, i) => (
               <li
@@ -589,9 +589,9 @@ export default function ListingForm({ categories, listing, uploads }) {
         </div>
         {isEdit && listing.status !== 'draft' && (
           <p className="mt-3 flex items-start gap-2 text-sm text-stone-600">
-            <Info size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-600" />
+            <Info size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-700" />
             {listing.status === 'rejected'
-              ? 'Fix what needs changing and publish — it goes back to our team for review.'
+              ? 'Fix what needs changing and publish. It goes back to our team for review.'
               : 'Publishing your changes sends this listing back for a quick review. It’s hidden from the store until it’s approved again.'}
           </p>
         )}
@@ -609,7 +609,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                 onClick={() => scrollTo(s.id)}
                 aria-current={activeSection === s.id ? 'true' : undefined}
                 className={`relative shrink-0 whitespace-nowrap border-b-2 py-4 text-[15px] transition-colors ${
-                  activeSection === s.id ? 'border-brand-600 font-medium text-brand-600' : 'border-transparent text-stone-700 hover:text-black'
+                  activeSection === s.id ? 'border-brand-600 font-medium text-brand-700' : 'border-transparent text-stone-700 hover:text-black'
                 }`}
               >
                 {s.label}
@@ -636,7 +636,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                   {values.images.length}/{LISTING_LIMITS.photos} photos · {values.videos.length}/{LISTING_LIMITS.videos} videos
                 </span>
               </div>
-              <Help>Drag to reorder. The first photo is your cover — it’s what buyers see in search. At least one photo is required.</Help>
+              <Help>Drag to reorder. The first photo is your cover. It’s what buyers see in search. At least one photo is required.</Help>
 
               <div
                 onDragOver={(e) => {
@@ -650,7 +650,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                   e.preventDefault();
                   if (e.dataTransfer.files?.length) {
                     if (uploads) addMediaFiles(e.dataTransfer.files);
-                    else setMediaError('File uploads aren’t set up on this site yet — add photos from a link instead.');
+                    else setMediaError('File uploads aren’t set up on this site yet. Add photos from a link instead.');
                   } else addPhoto(e.dataTransfer.getData('text/uri-list').split('\n')[0] || e.dataTransfer.getData('text/plain'));
                 }}
                 className={`mt-4 rounded-xl border-2 border-dashed px-5 py-9 text-center transition-colors ${
@@ -1012,8 +1012,8 @@ export default function ListingForm({ categories, listing, uploads }) {
             </div>
             {split && (
               <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                You earn <span className="font-medium">{priceCents === 0 ? '$0 — it’s free' : formatPrice(split.sellerEarning)}</span> per sale
-                {NO_PLATFORM_FEE ? ' — no platform fees.' : ` after a ${formatPrice(split.commission)} platform fee.`}
+                You earn <span className="font-medium">{priceCents === 0 ? '$0. It’s free' : formatPrice(split.sellerEarning)}</span> per sale
+                {NO_PLATFORM_FEE ? ', no platform fees.' : ` after a ${formatPrice(split.commission)} platform fee.`}
               </p>
             )}
           </Card>
@@ -1038,7 +1038,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                   <Label htmlFor="downloadUrl" required>
                     Link
                   </Label>
-                  <Help>The link buyers get after paying — e.g. a Canva template link (https://canva.link/…), a Notion page or a Figma file.</Help>
+                  <Help>The link buyers get after paying, e.g. a Canva template link (https://canva.link/…), a Notion page or a Figma file.</Help>
                   <input
                     id="downloadUrl"
                     value={values.linkUrl}
@@ -1104,7 +1104,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                       <span className="tabular-nums text-stone-500">{sourceProgress}%</span>
                     </div>
                     <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
-                      <div className="h-full rounded-full bg-brand-600 transition-[width]" style={{ width: `${sourceProgress}%` }} />
+                      <div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${sourceProgress}%` }} />
                     </div>
                   </div>
                 ) : values.fileUrl ? (
@@ -1336,7 +1336,7 @@ export default function ListingForm({ categories, listing, uploads }) {
                 onChange={(v) => update('isPublished', v === 'auto')}
                 options={[
                   { value: 'auto', label: 'Automatic', text: 'Goes live in the store as soon as it’s approved (recommended).' },
-                  { value: 'manual', label: 'Manual', text: 'Stays inactive after approval — I’ll activate it from Listings myself.' },
+                  { value: 'manual', label: 'Manual', text: 'Stays inactive after approval, I’ll activate it from Listings myself.' },
                 ]}
               />
             </div>
@@ -1376,7 +1376,7 @@ export default function ListingForm({ categories, listing, uploads }) {
         className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-4xl overflow-auto rounded-2xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/50"
       >
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-5 py-3 backdrop-blur">
-          <p className="text-sm font-medium">Preview — how buyers will see your listing</p>
+          <p className="text-sm font-medium">Preview: how buyers will see your listing</p>
           <button
             type="button"
             onClick={() => previewRef.current?.close()}
@@ -1424,7 +1424,7 @@ export default function ListingForm({ categories, listing, uploads }) {
             {values.shortDescription && <p className="mt-2 text-stone-600">{values.shortDescription}</p>}
             <p className="mt-4 flex items-baseline gap-3">
               <span className="headline text-3xl tabular-nums">
-                {Number.isInteger(priceCents) ? (priceCents === 0 ? 'Free' : formatPrice(priceCents)) : '—'}
+                {Number.isInteger(priceCents) ? (priceCents === 0 ? 'Free' : formatPrice(priceCents)) : '–'}
               </span>
               {Number.isInteger(toCents(values.compareAtPrice)) && Number.isInteger(priceCents) && toCents(values.compareAtPrice) > priceCents && (
                 <span className="text-stone-500 line-through">{formatPrice(toCents(values.compareAtPrice))}</span>

@@ -71,7 +71,7 @@ export default function PayoutDetailsForm({ initial = {} }) {
       setSuccess('Payout details saved.');
       router.refresh();
     } catch {
-      setFormError('Network error — please try again.');
+      setFormError('Network error. Please try again.');
     } finally {
       setPending(false);
     }

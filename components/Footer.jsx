@@ -7,7 +7,7 @@ import { siteConfig, gmailCompose } from '@/lib/site';
 
 const TRUST = [
   { icon: Download, title: 'Instant delivery', text: 'Download links the moment payment clears.' },
-  { icon: Lock, title: 'Secure payments', text: 'Encrypted checkout — we never store card details.' },
+  { icon: Lock, title: 'Secure payments', text: 'Encrypted checkout. We never store card details.' },
   { icon: InfinityIcon, title: 'Lifetime access', text: 'Re-download your purchases any time.' },
   { icon: BadgeCheck, title: 'Verified creators', text: 'Every product is reviewed before it goes live.' },
 ];

@@ -79,7 +79,7 @@ export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
       setSaved(true);
       router.refresh();
     } catch {
-      setFormError('Network error — please try again.');
+      setFormError('Network error. Please try again.');
     } finally {
       setPending(false);
     }
@@ -121,9 +121,9 @@ export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
 
       {mode === 'setup' && (
         <div aria-hidden="true" className="rounded-2xl border border-dashed border-stone-300 p-4">
-          <p className="text-xs text-stone-500">Preview — how buyers will see your shop</p>
+          <p className="text-xs text-stone-500">Preview: how buyers will see your shop</p>
           <div className="mt-3 flex gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-600 text-lg font-medium text-white">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-500 text-lg font-medium text-ink">
               {(name.charAt(0) || 'S').toUpperCase()}
             </span>
             <div className="min-w-0">

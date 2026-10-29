@@ -7,7 +7,7 @@ const compact = (cents) => {
 };
 
 /**
- * Monthly earnings as single-series columns (brand indigo, validated ≥3:1 on white). Pure CSS / server-rendered.
+ * Monthly earnings as single-series columns (brand yellow with a gold edge so the bars hold up on white). Pure CSS / server-rendered.
  * Columns: ≤24px wide, 4px rounded data-end, square at the shared baseline; recessive gridlines; hover/focus
  * tooltip per month (the whole column is the hit target). Pair it with a table of the same numbers.
  */
@@ -40,9 +40,9 @@ export default function EarningsChart({ months, title = 'Monthly earnings' }) {
                   key={m.month}
                   tabIndex={0}
                   aria-label={`${m.label}: ${usd(m.earnings)} earned from ${m.sales} sale${m.sales === 1 ? '' : 's'}`}
-                  className="group relative flex h-full flex-1 items-end justify-center rounded-md outline-none hover:bg-stone-100/70 focus-visible:bg-stone-100/70 focus-visible:ring-2 focus-visible:ring-brand-500"
+                  className="group relative flex h-full flex-1 items-end justify-center rounded-md outline-none hover:bg-stone-100/70 focus-visible:bg-stone-100/70 focus-visible:ring-2 focus-visible:ring-brand-700"
                 >
-                  {height > 0 && <span className="w-full max-w-6 rounded-t-[4px] bg-brand-600" style={{ height: `${height}%` }} />}
+                  {height > 0 && <span className="w-full max-w-6 rounded-t-[4px] bg-brand-500 ring-1 ring-brand-700/30 ring-inset" style={{ height: `${height}%` }} />}
                   {/* Tooltip */}
                   <span
                     role="tooltip"

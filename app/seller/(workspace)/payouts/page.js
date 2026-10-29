@@ -12,7 +12,7 @@ export const metadata = { title: 'Payouts & Bank Details' };
 const usd = (cents) => formatPrice(cents, 'USD');
 
 function payoutBlocker(data) {
-  if (data.openRequest) return `Request for ${usd(data.openRequest.amount)} sent ${formatDateTime(data.openRequest.createdAt).date} — awaiting payment.`;
+  if (data.openRequest) return `Request for ${usd(data.openRequest.amount)} sent ${formatDateTime(data.openRequest.createdAt).date}, awaiting payment.`;
   if (data.balances.pendingPayout <= 0) return 'Your pending balance is empty.';
   if (!data.hasPayoutMethod) return 'Add bank or wallet details below first.';
   return null;
@@ -28,7 +28,7 @@ export default async function SellerPayoutsPage() {
     <>
       <PageHeader
         title="Payouts & Bank Details"
-        description={`${NO_PLATFORM_FEE ? 'No platform fees — you keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance — our team sends it to the details below.`}
+        description={`${NO_PLATFORM_FEE ? 'No platform fees. You keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance. Our team sends it to the details below.`}
       />
 
       {!data.hasPayoutMethod && (

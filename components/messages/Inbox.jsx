@@ -52,7 +52,7 @@ function ConversationRow({ conv, checked, onCheck, onOpen, onStar }) {
         <Initial name={name} />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
-            {conv.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-600" />}
+            {conv.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-500" />}
             <span className={`truncate text-[15px] ${conv.unread ? 'font-bold text-ink' : 'font-medium text-stone-800'}`}>{name}</span>
             {conv.side === 'seller' && conv.kind === 'direct' && (
               <span className={`hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline ${conv.buyerIsCustomer ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-200/70 text-stone-600'}`}>
@@ -67,7 +67,7 @@ function ConversationRow({ conv, checked, onCheck, onOpen, onStar }) {
             ))}
           </span>
           <span className={`mt-0.5 block truncate text-sm ${conv.unread ? 'font-medium text-stone-800' : 'text-stone-500'}`}>
-            {conv.product && <span className="text-stone-500">{conv.product.title} — </span>}
+            {conv.product && <span className="text-stone-500">{conv.product.title}: </span>}
             {snippet}
           </span>
         </span>
@@ -207,7 +207,7 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
           delete: `${n} deleted.`,
           archive: `${n} archived.`,
           inbox: `${n} moved to your Inbox.`,
-          report: `${n} reported and moved to Spam. Thanks — our team will take a look.`,
+          report: `${n} reported and moved to Spam. Thanks. Our team will take a look.`,
           notspam: `${n} marked as not spam.`,
           read: `${n} marked as read.`,
           unread: `${n} marked as unread.`,
