@@ -15,6 +15,14 @@
   --color-ink: #141414;
   --color-beige: #f3ede2; /* warm neutral for large calm surfaces (footer) */
   --color-beige-dark: #e7dfd0; /* hover / dividers on beige */
+  --color-paper: #faf8f3; /* warm off-white canvas (homepage hero) */
+  /* Flat pastel panels (homepage categories / sections): tinted surfaces, never for text or buttons. */
+  --color-highlight: #f7dc6f; /* highlighter stroke under the hero's accent words */
+  --color-tint-mint: #dcf1e6;
+  --color-tint-butter: #fbefc4;
+  --color-tint-blush: #f9e3dc;
+  --color-tint-sky: #dfeaf7;
+  --color-tint-sage: #e6eddc;
 
   /* The one elevation: a soft, wide lift for hovered cards and floating panels. */
   --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.1);
@@ -25,6 +33,50 @@
   /* Hero gallery (components/home/HeroShowcase.jsx): the track holds two identical copies, so -50% = one seamless loop. */
   --animate-marquee-x: marquee-x 60s linear infinite;
   --animate-marquee-y: marquee-y 60s linear infinite;
+  /* Homepage hero entrance (components/home/HeroShowcase.jsx): text rises in, colour shapes grow, photos float up,
+     then the shapes slowly morph and the photo clusters drift. Stagger with [animation-delay:…]. */
+  --animate-hero-rise: hero-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-hero-photo: hero-photo 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-hero-blob: hero-pop 1.3s cubic-bezier(0.22, 1, 0.36, 1) both, blob-morph 14s ease-in-out 1.3s infinite alternate;
+  --animate-hero-float: hero-float 6s ease-in-out 1.6s infinite alternate;
+  --animate-hero-draw: hero-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) 1.1s both;
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translate3d(0, 28px, 0);
+    }
+  }
+  @keyframes hero-photo {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 56px, 0) scale(0.9);
+    }
+  }
+  @keyframes hero-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+  @keyframes hero-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes hero-float {
+    to {
+      transform: translate3d(0, -12px, 0);
+    }
+  }
+  @keyframes blob-morph {
+    to {
+      border-radius: 44% 56% 62% 38% / 58% 42% 58% 42%;
+    }
+  }
   @keyframes marquee-x {
     to {
       transform: translate3d(-50%, 0, 0);

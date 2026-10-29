@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowDown, ArrowUp, ChevronsUpDown, Search, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
-import { categorySlug, MAX_CATEGORY_LEVELS, orderTree, subtreeLevels } from '@/lib/category-tree';
+import { siteConfig } from '@/lib/site';
+import { CATEGORY_TYPES, categoryHref, categorySlug, categoryTypeLabel, MAX_CATEGORY_LEVELS, orderTree, subtreeLevels } from '@/lib/category-tree';
 
-const EMPTY = { name: '', slug: '', parent: '', description: '' };
+const siteHost = siteConfig.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const EMPTY = { name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
 const inputCls = (err) =>
   `mt-1.5 w-full rounded-xl border bg-white px-3.5 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
@@ -88,7 +90,15 @@ export default function CategoryManager({ categories }) {
 
   function startEdit(c) {
     setEditingId(c._id);
-    setValues({ name: c.name, slug: c.slug, parent: c.parent ?? '', description: c.description ?? '' });
+    setValues({
+      name: c.name,
+      slug: c.slug,
+      parent: c.parent ?? '',
+      description: c.description ?? '',
+      type: c.type ?? 'digital',
+      metaTitle: c.metaTitle ?? '',
+      metaDescription: c.metaDescription ?? '',
+    });
     setSlugTouched(true); // an existing slug is part of live URLs: never rewrite it silently
     setErrors({});
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -292,9 +302,70 @@ export default function CategoryManager({ categories }) {
               className={`${inputCls(errors.description)} resize-y py-2.5 leading-relaxed`}
             />
             <FieldHelp id="cat-description-help" error={errors.description}>
-              {values.description.length}/300 · Shown in the Shop menu for main categories.
+              {values.description.length}/300 · Shown on the category page and in the Shop menu.
             </FieldHelp>
           </div>
+
+          <div>
+            <label htmlFor="cat-type" className="text-sm font-medium">
+              What can be listed here
+            </label>
+            <select id="cat-type" value={values.type} onChange={(e) => update('type', e.target.value)} className={`${inputCls()} h-11`}>
+              {CATEGORY_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+            <FieldHelp>Shown as a badge when sellers search for a category.</FieldHelp>
+          </div>
+
+          {/* ---------- SEO ---------- */}
+          <fieldset className="space-y-4 rounded-xl border border-stone-200 p-4">
+            <legend className="px-1 text-sm font-medium">Search engines (SEO)</legend>
+            <p className="break-all rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-600">
+              {siteHost}
+              {categoryHref({
+                slugPath: [
+                  ...(byId.get(values.parent)?.slugPath ? [byId.get(values.parent).slugPath] : []),
+                  categorySlug(values.slug || values.name) || 'slug',
+                ].join('/'),
+              })}
+            </p>
+            <div>
+              <label htmlFor="cat-metaTitle" className="text-sm font-medium">
+                SEO title <span className="font-normal text-stone-400">(optional)</span>
+              </label>
+              <input
+                id="cat-metaTitle"
+                value={values.metaTitle}
+                maxLength={70}
+                placeholder={values.name || 'Defaults to the name'}
+                onChange={(e) => update('metaTitle', e.target.value)}
+                aria-invalid={Boolean(errors.metaTitle) || undefined}
+                className={`${inputCls(errors.metaTitle)} h-11`}
+              />
+              <FieldHelp error={errors.metaTitle}>{values.metaTitle.length}/70 · The page title in Google results.</FieldHelp>
+            </div>
+            <div>
+              <label htmlFor="cat-metaDescription" className="text-sm font-medium">
+                SEO description <span className="font-normal text-stone-400">(optional)</span>
+              </label>
+              <textarea
+                id="cat-metaDescription"
+                rows={3}
+                maxLength={160}
+                value={values.metaDescription}
+                placeholder={values.description || 'Defaults to the description'}
+                onChange={(e) => update('metaDescription', e.target.value)}
+                aria-invalid={Boolean(errors.metaDescription) || undefined}
+                className={`${inputCls(errors.metaDescription)} resize-y py-2.5 leading-relaxed`}
+              />
+              <FieldHelp error={errors.metaDescription}>
+                {values.metaDescription.length}/160 · The snippet under the title in Google results.
+              </FieldHelp>
+            </div>
+          </fieldset>
 
           <div className="flex flex-wrap gap-2 pt-1">
             <button type="submit" disabled={saving} className="btn btn-md btn-primary">
@@ -451,7 +522,7 @@ export default function CategoryManager({ categories }) {
                                   |
                                 </span>
                                 <a
-                                  href={`/products?category=${c.slug}`}
+                                  href={categoryHref(c)}
                                   target="_blank"
                                   rel="noopener"
                                   className="font-medium text-stone-600 hover:text-black hover:underline"
@@ -465,7 +536,12 @@ export default function CategoryManager({ categories }) {
                         <td className="max-w-[18rem] px-4 py-3 text-stone-600">
                           {c.description ? <span className="line-clamp-2">{c.description}</span> : <span className="text-stone-300">—</span>}
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-stone-600">{c.slug}</td>
+                        <td className="px-4 py-3">
+                          <span className="block font-mono text-xs text-stone-600">{categoryHref(c)}</span>
+                          <span className="mt-1 inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">
+                            {categoryTypeLabel(c.type)}
+                          </span>
+                        </td>
                         <td className="px-4 py-3 text-right tabular-nums">
                           {c.count > 0 ? (
                             <Link href={`/admin/products?category=${c._id}`} className="font-medium text-brand-600 hover:underline">

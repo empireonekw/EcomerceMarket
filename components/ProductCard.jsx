@@ -4,6 +4,7 @@ import { ArrowUpRight, Download, Flame } from 'lucide-react';
 import AddToCartButton from '@/components/AddToCartButton';
 import CategoryIcon from '@/components/CategoryIcon';
 import { formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { categoryHref } from '@/lib/category-tree';
 
 // Earned, not hand-picked: products with at least this many sales get the "Bestseller" badge.
 const BESTSELLER_MIN_SALES = 250;
@@ -70,10 +71,10 @@ export default function ProductCard({ product, preload = false }) {
           <p className="flex min-w-0 items-center gap-2 text-xs text-stone-500">
             {category?.name && (
               <Link
-                href={`/products?category=${category.slug}`}
+                href={categoryHref(category)}
                 className="relative z-10 inline-flex shrink-0 items-center gap-1.5 font-medium text-stone-700 transition-colors hover:text-brand-600"
               >
-                <CategoryIcon slug={category.slug} className="size-3.5" />
+                <CategoryIcon slug={(category.slugPath ?? category.slug).split('/')[0]} className="size-3.5" />
                 {category.name}
               </Link>
             )}

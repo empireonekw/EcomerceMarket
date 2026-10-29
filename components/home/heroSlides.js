@@ -17,8 +17,10 @@ export const HERO_SLIDES = [
   { src: unsplash('1573227890085-12ab5d68a170'), alt: 'Handmade leather teardrop earrings' },
 ];
 
-// Optional photo behind the whole hero, softened by a white veil so the text stays crisp (HeroShowcase.jsx).
-// To remove it, set this to null.
-export const HERO_BACKGROUND = {
-  src: 'https://images.unsplash.com/photo-1631945788919-24e76faead25?auto=format&fit=crop&w=2000&q=70', // cotton cord spools on a wooden table
-};
+// The four photos framing the hero headline: left top, left bottom, right top, right bottom.
+// Phones and tablets show left top, right top and right bottom in a row.
+export const HERO_PHOTOS = [HERO_SLIDES[0], HERO_SLIDES[1], HERO_SLIDES[2], HERO_SLIDES[3]];
+
+// Optional photo behind the whole hero, under a paper-coloured veil (HeroShowcase.jsx). null = the faint grid instead.
+// e.g. { src: 'https://images.unsplash.com/photo-1631945788919-24e76faead25?auto=format&fit=crop&w=2000&q=70' } (cotton cord spools)
+export const HERO_BACKGROUND = null;

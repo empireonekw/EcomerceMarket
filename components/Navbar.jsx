@@ -14,9 +14,9 @@ async function loadCategories() {
   try {
     return await getCategories(); // cached (unstable_cache) — no DB hit per request
   } catch (err) {
-    // The header must never take the whole page down; fall back to static nav.
+    // The header must never take the whole page down: show it without the category list.
     console.error('[Navbar] categories unavailable', err);
-    return siteConfig.navCategories.map(({ label, slug }) => ({ name: label, slug }));
+    return [];
   }
 }
 
@@ -47,7 +47,7 @@ function AnnouncementBar() {
 }
 
 /**
- * Storefront header: compact announcement strip + sticky white bar.
+ * Storefront header: compact announcement strip + sticky bar on the warm paper tone of the homepage hero.
  * Server Component; the interactive parts (active link, Shop dropdown, account menu, cart badge,
  * mobile menu) are small client islands, so the shell renders instantly and pages stay static.
  */
@@ -57,7 +57,7 @@ export default async function Navbar() {
   return (
     <>
       <AnnouncementBar />
-      <header className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-paper/95 backdrop-blur supports-[backdrop-filter]:bg-paper/85">
         {/* 3 columns on desktop so the centre nav stays centred regardless of logo/utility widths. */}
         <div className="container-page relative flex items-center justify-between gap-4 py-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6">
           <Logo />

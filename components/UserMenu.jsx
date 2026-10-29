@@ -59,7 +59,7 @@ function RoleBadge({ role }) {
   return <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">{ROLE_BADGES[role]}</span>;
 }
 
-const iconBtn = 'grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-stone-100 hover:text-black';
+const iconBtn = 'grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-white hover:text-black';
 
 function UserIcon() {
   return (
@@ -186,7 +186,7 @@ export default function UserMenu() {
         aria-controls={panelId}
         aria-haspopup={user ? 'menu' : 'dialog'}
         aria-label={user ? `Account menu for ${user.name}` : 'Account: log in or create an account'}
-        className={`${iconBtn} relative ${open ? 'bg-stone-100 text-black' : ''}`}
+        className={`${iconBtn} relative ${open ? 'bg-white text-black' : ''}`}
       >
         <UserIcon />
         {user && <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 rounded-full bg-emerald-500 ring-2 ring-white" />}

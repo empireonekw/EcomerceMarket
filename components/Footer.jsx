@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { BadgeCheck, Download, Infinity as InfinityIcon, Lock } from 'lucide-react';
 import Logo from '@/components/Logo';
+import { categoryHref } from '@/lib/category-tree';
+import { getCategories } from '@/lib/data/categories';
 import { siteConfig } from '@/lib/site';
 
 const TRUST = [
@@ -10,11 +12,17 @@ const TRUST = [
   { icon: BadgeCheck, title: 'Verified creators', text: 'Every product is reviewed before it goes live.' },
 ];
 
+/** Main categories for the Shop column (cached list); a database hiccup falls back to "All products" only. */
+async function shopLinks() {
+  try {
+    return (await getCategories()).filter((c) => !c.parent).slice(0, 6).map((c) => ({ label: c.name, href: categoryHref(c) }));
+  } catch (err) {
+    console.error('[Footer] categories unavailable', err);
+    return [];
+  }
+}
+
 const LINK_GROUPS = [
-  {
-    title: 'Shop',
-    links: siteConfig.navCategories.map((c) => ({ label: c.label, href: `/products?category=${c.slug}` })),
-  },
   {
     title: 'Discover',
     links: [
@@ -43,7 +51,9 @@ const LEGAL = [
  * Site footer: a wave out of the white page into a warm beige block — call to action, trust points,
  * link columns, then the brand line and a slim legal bar. Pure server markup (no client JS).
  */
-export default function Footer() {
+export default async function Footer() {
+  const shop = await shopLinks();
+  const groups = [{ title: 'Shop', links: shop.length ? shop : [{ label: 'All products', href: '/products' }] }, ...LINK_GROUPS];
   return (
     <footer className="mt-24 text-ink sm:mt-32">
       {/* Wavy top edge (same colour as the block below, so the two read as one shape). */}
@@ -84,7 +94,7 @@ export default function Footer() {
 
             {/* ---------- Link columns ---------- */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:justify-items-end">
-              {LINK_GROUPS.map((group) => (
+              {groups.map((group) => (
                 <nav key={group.title} aria-label={group.title} className="lg:min-w-36">
                   <p className="headline text-2xl">{group.title}</p>
                   <ul className="mt-5 space-y-3.5">

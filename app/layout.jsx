@@ -4,7 +4,7 @@ import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 // Editorial serif for the homepage hero headline (variable font: every weight, plus optical sizing for large text).
-const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-fraunces', axes: ['opsz'] });
+const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--font-fraunces', axes: ['opsz'], style: ['normal', 'italic'] });
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),

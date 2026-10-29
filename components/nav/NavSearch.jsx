@@ -171,7 +171,7 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
           aria-expanded={showPanel}
           aria-controls={listboxId}
           aria-activedescendant={showPanel && active >= 0 ? optionId(active) : undefined}
-          className={`peer h-10 rounded-full border border-transparent bg-stone-100 pl-10 pr-4 text-sm placeholder:text-stone-500 transition-colors focus:border-stone-300 focus:bg-white focus:outline-none [&::-webkit-search-cancel-button]:hidden ${
+          className={`peer h-10 rounded-full border border-stone-200 bg-white pl-10 pr-4 text-sm placeholder:text-stone-500 transition-colors focus:border-stone-400 focus:outline-none [&::-webkit-search-cancel-button]:hidden ${
             block ? 'w-full' : 'w-44 xl:w-56'
           }`}
         />
