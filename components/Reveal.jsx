@@ -1,36 +1,12 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-
 /**
- * Fades and lifts its content in when it scrolls into view (`delay` in ms staggers siblings). Server-rendered visible,
- * and only hidden after mount while still below the fold, so nothing depends on JS to be seen, nothing already on
- * screen ever blinks, and "reduce motion" leaves everything static. Styles: .reveal-hidden / .reveal-shown (globals.css).
+ * Fades and lifts its content in as it scrolls into view, driven by the scroll position itself (CSS scroll-driven
+ * animation, `.reveal` in globals.css). No JavaScript: content is always rendered visible, never waits for the page's
+ * scripts, and anything already on screen simply shows. `delay` (ms) staggers siblings by starting their fade a little
+ * later in the scroll. Browsers without scroll-driven animations, and "reduce motion", show everything static.
  */
 export default function Reveal({ as: Tag = 'div', delay = 0, className = '', style, children, ...rest }) {
-  const ref = useRef(null);
-  const [state, setState] = useState('static'); // static → hidden → shown
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return; // already on screen: leave it alone
-    setState('hidden');
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setState('shown');
-        io.disconnect();
-      },
-      { rootMargin: '0px 0px -10% 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const motion = state === 'hidden' ? 'reveal-hidden' : state === 'shown' ? 'reveal-shown' : '';
   return (
-    <Tag ref={ref} className={`${className} ${motion}`} style={{ ...style, '--reveal-delay': `${delay}ms` }} {...rest}>
+    <Tag className={`reveal ${className}`} style={{ ...style, '--reveal-offset': `${Math.min(delay, 400) / 40}%` }} {...rest}>
       {children}
     </Tag>
   );

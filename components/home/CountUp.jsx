@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-const DURATION = 1600;
+const DURATION = 1200;
 const easeOut = (t) => 1 - (1 - t) ** 3;
 
 /**
@@ -31,7 +31,7 @@ export default function CountUp({ value, suffix = '', className = '' }) {
         };
         frame = requestAnimationFrame(tick);
       },
-      { threshold: 0.6 },
+      { threshold: 0.25 },
     );
     io.observe(el);
     return () => {
