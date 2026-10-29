@@ -8,18 +8,20 @@ const SOCKET_ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localh
  * HTML. 'unsafe-inline' stays for Next.js's own inline bootstrap scripts: the nonce alternative forces every page to
  * render per request and would switch off the caching the storefront relies on (node_modules/next/dist/docs/01-app/
  * 02-guides/content-security-policy.md). React needs 'unsafe-eval' in development only.
- * connect-src: this site (API + Socket.IO) and Vercel Blob for seller uploads. No plugins, no framing, forms post here.
+ * connect-src: this site (API + Socket.IO), Vercel Blob for seller uploads, reCAPTCHA. No plugins, no one may frame
+ * this site, forms post here. The only third parties allowed at all are Google reCAPTCHA and Vercel Blob.
  */
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isProd ? '' : " 'unsafe-eval'"}`,
+  // Google reCAPTCHA (login / sign-up): its script from google.com + gstatic.com, its checkbox in a google.com frame.
+  `script-src 'self' 'unsafe-inline' https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/${isProd ? '' : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "media-src 'self' blob: https:",
   "font-src 'self' data:",
   // The live-chat socket is same-origin; its wss:// address is listed too because older Safari doesn't count ws(s) as 'self'.
-  `connect-src 'self' ${SOCKET_ORIGIN} https://vercel.com https://*.blob.vercel-storage.com${isProd ? '' : ' ws: wss:'}`,
-  "frame-src 'none'",
+  `connect-src 'self' ${SOCKET_ORIGIN} https://vercel.com https://*.blob.vercel-storage.com https://www.google.com/recaptcha/${isProd ? '' : ' ws: wss:'}`,
+  "frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

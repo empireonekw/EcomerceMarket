@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import { publicUser, isSameOrigin } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { validateName, validateEmail, validatePassword, normalizeEmail } from '@/lib/validation';
+import { verifyCaptcha } from '@/lib/captcha';
+import { checkSignupEmail } from '@/lib/email-guard';
 import User from '@/models/User';
 
 const noStore = { 'Cache-Control': 'no-store' };
@@ -17,7 +19,10 @@ const noStore = { 'Cache-Control': 'no-store' };
 export async function POST(request) {
   if (!isSameOrigin(request)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403, headers: noStore });
 
-  const limit = rateLimit(`signup:${clientIp(request)}`, { limit: 5, windowMs: 60 * 60 * 1000 });
+  // Per network: 5 accounts an hour and 15 a day (stops scripted mass sign-ups even if they solve the captcha).
+  const ip = clientIp(request);
+  const hourly = rateLimit(`signup:${ip}`, { limit: 5, windowMs: 60 * 60 * 1000 });
+  const limit = hourly.ok ? rateLimit(`signup:day:${ip}`, { limit: 15, windowMs: 24 * 60 * 60 * 1000 }) : hourly;
   if (!limit.ok) {
     return NextResponse.json(
       { error: 'Too many accounts created from this network. Please try again later.' },
@@ -46,6 +51,12 @@ export async function POST(request) {
   if (Object.keys(fields).length) {
     return NextResponse.json({ error: 'Please fix the highlighted fields.', fields }, { status: 400, headers: noStore });
   }
+
+  // "I'm not a robot" (lib/captcha.js), then no throwaway inboxes or domains that can't receive mail (lib/email-guard.js).
+  const captcha = await verifyCaptcha(body?.captchaToken, clientIp(request));
+  if (!captcha.ok) return NextResponse.json({ error: captcha.error, fields: { captcha: captcha.error } }, { status: 400, headers: noStore });
+  const emailProblem = await checkSignupEmail(email);
+  if (emailProblem) return NextResponse.json({ error: emailProblem, fields: { email: emailProblem } }, { status: 400, headers: noStore });
 
   try {
     await connectDB();

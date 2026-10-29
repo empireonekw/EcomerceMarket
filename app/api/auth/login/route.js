@@ -5,6 +5,7 @@ import { setSessionCookies, publicUser, isSameOrigin } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { normalizeEmail } from '@/lib/validation';
 import { ensureOwnerAdmin, isOwnerAdminEmail } from '@/lib/owner-admin';
+import { verifyCaptcha } from '@/lib/captcha';
 import User from '@/models/User';
 
 const noStore = { 'Cache-Control': 'no-store' };
@@ -26,9 +27,9 @@ export async function POST(request) {
   const perIp = rateLimit(`login:${clientIp(request)}`, { limit: 10, windowMs: 15 * 60 * 1000 });
   if (!perIp.ok) return tooMany(perIp.retryAfterMs);
 
-  let email, password;
+  let email, password, captchaToken;
   try {
-    ({ email, password } = await request.json());
+    ({ email, password, captchaToken } = await request.json());
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400, headers: noStore });
   }
@@ -41,6 +42,10 @@ export async function POST(request) {
   // so rotating IPs must not allow unlimited guesses against one email.
   const perAccount = rateLimit(`login:acct:${email}`, { limit: 10, windowMs: 15 * 60 * 1000 });
   if (!perAccount.ok) return tooMany(perAccount.retryAfterMs);
+
+  // "I'm not a robot" (lib/captcha.js) — before any database or password work.
+  const captcha = await verifyCaptcha(captchaToken, clientIp(request));
+  if (!captcha.ok) return NextResponse.json({ error: captcha.error, fields: { captcha: captcha.error } }, { status: 400, headers: noStore });
 
   try {
     await connectDB();

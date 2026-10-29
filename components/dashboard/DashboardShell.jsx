@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowUpRight, Banknote, FolderTree, LayoutDashboard, Mail, Menu, MessageSquare, Package, Plus, Receipt, Store, Users } from 'lucide-react';
+import { Activity, ArrowUpRight, Banknote, FolderTree, LayoutDashboard, Mail, Menu, MessageSquare, Package, Plus, Receipt, Store, Users } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
 import SignOutButton from '@/components/SignOutButton';
 import { useMessaging } from '@/components/messages/MessagingProvider';
@@ -23,6 +23,7 @@ const AREAS = {
       { href: '/admin/orders', label: 'Orders & Sales', icon: Receipt, match: (p) => p.startsWith('/admin/orders') },
       { href: '/admin/payouts', label: 'Seller Payouts', icon: Banknote, match: (p) => p.startsWith('/admin/payouts') },
       { href: '/admin/messages', label: 'Messages', icon: Mail, match: (p) => p.startsWith('/admin/messages'), badge: 'unread' },
+      { href: '/admin/system', label: 'System Health', icon: Activity, match: (p) => p.startsWith('/admin/system') },
     ],
   },
   seller: {

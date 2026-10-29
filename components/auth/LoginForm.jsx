@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check } from 'lucide-react';
 import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateEmail } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
+import Recaptcha, { recaptchaEnabled } from '@/components/auth/Recaptcha';
 
 // Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /seller/onboarding.
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
@@ -19,6 +20,9 @@ export default function LoginForm({ next, registered = false }) {
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [pending, setPending] = useState(false);
+  const [captcha, setCaptcha] = useState(null); // reCAPTCHA token (single-use)
+  const [captchaError, setCaptchaError] = useState(null);
+  const captchaRef = useRef(null);
 
   // Pick up the email SignupForm left in sessionStorage (one-time) and jump straight to the password.
   useEffect(() => {
@@ -52,12 +56,16 @@ export default function LoginForm({ next, registered = false }) {
       document.getElementById(Object.keys(found)[0])?.focus();
       return;
     }
+    if (recaptchaEnabled && !captcha) return setCaptchaError('Please confirm you’re not a robot.');
 
     setPending(true);
-    const result = await login(values.email.trim(), values.password).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
+    const result = await login(values.email.trim(), values.password, captcha).catch(() => ({ ok: false, error: 'Network error — please try again.' }));
     if (!result.ok) {
-      setFormError(result.error);
-      setErrors(result.fields ?? {});
+      const { captcha: captchaMessage, ...fields } = result.fields ?? {};
+      setFormError(captchaMessage ? null : result.error);
+      setErrors(fields);
+      setCaptchaError(captchaMessage ?? null);
+      captchaRef.current?.reset(); // each token works once
       setPending(false);
       return;
     }
@@ -102,6 +110,15 @@ export default function LoginForm({ next, registered = false }) {
         <PasswordInput id="password" autoComplete="current-password" placeholder="Your password" value={values.password} onChange={onChange} error={errors.password} />
         <FieldError id="password-error">{errors.password}</FieldError>
       </div>
+
+      <Recaptcha
+        ref={captchaRef}
+        error={captchaError}
+        onChange={(token) => {
+          setCaptcha(token);
+          if (token) setCaptchaError(null);
+        }}
+      />
 
       <div className="pt-1">
         <SubmitButton pending={pending} pendingLabel="Logging in…">

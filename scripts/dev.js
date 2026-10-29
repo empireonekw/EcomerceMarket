@@ -59,7 +59,8 @@ function openTunnel() {
     if (!everConnected) {
       // Never got in (key not allowed on the server yet, wrong user, no network): retrying won't help.
       console.error('[db-tunnel] Could not connect to the database server (see the ssh message above).');
-      console.error('[db-tunnel] New on this project? Run  npm run dev:key  and send the command it prints to the server admin.');
+      console.error('[db-tunnel] New on this project? Run  npm run dev:key -- --install  (asks for the server password once),');
+      console.error('[db-tunnel] or  npm run dev:key  and send the command it prints to the server admin.');
       return;
     }
     console.error('[db-tunnel] Connection to the database server closed; reconnecting in 5 s…');
@@ -69,7 +70,8 @@ function openTunnel() {
 
 if (target && localPort && !existsSync(key)) {
   console.warn(`[db-tunnel] No SSH key at ${key}, so no connection to the database server.`);
-  console.warn('[db-tunnel] Run  npm run dev:key  once and send the command it prints to the server admin.');
+  console.warn('[db-tunnel] Run  npm run dev:key -- --install  once (asks for the server password), or  npm run dev:key');
+  console.warn('[db-tunnel] and send the command it prints to the server admin.');
 } else if (target && localPort) {
   if (await portIsOpen(localPort)) {
     console.log(`[db-tunnel] Port ${localPort} is already open (a tunnel is running); using it.`);

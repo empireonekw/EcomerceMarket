@@ -27,7 +27,9 @@ DEMO_CHECKOUT=false
 ```
 
 Each developer has their own key: run `npm run dev:key` once. It creates `~/.ssh/sellpify_dev_tunnel` (never share
-that file) and prints one command with your public key; the server admin pastes it in the server terminal. The key
+that file) and prints one command with your public key; the server admin pastes it in the server terminal. If you
+have the server password yourself, run `npm run dev:key -- --install` instead: it asks for the password once, adds
+your key on the server and checks it works. The key
 may only forward to MongoDB: its line in the server's `/root/.ssh/authorized_keys` starts with
 `restrict,port-forwarding,permitopen="127.0.0.1:27017"`. To remove someone, delete their line there. Without `DEV_DB_TUNNEL`, `npm run dev` just runs
 `node server.js --dev` with `.env.local`. It is the live data: test orders, users and products appear on sellpify.com.
