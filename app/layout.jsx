@@ -8,7 +8,7 @@ const fraunces = Fraunces({ subsets: ['latin'], display: 'swap', variable: '--fo
 
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: { default: `${siteConfig.name} — Templates, E-books, Software & Vectors`, template: `%s | ${siteConfig.name}` },
+  title: { default: `${siteConfig.name} — Digital Products, Physical Goods & Services`, template: `%s | ${siteConfig.name}` },
   description: siteConfig.description,
   openGraph: {
     type: 'website',

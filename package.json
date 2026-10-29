@@ -16,8 +16,7 @@
     "seed:messaging": "node --env-file=.env.local scripts/seed-messaging-test.js",
     "db:indexes": "node --env-file=.env.local scripts/sync-indexes.js",
     "create-admin": "node --env-file=.env.local scripts/create-admin.js",
-    "migrate:marketplace": "node --env-file=.env.local scripts/migrate-marketplace.js",
-    "migrate:categories": "node --env-file=.env.local scripts/migrate-categories.js"
+    "migrate:marketplace": "node --env-file=.env.local scripts/migrate-marketplace.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.1",

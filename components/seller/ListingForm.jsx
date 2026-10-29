@@ -234,61 +234,6 @@ function UploadingTile({ upload, video = false }) {
 }
 
 /**
- * Step-by-step category choice: main category → its sub-categories → their inner categories. The listing's category
- * is only set once the most specific level is chosen (a category without children). Stores the id; mirrors a pick
- * made with the search below.
- */
-function CategoryStepper({ categories, value, onChange, error }) {
-  const byId = useMemo(() => new Map(categories.map((c) => [c._id, c])), [categories]);
-  const childrenOf = (id) => categories.filter((c) => (c.parent ?? null) === id);
-  const [draft, setDraft] = useState([]); // chosen ids while the pick is still incomplete
-  const selected = byId.get(value);
-  const chain = selected ? [...selected.ancestors, selected._id] : draft;
-
-  function choose(level, id) {
-    const next = [...chain.slice(0, level), ...(id ? [id] : [])];
-    setDraft(next);
-    onChange(id && childrenOf(id).length === 0 ? id : '');
-  }
-
-  const levels = [
-    { label: 'Main category', options: childrenOf(null) },
-    { label: 'Sub-category', options: chain[0] ? childrenOf(chain[0]) : [] },
-    { label: 'Inner category', options: chain[1] ? childrenOf(chain[1]) : [] },
-  ].filter((l, i) => i === 0 || l.options.length > 0);
-
-  return (
-    <div className="grid max-w-3xl gap-3 sm:grid-cols-3">
-      {levels.map((level, i) => (
-        <div key={level.label}>
-          <label htmlFor={i === 0 ? 'category' : `category-${i}`} className="mb-1.5 block text-xs font-medium text-stone-500">
-            {level.label}
-          </label>
-          <div className="relative">
-            <select
-              id={i === 0 ? 'category' : `category-${i}`}
-              value={chain[i] ?? ''}
-              onChange={(e) => choose(i, e.target.value)}
-              aria-invalid={(i === levels.length - 1 && Boolean(error)) || undefined}
-              aria-describedby={error ? 'category-error' : undefined}
-              className={`${inputCls(i === levels.length - 1 && error)} h-12 appearance-none pr-10`}
-            >
-              <option value="">Choose…</option>
-              {level.options.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-500" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/**
  * Etsy-style category search: type anything (typos are fine — "rsuem" finds "Résumé Templates"), then pick a result.
  * Each result shows its parent path and what can be listed there (Digital / Physical or digital). Stores the id.
  */
@@ -315,13 +260,13 @@ function CategoryPicker({ categories, value, onChange, error }) {
     onChange('');
     setQuery('');
     setOpen(true);
-    document.getElementById('category-search')?.focus();
+    document.getElementById('category')?.focus();
   }
 
   return (
     <div className="relative max-w-xl">
       <input
-        id="category-search"
+        id="category"
         role="combobox"
         aria-expanded={open}
         aria-controls={`${id}-list`}
@@ -331,7 +276,7 @@ function CategoryPicker({ categories, value, onChange, error }) {
         aria-describedby={error ? 'category-error' : selected ? `${id}-path` : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder="Or search, e.g. résumé, crochet, logo design"
+        placeholder="Type to search, e.g. résumé, crochet, logo"
         value={query}
         onChange={(e) => {
           setQuery(e.target.value);
@@ -908,24 +853,12 @@ export default function ListingForm({ categories, listing, uploads }) {
               <Label htmlFor="category" required>
                 Category
               </Label>
-              <Help>Choose the main category, then a sub-category, then the inner category that fits best.</Help>
-              <CategoryStepper
+              <CategoryPicker
                 categories={categories}
                 value={values.category}
                 onChange={(id) => (update('category', id), touch('category'))}
                 error={show('category')}
               />
-              <div className="mt-3">
-                <label htmlFor="category-search" className="sr-only">
-                  Search categories
-                </label>
-                <CategoryPicker
-                  categories={categories}
-                  value={values.category}
-                  onChange={(id) => (update('category', id), touch('category'))}
-                  error={show('category')}
-                />
-              </div>
               <ErrorText id="category-error">{show('category')}</ErrorText>
             </div>
 

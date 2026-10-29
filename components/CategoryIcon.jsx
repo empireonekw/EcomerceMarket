@@ -1,5 +1,5 @@
 // Inline SVG icons keyed by main-category slug — zero network requests, no icon library.
-// New main categories added in Admin › Categories get the grid fallback until an icon is added here.
+// Admins create their own categories; any slug without an icon here gets the grid fallback.
 const PATHS = {
   'paper-party-supplies': (
     <>
@@ -59,16 +59,8 @@ const PATHS = {
       <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18" />
     </>
   ),
-  'templates-legacy': (
-    <>
-      <rect x="3" y="4" width="18" height="16" rx="2" />
-      <path d="M3 9h18M9 9v11" />
-    </>
-  ),
 };
 
-// The old flat categories (before `npm run migrate:categories`) keep their icons.
-const ALIASES = { templates: 'templates-legacy', ebooks: 'books-movies-music', software: 'software-tools', 'vector-packs': 'design-assets' };
 const FALLBACK = (
   <>
     <rect x="4" y="4" width="7" height="7" rx="1.5" />
@@ -81,7 +73,7 @@ const FALLBACK = (
 export default function CategoryIcon({ slug, className = 'size-6' }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="1.6">
-      {PATHS[slug] ?? PATHS[ALIASES[slug]] ?? FALLBACK}
+      {PATHS[slug] ?? FALLBACK}
     </svg>
   );
 }

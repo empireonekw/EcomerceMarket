@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BadgeCheck, Download, Infinity as InfinityIcon, Lock } from 'lucide-react';
+import { BadgeCheck, Clock, Download, Infinity as InfinityIcon, Lock, Mail, MapPin, MessageSquare } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { categoryHref } from '@/lib/category-tree';
 import { getCategories } from '@/lib/data/categories';
@@ -29,6 +29,8 @@ const LINK_GROUPS = [
       { label: 'All products', href: '/products' },
       { label: 'Best sellers', href: '/products?sort=popular' },
       { label: 'New arrivals', href: '/products?sort=newest' },
+      { label: 'How it works', href: '/how-it-works' },
+      { label: 'Help & FAQ', href: '/help' },
     ],
   },
   {
@@ -38,22 +40,74 @@ const LINK_GROUPS = [
       { label: 'Blog', href: '/blog' },
       { label: 'Contact Us', href: '/contact' },
       { label: 'Sell With Us', href: '/sell/signup' },
+      { label: 'Seller Agreement', href: '/legal/seller-agreement' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Terms of Service', href: '/terms' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Refund Policy', href: '/legal/refund-policy' },
+      { label: 'Cookie Policy', href: '/legal/cookie-policy' },
+      { label: 'Acceptable Use', href: '/legal/acceptable-use' },
+      { label: 'Copyright & DMCA', href: '/legal/copyright' },
+      { label: 'Licensing', href: '/legal/licensing' },
+      { label: 'Accessibility', href: '/legal/accessibility' },
+      { label: 'Security', href: '/legal/security' },
     ],
   },
 ];
 
-const LEGAL = [
-  { label: 'Terms of Service', href: '/terms' },
-  { label: 'Privacy Policy', href: '/privacy' },
+const LEGAL_BAR = [
+  { label: 'Terms', href: '/terms' },
+  { label: 'Privacy', href: '/privacy' },
+  { label: 'Cookies', href: '/legal/cookie-policy' },
+  { label: 'Legal Center', href: '/legal' },
 ];
 
+// Line-style brand marks (24px grid, stroked like the Lucide icons used elsewhere).
+const SOCIAL_ICONS = {
+  instagram: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
+    </>
+  ),
+  facebook: <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" strokeLinejoin="round" />,
+  x: <path d="M4 4l11.7 16H20L8.3 4zM4 20l6.8-6.8M20 4l-6.8 6.8" strokeLinecap="round" strokeLinejoin="round" />,
+  pinterest: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8 20l4-9M10.7 14c.4 1.3 1.4 2 2.6 2 2 0 3.7-1.6 3.7-4a5 5 0 1 0-9.7 1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  ),
+  youtube: (
+    <>
+      <path d="M2.5 17a24 24 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.6 49.6 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24 24 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.6 49.6 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+      <path d="m10 15 5-3-5-3z" strokeLinejoin="round" />
+    </>
+  ),
+  linkedin: (
+    <>
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" strokeLinejoin="round" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
+    </>
+  ),
+};
+
 /**
- * Site footer: a wave out of the white page into a warm beige block — call to action, trust points,
- * link columns, then the brand line and a slim legal bar. Pure server markup (no client JS).
+ * Site footer: a wave out of the white page into a warm beige block — call to action and trust points beside four
+ * link columns (Shop, Discover, Company, Legal) with a contact + social panel under them, then the brand line and a
+ * slim legal bar. Pure server markup (no client JS).
  */
 export default async function Footer() {
   const shop = await shopLinks();
-  const groups = [{ title: 'Shop', links: shop.length ? shop : [{ label: 'All products', href: '/products' }] }, ...LINK_GROUPS];
+  const groups = [{ title: 'Shop', links: [...shop, { label: 'Shop all', href: '/products' }] }, ...LINK_GROUPS];
+  const { supportEmail, address, social } = siteConfig;
+
   return (
     <footer className="mt-24 text-ink sm:mt-32">
       {/* Wavy top edge (same colour as the block below, so the two read as one shape). */}
@@ -63,10 +117,10 @@ export default async function Footer() {
 
       <div className="-mt-px bg-beige">
         <div className="container-page pb-10 pt-10 sm:pt-14">
-          <div className="grid gap-14 lg:grid-cols-12 lg:gap-8">
+          <div className="grid gap-14 lg:grid-cols-12 lg:gap-10">
             {/* ---------- Call to action + trust points ---------- */}
-            <div className="lg:col-span-6">
-              <h2 className="headline text-4xl leading-[1.05] text-balance sm:text-5xl lg:text-[3.5rem]">Have something worth selling?</h2>
+            <div className="lg:col-span-5">
+              <h2 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-balance sm:text-5xl">Have something worth selling?</h2>
               <p className="mt-4 max-w-lg text-lg text-stone-600">Open a store in minutes and reach buyers looking for exactly what you make.</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/sell/signup" className="btn btn-lg btn-primary">
@@ -80,7 +134,7 @@ export default async function Footer() {
               <ul className="mt-12 grid gap-x-8 gap-y-5 sm:grid-cols-2">
                 {TRUST.map(({ icon: Icon, title, text }) => (
                   <li key={title} className="flex gap-3">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-brand-600">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-gray-900">
                       <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
                     </span>
                     <div>
@@ -92,22 +146,76 @@ export default async function Footer() {
               </ul>
             </div>
 
-            {/* ---------- Link columns ---------- */}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:col-span-6 lg:justify-items-end">
-              {groups.map((group) => (
-                <nav key={group.title} aria-label={group.title} className="lg:min-w-36">
-                  <p className="headline text-2xl">{group.title}</p>
-                  <ul className="mt-5 space-y-3.5">
-                    {group.links.map((l) => (
-                      <li key={l.href}>
-                        <Link href={l.href} className="text-[15px] text-stone-700 transition-colors hover:text-black hover:underline hover:underline-offset-4">
-                          {l.label}
-                        </Link>
+            <div className="lg:col-span-7">
+              {/* ---------- Link columns ---------- */}
+              <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
+                {groups.map((group) => (
+                  <nav key={group.title} aria-label={group.title}>
+                    <p className="font-serif text-xl tracking-tight">{group.title}</p>
+                    <ul className="mt-5 space-y-3">
+                      {group.links.map((l) => (
+                        <li key={l.href}>
+                          <Link href={l.href} className="text-[15px] text-stone-700 transition-colors hover:text-black hover:underline hover:underline-offset-4">
+                            {l.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                ))}
+              </div>
+
+              {/* ---------- Contact + social ---------- */}
+              <div className="mt-12 grid gap-8 rounded-2xl bg-white/60 p-6 sm:grid-cols-2 sm:p-8">
+                <div>
+                  <p className="font-serif text-xl tracking-tight">Get in touch</p>
+                  <ul className="mt-4 space-y-3 text-[15px] text-stone-700">
+                    <li className="flex items-center gap-3">
+                      <Mail size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-stone-500" />
+                      <a href={`mailto:${supportEmail}`} className="hover:text-black hover:underline hover:underline-offset-4">
+                        {supportEmail}
+                      </a>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <MessageSquare size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-stone-500" />
+                      <Link href="/contact" className="hover:text-black hover:underline hover:underline-offset-4">
+                        Send us a message
+                      </Link>
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Clock size={17} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-stone-500" />
+                      Replies within 1–2 business days
+                    </li>
+                    {address && (
+                      <li className="flex items-start gap-3">
+                        <MapPin size={17} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-stone-500" />
+                        <address className="not-italic">{address}</address>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-serif text-xl tracking-tight">Follow us</p>
+                  <p className="mt-2 text-sm text-stone-600">New drops, creator stories and tips.</p>
+                  <ul className="mt-4 flex flex-wrap gap-2">
+                    {social.map((s) => (
+                      <li key={s.icon}>
+                        <a
+                          href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${siteConfig.name} on ${s.label}`}
+                          className="grid size-10 place-items-center rounded-full border border-stone-300/70 bg-white text-stone-700 transition-colors hover:border-gray-900 hover:bg-gray-900 hover:text-white"
+                        >
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.75">
+                            {SOCIAL_ICONS[s.icon]}
+                          </svg>
+                        </a>
                       </li>
                     ))}
                   </ul>
-                </nav>
-              ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -124,7 +232,7 @@ export default async function Footer() {
             </p>
             <nav aria-label="Legal">
               <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                {LEGAL.map((l, i) => (
+                {LEGAL_BAR.map((l, i) => (
                   <li key={l.href} className="flex items-center gap-3">
                     {i > 0 && <span aria-hidden="true" className="size-1 rounded-full bg-stone-400" />}
                     <Link href={l.href} className="transition-colors hover:text-black">
