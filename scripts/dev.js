@@ -33,15 +33,16 @@ const portIsOpen = (port) =>
 const env = readEnvFile(ENV_FILE);
 const target = env.DEV_DB_TUNNEL;
 const localPort = Number(env.MONGODB_URI?.match(/@127\.0\.0\.1:(\d+)\//)?.[1]);
+const key = path.normalize((env.DEV_DB_TUNNEL_KEY || '~/.ssh/sellpify_dev_tunnel').replace(/^~(?=[\\/])/, os.homedir()));
 let tunnel = null;
 let stopping = false;
+let everConnected = false;
 
 function openTunnel() {
-  const key = (env.DEV_DB_TUNNEL_KEY || '~/.ssh/sellpify_dev_tunnel').replace(/^~(?=[\\/])/, os.homedir());
   tunnel = spawn(
     'ssh',
     [
-      '-i', path.normalize(key),
+      '-i', key,
       '-o', 'IdentitiesOnly=yes',
       '-o', 'BatchMode=yes', // never wait for a password prompt
       '-o', 'StrictHostKeyChecking=accept-new',
@@ -55,12 +56,21 @@ function openTunnel() {
   tunnel.on('exit', () => {
     tunnel = null;
     if (stopping) return;
+    if (!everConnected) {
+      // Never got in (key not allowed on the server yet, wrong user, no network): retrying won't help.
+      console.error('[db-tunnel] Could not connect to the database server (see the ssh message above).');
+      console.error('[db-tunnel] New on this project? Run  npm run dev:key  and send the command it prints to the server admin.');
+      return;
+    }
     console.error('[db-tunnel] Connection to the database server closed; reconnecting in 5 s…');
     setTimeout(() => { if (!stopping) openTunnel(); }, 5000);
   });
 }
 
-if (target && localPort) {
+if (target && localPort && !existsSync(key)) {
+  console.warn(`[db-tunnel] No SSH key at ${key}, so no connection to the database server.`);
+  console.warn('[db-tunnel] Run  npm run dev:key  once and send the command it prints to the server admin.');
+} else if (target && localPort) {
   if (await portIsOpen(localPort)) {
     console.log(`[db-tunnel] Port ${localPort} is already open (a tunnel is running); using it.`);
   } else {
@@ -70,6 +80,7 @@ if (target && localPort) {
       await new Promise((r) => setTimeout(r, 500));
       up = await portIsOpen(localPort);
     }
+    everConnected = up;
     console.log(up
       ? `[db-tunnel] Connected: 127.0.0.1:${localPort} → MongoDB on ${target.split('@').pop()}`
       : `[db-tunnel] Tunnel not up yet on port ${localPort}; pages that need the database will fail until it is.`);
