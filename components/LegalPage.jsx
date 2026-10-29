@@ -19,13 +19,13 @@ function Block({ children }) {
 }
 
 /**
- * Shared layout for the Terms of Service and Privacy Policy: numbered sections with a contents list,
+ * Shared layout for the legal and policy pages (Terms, Privacy, /legal/*, How It Works): numbered sections with a contents list,
  * then a support box. `sections` = [{ id, heading, body: Block[] }].
  */
-export default function LegalPage({ title, updated, intro, sections }) {
+export default function LegalPage({ title, updated, intro, sections, eyebrow = 'Legal' }) {
   return (
     <div className="container-page max-w-3xl py-16 sm:py-24">
-      <PageIntro eyebrow="Legal" title={title} description={`Last updated ${updated}`} />
+      <PageIntro eyebrow={eyebrow} title={title} description={`Last updated ${updated}`} />
       {intro && <p className="mt-8 text-lg leading-relaxed text-stone-700">{intro}</p>}
 
       <nav aria-label="Contents" className="mt-10 rounded-2xl border border-stone-200 bg-stone-50 p-6">
