@@ -190,7 +190,7 @@ function RadioList({ name, options, value, onChange, error }) {
 
 function OptionCards({ name, options, value, onChange, error }) {
   return (
-    <div role="radiogroup" aria-invalid={Boolean(error) || undefined} className="mt-3 grid gap-3 sm:grid-cols-2">
+    <div role="radiogroup" aria-invalid={Boolean(error) || undefined} className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
       {options.map((o, i) => (
         <label
           key={o.value}
@@ -806,7 +806,7 @@ export default function ListingForm({ categories, listing, uploads }) {
               )}
 
               {(values.videos.length > 0 || uploading.some((u) => u.kind === 'video')) && (
-                <ul className="mt-4 grid gap-3 sm:grid-cols-2" aria-label="Videos">
+                <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Videos">
                   {values.videos.map((url, i) => (
                     <li key={url} className="relative aspect-video overflow-hidden rounded-xl border border-stone-200 bg-black">
                       <video

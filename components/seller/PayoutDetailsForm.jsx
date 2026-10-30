@@ -92,7 +92,7 @@ export default function PayoutDetailsForm({ initial = {} }) {
           <Building2 size={16} strokeWidth={1.75} aria-hidden="true" />
           Bank account
         </legend>
-        <div className="mt-2 grid gap-4 sm:grid-cols-2">
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="bankName" className="text-sm font-medium">
               Bank name
@@ -122,7 +122,7 @@ export default function PayoutDetailsForm({ initial = {} }) {
           <Smartphone size={16} strokeWidth={1.75} aria-hidden="true" />
           Mobile wallet
         </legend>
-        <div className="mt-2 grid gap-4 sm:grid-cols-2">
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="walletProvider" className="text-sm font-medium">
               Provider

@@ -14,7 +14,7 @@ export function AdminOverviewSkeleton() {
       <div className="mt-4">
         <StatsSkeleton count={3} />
       </div>
-      <div className="mt-8 grid gap-6 xl:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <PanelSkeleton rows={6} />
         <PanelSkeleton rows={5} />
       </div>
@@ -71,7 +71,7 @@ export function AdminUserSkeleton() {
       <div className="mt-8">
         <ChartSkeleton />
       </div>
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
         <PanelSkeleton rows={4} />
         <PanelSkeleton rows={6} />
       </div>
@@ -284,7 +284,7 @@ export function SellerPayoutsSkeleton() {
     <DashboardPageSkeleton label="Loading payouts">
       <HeaderSkeleton />
       <StatsSkeleton count={3} />
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
         <PanelSkeleton rows={6} />
         <PanelSkeleton rows={4} />
       </div>
@@ -338,7 +338,7 @@ export function AdminSystemSkeleton() {
     <DashboardPageSkeleton label="Loading system health">
       <HeaderSkeleton />
       <StatsSkeleton count={6} />
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="h-[44rem] rounded-2xl border border-stone-200 bg-white" />
         <PanelSkeleton rows={5} />
       </div>

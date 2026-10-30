@@ -113,7 +113,7 @@ export default async function ProductPage({ params }) {
         </ol>
       </nav>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
+      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
         {/* ---------- Cover (or a gallery when the listing has several photos) ---------- */}
         {product.images?.length > 1 || product.videos?.length > 0 ? (
           <ProductGallery images={product.images?.length ? product.images : [product.coverImage].filter(Boolean)} videos={product.videos ?? []} title={product.title} coverBlurDataURL={product.coverBlurDataURL} />
@@ -165,7 +165,7 @@ export default async function ProductPage({ params }) {
             )}
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             <BuyNowButton product={cartProduct} />
             <AddToCartButton product={cartProduct} />
           </div>

@@ -123,7 +123,7 @@ export default async function SellerDashboardPage() {
         </Panel>
       </div>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-2 xl:items-start">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
         {/* ---------- Recent sales (ledger) ---------- */}
         <Panel
           title="Recent sales"

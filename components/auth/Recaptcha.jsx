@@ -50,8 +50,13 @@ export default function Recaptcha({ onChange, error, ref }) {
     loadRecaptcha()
       .then((grecaptcha) => {
         if (cancelled || !boxRef.current || widgetId.current != null) return;
+        // The normal widget is a fixed 304 px wide; on small phones the card is narrower, so use the compact one
+        // (164 × 144) instead of letting it push the page sideways.
+        const compact = boxRef.current.clientWidth < 304;
+        if (compact) boxRef.current.style.minHeight = '144px';
         widgetId.current = grecaptcha.render(boxRef.current, {
           sitekey: SITE_KEY,
+          size: compact ? 'compact' : 'normal',
           callback: (token) => onChangeRef.current?.(token),
           'expired-callback': () => onChangeRef.current?.(null),
           'error-callback': () => onChangeRef.current?.(null),
@@ -66,7 +71,7 @@ export default function Recaptcha({ onChange, error, ref }) {
   if (!SITE_KEY) return null;
   return (
     <div>
-      {/* 78px = the widget's height, reserved so the form doesn't jump when it appears. */}
+      {/* 78px = the widget's height (144px compact), reserved so the form doesn't jump when it appears. */}
       <div ref={boxRef} className="min-h-[78px]" aria-describedby={error ? 'captcha-error' : undefined} />
       {error && (
         <p id="captcha-error" role="alert" className="mt-1.5 text-sm text-red-600">

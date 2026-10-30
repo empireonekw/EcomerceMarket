@@ -2,6 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     { "name": "apex-prod", "runtimeExecutable": "npm", "runtimeArgs": ["run", "start"], "port": 3000 },
-    { "name": "apex-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
+    { "name": "apex-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 },
+    { "name": "apex-dev-3001", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "PORT=3001 npm run dev"], "port": 3001 }
   ]
 }

@@ -56,10 +56,11 @@ export default function CartToast() {
           onMouseLeave={() => setPausedKey(null)}
           onFocus={() => setPausedKey(added.key)}
           onBlur={() => setPausedKey(null)}
-          className="pointer-events-auto mt-3 flex w-full max-w-[26rem] gap-4 rounded-2xl border border-stone-200 bg-white p-3 shadow-lift transition-[opacity,translate] duration-300 ease-out starting:-translate-y-2 starting:opacity-0 motion-reduce:transition-none"
+          className="pointer-events-auto mt-3 grid w-full max-w-[26rem] grid-cols-[4rem_minmax(0,1fr)] gap-3 rounded-2xl sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-x-4 border border-stone-200 bg-white p-3 shadow-lift transition-[opacity,translate] duration-300 ease-out starting:-translate-y-2 starting:opacity-0 motion-reduce:transition-none"
         >
-          {/* ---------- Thumbnail with a "done" badge ---------- */}
-          <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100">
+          {/* ---------- Thumbnail with a "done" badge (beside the text and the buttons from sm up; phones put the
+              buttons on their own full-width row so both fit) ---------- */}
+          <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-stone-100 sm:row-span-2">
             {item.coverImage ? (
               <Image src={item.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />
             ) : (
@@ -67,13 +68,13 @@ export default function CartToast() {
                 {item.title.charAt(0)}
               </span>
             )}
-            <span aria-hidden="true" className="absolute bottom-0 left-0 grid size-8 place-items-center rounded-tr-xl bg-emerald-500 text-white">
+            <span aria-hidden="true" className="absolute bottom-0 left-0 grid size-6 place-items-center rounded-tr-xl bg-emerald-500 text-white sm:size-8">
               <Check size={16} strokeWidth={2.5} />
             </span>
           </div>
 
           {/* ---------- Text + actions ---------- */}
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-w-0 flex-col">
             <div className="flex items-start justify-between gap-2">
               <p className="pt-0.5 font-medium text-black">Added to your cart!</p>
               <button
@@ -94,16 +95,16 @@ export default function CartToast() {
                 {count} item{count === 1 ? '' : 's'} · {formatPrice(totals.total, currency)}
               </span>
             </p>
+          </div>
 
-            <div className="mt-3 flex gap-2">
-              <button type="button" onClick={openCart} className="btn btn-sm btn-outline shrink-0">
-                View cart
-              </button>
-              <Link href="/checkout" onClick={dismissAdded} className="btn btn-sm btn-dark flex-1">
-                Checkout
-                <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
-              </Link>
-            </div>
+          <div className="col-span-2 flex gap-2 sm:col-span-1 sm:col-start-2">
+            <button type="button" onClick={openCart} className="btn btn-sm btn-outline shrink-0">
+              View cart
+            </button>
+            <Link href="/checkout" onClick={dismissAdded} className="btn btn-sm btn-dark flex-1">
+              Checkout
+              <ArrowRight size={15} strokeWidth={2} aria-hidden="true" />
+            </Link>
           </div>
         </div>
       </div>

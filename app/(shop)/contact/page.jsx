@@ -26,7 +26,7 @@ export default async function ContactPage() {
         description="Questions about an order, a download, a refund or selling on the marketplace, send us a message and a real person will get back to you."
       />
 
-      <div className="mt-12 grid gap-8 sm:mt-16 lg:grid-cols-12 lg:gap-10">
+      <div className="mt-12 grid grid-cols-1 gap-8 sm:mt-16 lg:grid-cols-12 lg:gap-10">
         {/* ---------- Support details ---------- */}
         <aside className="space-y-5 lg:col-span-5">
           <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-7">

@@ -368,7 +368,8 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
                     </button>
                   ))}
                 </div>
-                <div className="shrink-0 sm:ml-2">
+                {/* Phones: pinned to the right end, so the menu (which opens leftwards from here) stays on screen. */}
+                <div className="ml-auto shrink-0 sm:ml-2">
                   <LabelMenu labels={settings.labels} selected={selectedConvs} onApply={applyLabels} />
                 </div>
               </div>

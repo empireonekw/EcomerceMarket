@@ -19,7 +19,7 @@ export default function HowItWorks() {
           <ArrowRight size={15} strokeWidth={1.75} aria-hidden="true" />
         </Link>
       </SectionHeading>
-      <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+      <ol className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
         {STEPS.map(({ title, text }, i) => (
           <Reveal as="li" key={title} delay={i * 120} className="relative border-t border-stone-300 pt-6 before:absolute before:-top-[5px] before:left-0 before:size-2.5 before:rounded-full before:bg-brand-500">
             <span className="font-serif text-5xl leading-none tracking-[-0.03em] text-brand-600 tabular-nums">{String(i + 1).padStart(2, '0')}</span>

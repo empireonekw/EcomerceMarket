@@ -26,7 +26,7 @@ export default function LegalCenterPage() {
         title="Legal Center"
         description={`Plain-language policies for buyers and sellers on ${siteConfig.name}. Questions? Email ${siteConfig.supportEmail}.`}
       />
-      <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {DOCUMENTS.map((d) => (
           <li key={d.href}>
             <Link

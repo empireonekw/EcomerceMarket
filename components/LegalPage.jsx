@@ -30,7 +30,7 @@ export default function LegalPage({ title, updated, intro, sections, eyebrow = '
 
       <nav aria-label="Contents" className="mt-10 rounded-2xl border border-stone-200 bg-stone-50 p-6">
         <p className="text-sm font-medium text-black">Contents</p>
-        <ol className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+        <ol className="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
           {sections.map((s, i) => (
             <li key={s.id}>
               <a href={`#${s.id}`} className="text-stone-600 transition-colors hover:text-black hover:underline hover:underline-offset-4">

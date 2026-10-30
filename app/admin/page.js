@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
         />
       </section>
 
-      <section aria-label="Orders and earnings" className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <section aria-label="Orders and earnings" className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="Total Orders"
           value={stats.orders.total.toLocaleString('en-US')}
@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
         </a>
       </section>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
         {/* Recent orders */}
         <section className="rounded-2xl border border-stone-200 bg-white" aria-labelledby="recent-orders">
           <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
