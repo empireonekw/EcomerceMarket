@@ -205,23 +205,17 @@ html:has(dialog[open]:modal) {
   }
 }
 
-/* Scroll reveal (components/Reveal.jsx): content fades and lifts in as it enters the viewport, tied to the scroll
-   position (no JS, no waiting). Only where the browser supports it and motion is welcome; everywhere else it's static.
-   --reveal-offset (set per element) starts a sibling's fade slightly later for a gentle stagger. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: reveal-up linear both;
-      animation-timeline: view();
-      animation-range: entry var(--reveal-offset, 0%) entry calc(var(--reveal-offset, 0%) + 28%);
-    }
-  }
+/* Scroll reveal (components/Reveal.jsx): once the early reveal script has run (html[data-reveal]), a block that
+   hasn't entered the viewport yet waits slightly lowered and transparent, then fades up quickly when it does.
+   --reveal-delay staggers siblings. Without the script everything is simply visible. */
+html[data-reveal] .reveal {
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
 }
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-  }
+html[data-reveal] .reveal:not([data-in]) {
+  opacity: 0;
+  transform: translateY(18px);
 }
 
 /* Homepage FAQ (components/home/Faq.jsx): answers open smoothly. Browsers that can animate to height:auto slide the

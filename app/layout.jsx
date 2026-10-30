@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Fraunces, Inter } from 'next/font/google';
 
 import NavigationProgress from '@/components/NavigationProgress';
+import { REVEAL_SCRIPT } from '@/components/Reveal';
 import { siteConfig } from '@/lib/site';
 
 import './globals.css';
@@ -48,7 +49,11 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Scroll reveals start as soon as the HTML arrives, not after the JS bundle (components/Reveal.jsx). */}
+        <script dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />
+      </head>
       <body className="flex min-h-dvh flex-col font-sans">
         <a
           href="#main"
