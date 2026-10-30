@@ -17,7 +17,8 @@ export default function SellCta({ className = '' }) {
         : siteConfig.sellCta;
 
   return (
-    <Link href={cta.href} className={className}>
+    // Full prefetch: seller sign-up (and the dashboards) render per request, so this makes the click instant.
+    <Link href={cta.href} prefetch className={className}>
       {cta.label}
     </Link>
   );

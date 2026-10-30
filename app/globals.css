@@ -155,6 +155,10 @@ html:has(dialog[open]:modal) {
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-700;
   }
+  /* Confirm dialogs often sit inside table cells (whitespace-nowrap): they must wrap their own text. */
+  dialog {
+    @apply whitespace-normal backdrop:backdrop-blur-[2px];
+  }
 }
 
 @utility container-page {
@@ -202,6 +206,30 @@ html:has(dialog[open]:modal) {
 @layer components {
   .dashboard-main :where(.rounded-2xl.border.bg-white, .rounded-xl.border.bg-white) {
     box-shadow: var(--shadow-card);
+  }
+}
+
+/* Navigation feedback (components/NavigationProgress.jsx): the link or button that was clicked shows a small spinner
+   inside it until the next page is on screen. Buttons and menu rows get the spinner; any other link just a busy cursor. */
+html[data-navigating],
+html[data-navigating] * {
+  cursor: progress;
+}
+:is(a.btn, a.flex, a.inline-flex, button.btn, button.inline-flex)[data-pending]::after {
+  content: '';
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  margin-left: 0.125rem;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  opacity: 0.75;
+  animation: pending-spin 0.7s linear infinite;
+}
+@keyframes pending-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

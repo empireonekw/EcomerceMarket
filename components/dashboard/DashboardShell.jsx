@@ -166,6 +166,7 @@ function NavGroup({ item, pathname, onNavigate }) {
             >
               <Link
                 href={c.href}
+                prefetch
                 onNavigate={() => onNavigate(c.href)}
                 aria-current={active ? 'page' : undefined}
                 className={`flex items-center rounded-xl px-3 py-1.5 text-[13px] transition ${active ? ACTIVE : IDLE}`}
@@ -199,6 +200,7 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
                   <li key={href}>
                     <Link
                       href={href}
+                      prefetch
                       onNavigate={() => onNavigate(href)}
                       aria-current={active ? 'page' : undefined}
                       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition ${active ? ACTIVE : IDLE}`}
@@ -215,29 +217,19 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
         ))}
       </nav>
 
-      <div className="space-y-3">
-        <a href="/" target="_blank" rel="noopener" className="group block overflow-hidden rounded-2xl bg-ink p-4 text-white">
-          <p className="text-xs text-stone-400">Your storefront</p>
-          <p className="mt-0.5 truncate text-sm font-medium">{siteConfig.name}</p>
-          <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium transition-colors group-hover:bg-white/20">
-            View store
-            <ArrowUpRight size={14} strokeWidth={1.9} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </span>
-        </a>
-        <div className="flex items-center gap-3 rounded-2xl p-2">
-          <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-medium text-ink uppercase">
-            {user.name?.charAt(0) ?? '?'}
-            <span aria-hidden="true" className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-canvas bg-emerald-500" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{user.name}</p>
-            <p className="truncate text-xs text-stone-500">{user.email}</p>
-          </div>
-          <SignOutButton className="grid size-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-white hover:text-ink">
-            <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
-            <span className="sr-only">Sign out</span>
-          </SignOutButton>
+      <div className="flex items-center gap-3 rounded-2xl p-2">
+        <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-medium text-ink uppercase">
+          {user.name?.charAt(0) ?? '?'}
+          <span aria-hidden="true" className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-canvas bg-emerald-500" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{user.name}</p>
+          <p className="truncate text-xs text-stone-500">{user.email}</p>
         </div>
+        <SignOutButton className="grid size-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-white hover:text-ink">
+          <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+          <span className="sr-only">Sign out</span>
+        </SignOutButton>
       </div>
     </div>
   );
@@ -255,14 +247,14 @@ function TopBar({ area, user, onNavigate }) {
         {first && <span className="font-medium text-ink">{first}</span>}
       </p>
       <div className="flex items-center gap-2">
-        <Link href={area.messages} onNavigate={() => onNavigate(area.messages)} className={`relative ${round}`} aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
+        <Link href={area.messages} prefetch onNavigate={() => onNavigate(area.messages)} className={`relative ${round}`} aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
           <Bell size={18} strokeWidth={1.75} aria-hidden="true" />
           {unread > 0 && <span aria-hidden="true" className="absolute top-2 right-2.5 size-2 rounded-full bg-brand-500 ring-2 ring-white" />}
         </Link>
         <a href="/" target="_blank" rel="noopener" className={round} aria-label={`View ${siteConfig.name} (opens in a new tab)`}>
           <ArrowUpRight size={18} strokeWidth={1.75} aria-hidden="true" />
         </a>
-        <Link href={area.action.href} onNavigate={() => onNavigate(area.action.href)} className="btn btn-md btn-primary ml-1 shadow-[0_8px_20px_-10px_rgba(220,154,47,0.8)]">
+        <Link href={area.action.href} prefetch onNavigate={() => onNavigate(area.action.href)} className="btn btn-md btn-primary ml-1 shadow-[0_8px_20px_-10px_rgba(220,154,47,0.8)]">
           <Plus size={16} strokeWidth={2} aria-hidden="true" />
           {area.action.label}
         </Link>

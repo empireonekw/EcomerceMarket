@@ -16,6 +16,7 @@ const QUESTIONS = [
   },
   {
     q: 'Can I get a refund?',
+    text: 'Digital files can’t be returned, so sales are generally final, but if a file is faulty, can’t be downloaded or is materially different from its description, you get a full refund. Contact us within 14 days of your purchase.',
     a: (
       <>
         Digital files can’t be returned, so sales are generally final, but if a file is faulty, can’t be downloaded or is materially different from its description, you get a full refund.
@@ -40,10 +41,22 @@ const QUESTIONS = [
   },
 ];
 
+// FAQPage structured data: eligible for FAQ results in Google and easy for AI answer engines to quote.
+const FAQ_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: QUESTIONS.map(({ q, a, text }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: text ?? a },
+  })),
+};
+
 /** Questions, answered: a sticky heading beside native <details> rows (no client JS; keyboard and screen-reader friendly). */
 export default function Faq() {
   return (
     <section className="container-page relative isolate pt-24 sm:pt-32" aria-labelledby="faq-heading">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD).replace(/</g, '\\u003c') }} />
       <Glow className="top-32 left-16 size-64 bg-peach-100/70" />
       <Sparkle className="top-28 left-[26%] hidden size-5 text-brand-500 lg:block" />
       <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">

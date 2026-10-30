@@ -197,13 +197,10 @@ export default function UserMenu() {
           <p className="headline text-3xl text-ink">Welcome</p>
           <p className="mt-2 text-sm leading-relaxed text-stone-600">Log in to check out, download your files and sell your work.</p>
           <div className="mt-5 space-y-2.5">
-            <Link href={withNext('/login')} className="btn btn-lg btn-dark w-full">
+            <Link href={withNext('/login')} prefetch className="btn btn-lg btn-dark w-full">
               Log in
             </Link>
-            <Link
-              href={withNext('/signup')}
-              className="btn btn-lg btn-outline w-full"
-            >
+            <Link href={withNext('/signup')} prefetch className="btn btn-lg btn-outline w-full">
               Create account
             </Link>
           </div>
@@ -249,10 +246,10 @@ export function MobileAuthLinks() {
   if (!user) {
     return (
       <div className="grid grid-cols-2 gap-2 border-t border-stone-100 px-1 pt-3">
-        <Link href={withNext('/login')} className="btn btn-sm btn-outline">
+        <Link href={withNext('/login')} prefetch className="btn btn-sm btn-outline">
           Login
         </Link>
-        <Link href={withNext('/signup')} className="btn btn-sm btn-dark">
+        <Link href={withNext('/signup')} prefetch className="btn btn-sm btn-dark">
           Sign Up
         </Link>
       </div>

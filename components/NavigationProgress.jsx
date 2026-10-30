@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 const isPlainClick = (e) => e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
@@ -20,77 +20,55 @@ function internalTarget(href) {
   return url;
 }
 
+const clearPending = () => {
+  document.querySelectorAll('[data-pending]').forEach((el) => el.removeAttribute('data-pending'));
+  document.documentElement.removeAttribute('data-navigating');
+};
+
 /**
- * A thin brand-yellow bar at the top of the page from the moment a link is clicked (or a search/filter form is sent)
- * until the new page is on screen, so a click never looks like nothing happened while the server renders the page.
+ * Feedback on the thing that was clicked while the next page loads: the clicked link (or a GET form's submit button)
+ * gets data-pending, and globals.css draws a small spinner inside buttons and menu rows (`.btn`, flex links) and a
+ * progress cursor everywhere. Cleared as soon as the new URL is on screen.
  */
 export default function NavigationProgress() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [progress, setProgress] = useState(null); // null = hidden, 0–100 = shown
-  const timers = useRef([]);
-  const running = useRef(false);
-
-  const clear = () => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-  };
-  const hide = () => {
-    running.current = false;
-    setProgress(null);
-  };
 
   useEffect(() => {
-    const start = () => {
-      clear();
-      running.current = true;
-      setProgress(12);
-      // Creep towards 90% while waiting; it only completes when the new page arrives.
-      const tick = (value) => {
-        timers.current.push(
-          setTimeout(() => {
-            setProgress((p) => (p == null ? p : Math.max(p, value)));
-            if (value < 90) tick(value + (90 - value) * 0.25);
-          }, 250),
-        );
-      };
-      tick(30);
-      timers.current.push(setTimeout(hide, 15000)); // never stuck on screen
+    let timer;
+    const mark = (el) => {
+      clearPending();
+      clearTimeout(timer);
+      el?.setAttribute('data-pending', '');
+      document.documentElement.setAttribute('data-navigating', '');
+      timer = setTimeout(clearPending, 15000); // never stuck
     };
     const onClick = (e) => {
       const a = e.target.closest?.('a[href]');
       if (!a || !isPlainClick(e) || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
-      if (internalTarget(a.href)) start();
+      if (a.getAttribute('aria-current') === 'page') return;
+      if (internalTarget(a.href)) mark(a);
     };
     const onSubmit = (e) => {
       const form = e.target;
       if (!(form instanceof HTMLFormElement) || (form.method || 'get').toLowerCase() !== 'get') return;
-      if (internalTarget(form.action)) start();
+      const url = new URL(form.action, location.href);
+      url.search = new URLSearchParams(new FormData(form, e.submitter)).toString();
+      if (internalTarget(url.href)) mark(e.submitter ?? form.querySelector('button[type=submit], button:not([type])'));
     };
-    document.addEventListener('click', onClick, true);
-    document.addEventListener('submit', onSubmit, true);
+    document.addEventListener('click', onClick);
+    document.addEventListener('submit', onSubmit);
+    window.addEventListener('pageshow', clearPending);
     return () => {
-      document.removeEventListener('click', onClick, true);
-      document.removeEventListener('submit', onSubmit, true);
-      clear();
+      document.removeEventListener('click', onClick);
+      document.removeEventListener('submit', onSubmit);
+      window.removeEventListener('pageshow', clearPending);
+      clearTimeout(timer);
     };
   }, []);
 
-  // The new page is here: fill the bar, then fade it out.
-  useEffect(() => {
-    if (!running.current) return;
-    clear();
-    setProgress(100);
-    timers.current.push(setTimeout(hide, 300));
-  }, [pathname, searchParams]);
+  // The new page is here.
+  useEffect(clearPending, [pathname, searchParams]);
 
-  if (progress == null) return null;
-  return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[3px]">
-      <div
-        className={`h-full rounded-r-full bg-brand-500 shadow-[0_0_10px_rgba(237,174,73,0.9)] transition-[width,opacity] duration-300 ease-out ${progress === 100 ? 'opacity-0 delay-150' : 'opacity-100'}`}
-        style={{ width: `${progress}%` }}
-      />
-    </div>
-  );
+  return null;
 }

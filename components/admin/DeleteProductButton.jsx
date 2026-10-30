@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { Trash2 } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
 
 /** Delete with a native <dialog> confirmation; shows pending state until the table has refreshed. */
@@ -55,36 +56,41 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
         ref={dialogRef}
         aria-labelledby={titleId}
         onClick={(e) => e.target === e.currentTarget && !deleting && e.currentTarget.close()}
-        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/40"
+        className="m-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-3xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/40"
       >
-        <div className="p-6">
-          <h2 id={titleId} className="text-lg font-medium">
-            Are you sure you want to delete?
+        <div className="p-6 sm:p-7">
+          <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50">
+            <Trash2 size={20} strokeWidth={1.9} />
+          </span>
+          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
+            Delete this product?
           </h2>
-          <p className="mt-1 text-sm font-medium text-stone-800">{title}</p>
-          <p className="mt-2 text-sm text-stone-600">
-            This permanently removes the product from the store. If it has already been purchased, it will be
-            <strong> unpublished instead</strong> so existing buyers keep access to their downloads.
+          <p className="mt-3 truncate rounded-xl bg-stone-50 px-3.5 py-2.5 text-sm font-medium text-stone-800 ring-1 ring-stone-200/70" title={title}>
+            {title}
           </p>
-          <div className="mt-6 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => dialogRef.current?.close()}
-              disabled={deleting}
-              className="h-10 rounded-full px-4 text-sm font-medium hover:bg-stone-100"
-            >
-              No, cancel
-            </button>
-            <button
-              type="button"
-              onClick={confirmDelete}
-              disabled={deleting}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-red-600 px-4 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-70"
-            >
-              {deleting && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-              {deleting ? 'Deleting…' : 'Yes, delete'}
-            </button>
-          </div>
+          <p className="mt-3 text-sm leading-relaxed text-stone-600">
+            It will be removed from the store for good. If someone has already bought it, it is{' '}
+            <strong className="font-medium text-ink">unpublished instead</strong>, so buyers keep their downloads.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 border-t border-stone-100 bg-stone-50/60 px-6 py-4 sm:flex sm:justify-end sm:px-7">
+          <button
+            type="button"
+            onClick={() => dialogRef.current?.close()}
+            disabled={deleting}
+            className="h-10 rounded-full border border-stone-300 bg-white px-5 text-sm font-medium hover:border-ink disabled:opacity-60"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={confirmDelete}
+            disabled={deleting}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-70"
+          >
+            {deleting && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
+            {deleting ? 'Deleting…' : 'Delete product'}
+          </button>
         </div>
       </dialog>
     </>

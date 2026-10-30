@@ -14,10 +14,45 @@ import TalkToSellers from '@/components/home/TalkToSellers';
 import { getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 import Reveal from '@/components/Reveal';
+import { siteConfig } from '@/lib/site';
 
 // ISR: served as static HTML from the cache, regenerated at most every 5 minutes
 // (and immediately after an admin creates a product, see POST /api/products).
 export const revalidate = 300;
+
+export const metadata = {
+  description: `Shop templates, e-books, software, vectors and more from independent creators on ${siteConfig.name}. Secure checkout, instant download, and sellers keep 100% of every sale.`,
+  alternates: { canonical: '/' },
+};
+
+// Who runs the site and how to search it: lets Google show the brand panel and a sitelinks search box, and gives
+// AI answer engines a clean description to quote.
+const SITE_JSON_LD = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${siteConfig.url}/#organization`,
+    name: siteConfig.name,
+    url: siteConfig.url,
+    logo: `${siteConfig.url}/icon.svg`,
+    email: siteConfig.supportEmail,
+    description: siteConfig.description,
+    sameAs: siteConfig.social.map((s) => s.href),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${siteConfig.url}/#website`,
+    name: siteConfig.name,
+    url: siteConfig.url,
+    publisher: { '@id': `${siteConfig.url}/#organization` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${siteConfig.url}/products?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+];
 
 /**
  * Homepage, top to bottom: hero · formats strip · why Sellpify · latest products · for creators · categories ·
@@ -32,6 +67,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD).replace(/</g, '\\u003c') }} />
       <HeroShowcase />
       <FormatStrip />
       <Statement />

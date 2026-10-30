@@ -6,12 +6,18 @@ import Pagination from '@/components/Pagination';
 import { categoryHref } from '@/lib/category-tree';
 import { findCategory, getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
-import { parseProductQuery, PRODUCT_SORTS } from '@/lib/utils';
+import { parseProductQuery, PRODUCT_SORTS, tagHref } from '@/lib/utils';
 
 export async function generateMetadata({ searchParams }) {
-  const { q } = parseProductQuery(await searchParams);
+  const { q, tag } = parseProductQuery(await searchParams);
   if (q) return { title: `Search: ${q}`, robots: { index: false } };
-  return { title: 'Browse products' };
+  // Tag filters have their own landing pages (app/(shop)/tags/[tag]): point search engines there.
+  if (tag) return { title: `#${tag}`, alternates: { canonical: tagHref(tag) } };
+  return {
+    title: 'Browse products',
+    description: `Templates, e-books, software, vectors and more from independent creators. Secure checkout and instant download.`,
+    alternates: { canonical: '/products' },
+  };
 }
 
 export default async function ProductsPage({ searchParams }) {

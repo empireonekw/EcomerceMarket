@@ -8,7 +8,7 @@ import AddToCartButton from '@/components/AddToCartButton';
 import BuyNowButton from '@/components/BuyNowButton';
 import MessageSellerButton from '@/components/messages/MessageSellerButton';
 import { getProductBySlug, getRelatedProducts, getShopSummary } from '@/lib/data/products';
-import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL, tagHref } from '@/lib/utils';
 import { LICENSES, labelOf } from '@/lib/listing';
 import { stripRichText } from '@/lib/rich-text';
 import { siteConfig } from '@/lib/site';
@@ -255,7 +255,7 @@ export default async function ProductPage({ params }) {
             {product.tags.map((tag) => (
               <li key={tag}>
                 <Link
-                  href={`/products?tag=${encodeURIComponent(tag)}`}
+                  href={tagHref(tag)}
                   className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200"
                 >
                   #{tag}
