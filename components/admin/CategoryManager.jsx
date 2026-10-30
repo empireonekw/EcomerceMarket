@@ -3,22 +3,25 @@
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowDown, ArrowUp, ChevronsUpDown, Search, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronsUpDown, Plus, Search, Trash2, X } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
 import { siteConfig } from '@/lib/site';
 import { CATEGORY_TYPES, categoryHref, categorySlug, categoryTypeLabel, MAX_CATEGORY_LEVELS, orderTree, subtreeLevels } from '@/lib/category-tree';
 
 const siteHost = siteConfig.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-const EMPTY = { main: '', sub: '', inner: '', name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
-const LEVELS = [
-  { key: 'main', label: 'Main category', placeholder: 'e.g. Templates', help: 'Type a new main category, or an existing one to add under it.' },
-  { key: 'sub', label: 'Sub category', placeholder: 'e.g. Business', help: 'Optional. Leave empty to add just the main category.' },
-  { key: 'inner', label: 'Inner category', placeholder: 'e.g. Invoices', help: 'Optional. The most specific level. The best match for search engines.' },
-];
+const EMPTY = { main: '', name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
 const lower = (s) => s.trim().toLowerCase();
 const optionalFields = (v) => ({ description: v.description, type: v.type, metaTitle: v.metaTitle, metaDescription: v.metaDescription });
-/** The deepest name typed in the add form (the category being created). */
-const deepest = (v) => [v.inner, v.sub, v.main].map((n) => n.trim()).find(Boolean) ?? '';
+let subKey = 0;
+const newSub = (name = '') => ({ key: ++subKey, name, inners: [], draft: '' });
+/** "Invoices, Receipts" typed in an inner-category box → ["Invoices", "Receipts"]. */
+const splitNames = (text) =>
+  text
+    .split(',')
+    .map((n) => n.trim().replace(/\s+/g, ' '))
+    .filter(Boolean);
+/** A sub's inner categories, including what's still typed in its box (not yet turned into a chip). */
+const innersOf = (sub) => [...sub.inners, ...splitNames(sub.draft)];
 const inputCls = (err) =>
   `mt-1.5 w-full rounded-xl border bg-white px-3.5 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
@@ -32,6 +35,86 @@ function FieldHelp({ id, error, children }) {
       </p>
     );
   return children ? <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{children}</p> : null;
+}
+
+/**
+ * A sub category's inner categories (optional) in the add form: type a name and press Enter or comma to add it as a
+ * chip, as many as needed; Backspace in the empty box removes the last one. Whatever is still typed is saved too.
+ * `existing` = each name with `exists` (already under this sub: kept, not added again).
+ */
+function InnerCategories({ index, sub, options, existing, error, onChange }) {
+  const id = `cat-inners-${index}`;
+  // Typed (or pasted) names become chips; the same name twice is added once.
+  const add = (text, draft = '') => {
+    const names = splitNames(text).filter((n, k, all) => ![...sub.inners, ...all.slice(0, k)].some((x) => lower(x) === lower(n)));
+    onChange({ inners: [...sub.inners, ...names], draft });
+  };
+  const exists = (name) => existing.find((x) => lower(x.name) === lower(name))?.exists;
+  return (
+    <div className="mt-3">
+      <label htmlFor={id} className="text-xs font-medium text-stone-700">
+        Inner categories <span className="font-normal text-stone-400">(optional)</span>
+      </label>
+      <div
+        onClick={() => document.getElementById(id)?.focus()}
+        className={`mt-1.5 flex min-h-11 cursor-text flex-wrap items-center gap-1.5 rounded-xl border bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-brand-500/20 ${
+          error ? 'border-red-400' : 'border-stone-300 hover:border-stone-400 focus-within:border-ink'
+        }`}
+      >
+        {sub.inners.map((name, k) => (
+          <span
+            key={`${name}-${k}`}
+            className={`inline-flex max-w-full items-center gap-1 rounded-full py-1 pl-2.5 pr-1 text-xs font-medium ${
+              exists(name) ? 'bg-stone-100 text-stone-500' : 'bg-brand-50 text-brand-800'
+            }`}
+            title={exists(name) ? 'Already exists, kept as it is' : undefined}
+          >
+            <span className="truncate">{name}</span>
+            <button
+              type="button"
+              onClick={(e) => (e.stopPropagation(), onChange({ inners: sub.inners.filter((_, j) => j !== k) }))}
+              aria-label={`Remove ${name}`}
+              className="grid size-5 shrink-0 place-items-center rounded-full hover:bg-black/10"
+            >
+              <X size={12} strokeWidth={2.25} aria-hidden="true" />
+            </button>
+          </span>
+        ))}
+        <input
+          id={id}
+          list={`${id}-options`}
+          value={sub.draft}
+          maxLength={200}
+          autoComplete="off"
+          placeholder={sub.inners.length ? 'Add another' : 'e.g. Invoices, then press Enter'}
+          onChange={(e) => {
+            const text = e.target.value;
+            // A comma (typed or pasted "Invoices, Receipts") ends a name: everything before the last one becomes chips.
+            if (text.includes(',')) add(text.slice(0, text.lastIndexOf(',')), text.slice(text.lastIndexOf(',') + 1).trimStart());
+            else onChange({ draft: text });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault(); // never submits the whole form from here
+              if (sub.draft.trim()) add(sub.draft);
+            } else if (e.key === 'Backspace' && !sub.draft && sub.inners.length) onChange({ inners: sub.inners.slice(0, -1) });
+          }}
+          onBlur={() => sub.draft.trim() && add(sub.draft)}
+          aria-invalid={Boolean(error) || undefined}
+          aria-describedby={`${id}-help`}
+          className="h-8 min-w-[8rem] flex-1 bg-transparent px-1.5 text-sm placeholder:text-stone-400 focus:outline-none"
+        />
+        <datalist id={`${id}-options`}>
+          {options.map((c) => (
+            <option key={c._id} value={c.name} />
+          ))}
+        </datalist>
+      </div>
+      <FieldHelp id={`${id}-help`} error={error}>
+        {sub.inners.length > 0 ? `${sub.inners.length} added. Add as many as you need.` : 'Press Enter after each one. Add as many as you need.'}
+      </FieldHelp>
+    </div>
+  );
 }
 
 const SORTS = {
@@ -55,6 +138,7 @@ export default function CategoryManager({ categories }) {
 
   const [editingId, setEditingId] = useState(null);
   const [values, setValues] = useState(EMPTY);
+  const [subs, setSubs] = useState(() => [newSub()]);
   const [slugTouched, setSlugTouched] = useState(false);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -90,19 +174,28 @@ export default function CategoryManager({ categories }) {
     return tree.filter((c) => c._id !== editingId && !c.ancestors.includes(editingId) && c.depth + levels <= MAX_CATEGORY_LEVELS - 1);
   }, [tree, editingId]);
 
-  // Suggestions for the add form: existing main categories, then the subs / inners under what's typed above.
-  const suggestions = useMemo(() => {
+  // The add form against what exists: the typed main (if it's an existing one), its subs, and which typed subs /
+  // inners are new. Existing ones are reused by the server, so the same form adds under an existing category.
+  const plan = useMemo(() => {
+    const named = (name, parentId) => name.trim() && tree.find((c) => (c.parent ?? null) === parentId && lower(c.name) === lower(name));
     const mains = tree.filter((c) => c.depth === 0);
-    const main = mains.find((c) => lower(c.name) === lower(values.main));
-    const subs = main ? tree.filter((c) => c.parent === main._id) : [];
-    const sub = subs.find((c) => lower(c.name) === lower(values.sub));
-    const inners = sub ? tree.filter((c) => c.parent === sub._id) : [];
-    return { main: mains, sub: subs, inner: inners, matched: { main, sub } };
-  }, [tree, values.main, values.sub]);
+    const main = named(values.main, null) || null;
+    const existingSubs = main ? tree.filter((c) => c.parent === main._id) : [];
+    const rows = subs.map((sub) => {
+      const existing = main ? named(sub.name, main._id) || null : null;
+      const inners = innersOf(sub).map((name) => ({ name, exists: Boolean(existing && named(name, existing._id)) }));
+      return { existing, inners, innerOptions: existing ? tree.filter((c) => c.parent === existing._id) : [] };
+    });
+    const newCount =
+      (values.main.trim() && !main ? 1 : 0) +
+      subs.reduce((n, sub, i) => n + (sub.name.trim() && !rows[i].existing ? 1 : 0) + rows[i].inners.filter((x) => !x.exists).length, 0);
+    return { mains, main, existingSubs, rows, newCount };
+  }, [tree, values.main, subs]);
 
   function resetForm() {
     setEditingId(null);
     setValues(EMPTY);
+    setSubs([newSub()]);
     setSlugTouched(false);
     setErrors({});
   }
@@ -125,24 +218,51 @@ export default function CategoryManager({ categories }) {
     setTimeout(() => document.getElementById('cat-name')?.focus({ preventScroll: true }), 300);
   }
 
+  /** Row action "Add sub" (on a main category) / "Add inner" (on a sub): the add form, filled in down to that row. */
+  function startAddUnder(c) {
+    resetForm();
+    const main = c.depth === 0 ? c : byId.get(c.parent);
+    setValues({ ...EMPTY, main: main?.name ?? '' });
+    setSubs([newSub(c.depth === 0 ? '' : c.name)]);
+    formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => document.getElementById(c.depth === 0 ? 'cat-sub-0' : 'cat-inners-0')?.focus({ preventScroll: true }), 300);
+  }
+
   function update(key, value) {
     setValues((v) => {
       const next = { ...v, [key]: value };
       if (!slugTouched && key === 'name') next.slug = categorySlug(value);
-      if (!slugTouched && ['main', 'sub', 'inner'].includes(key)) next.slug = categorySlug(deepest(next));
       return next;
     });
     if (errors[key]) setErrors(({ [key]: _, ...rest }) => rest);
   }
 
+  /** Changes sub category `i` in the add form (`patch` = fields to set) and clears its errors. */
+  function updateSub(i, patch) {
+    setSubs((list) => list.map((sub, k) => (k === i ? { ...sub, ...patch } : sub)));
+    setErrors(({ [`sub-${i}`]: _a, [`inners-${i}`]: _b, subs: _c, ...rest }) => rest);
+  }
+  function removeSub(i) {
+    setSubs((list) => list.filter((_, k) => k !== i));
+    setErrors({}); // per-row errors are keyed by position, which just shifted
+  }
+  function addSub() {
+    setSubs((list) => [...list, newSub()]);
+    setTimeout(() => document.getElementById(`cat-sub-${subs.length}`)?.focus(), 0);
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     const found = {};
-    const name = editingId ? values.name : deepest(values);
-    if (editingId && !values.name.trim()) found.name = 'Enter a name.';
-    if (!editingId && !values.main.trim()) found.main = 'Enter a main category.';
-    if (!editingId && values.inner.trim() && !values.sub.trim()) found.sub = 'Enter a sub category before the inner category.';
-    if (name && !categorySlug(values.slug || name)) found.slug = 'Enter a slug (letters, numbers and hyphens).';
+    const filled = subs.filter((sub) => sub.name.trim() || innersOf(sub).length);
+    if (editingId) {
+      if (!values.name.trim()) found.name = 'Enter a name.';
+      else if (!categorySlug(values.slug || values.name)) found.slug = 'Enter a slug (letters, numbers and hyphens).';
+    } else {
+      if (!values.main.trim()) found.main = 'Enter a main category.';
+      subs.forEach((sub, i) => !sub.name.trim() && innersOf(sub).length && (found[`sub-${i}`] = 'Enter the sub category these go under.'));
+      if (!filled.length) found['sub-0'] = 'Add at least one sub category.';
+    }
     setErrors(found);
     if (Object.keys(found).length) return document.getElementById(`cat-${Object.keys(found)[0]}`)?.focus();
 
@@ -154,7 +274,7 @@ export default function CategoryManager({ categories }) {
         body: JSON.stringify(
           editingId
             ? { name: values.name, slug: categorySlug(values.slug || values.name), parent: values.parent || null, ...optionalFields(values) }
-            : { main: values.main, sub: values.sub, inner: values.inner, slug: categorySlug(values.slug || name), ...optionalFields(values) },
+            : { main: values.main, subs: filled.map((sub) => ({ name: sub.name, inners: innersOf(sub) })), ...optionalFields(values) },
         ),
       });
       const data = await res.json().catch(() => ({}));
@@ -163,7 +283,12 @@ export default function CategoryManager({ categories }) {
         toast.error(editingId ? 'Category not updated' : 'Category not added', data.error);
         return;
       }
-      toast.success(editingId ? `“${data.name}” updated` : `“${data.path ?? data.name}” added`);
+      if (editingId) toast.success(`“${data.name}” updated`);
+      else
+        toast.success(
+          `${data.created.length} categor${data.created.length === 1 ? 'y' : 'ies'} added to “${data.path}”`,
+          data.reused ? `${data.reused} that already existed were kept as they are.` : undefined,
+        );
       resetForm();
       startRefresh(() => router.refresh());
     } catch {
@@ -215,6 +340,7 @@ export default function CategoryManager({ categories }) {
   const someSelected = !allSelected && visibleIds.some((id) => selected.has(id));
   const pendingDelete = toDelete.map((id) => byId.get(id)).filter(Boolean);
   const childrenOf = (id) => tree.filter((c) => c.parent === id);
+  const hasChildren = new Set(tree.map((c) => c.parent).filter(Boolean));
 
   const sortHeader = (k, label, className = '') => {
     const Icon = sort.key !== k ? ChevronsUpDown : sort.dir === 'asc' ? ArrowUp : ArrowDown;
@@ -269,66 +395,128 @@ export default function CategoryManager({ categories }) {
               </FieldHelp>
             </div>
           ) : (
-            <fieldset className="space-y-4">
-              <legend className="sr-only">Category path</legend>
-              {LEVELS.map((level, i) => {
-                const disabled = i > 0 && !values[LEVELS[i - 1].key].trim();
-                const exists = i < 2 && suggestions.matched[level.key];
-                return (
-                  <div key={level.key}>
-                    <label htmlFor={`cat-${level.key}`} className="text-sm font-medium">
-                      {level.label} {i === 0 ? <span className="text-red-600">*</span> : <span className="font-normal text-stone-400">(optional)</span>}
-                    </label>
-                    <input
-                      id={`cat-${level.key}`}
-                      list={`cat-${level.key}-options`}
-                      value={values[level.key]}
-                      maxLength={60}
-                      disabled={disabled}
-                      placeholder={level.placeholder}
-                      autoComplete="off"
-                      onChange={(e) => update(level.key, e.target.value)}
-                      aria-invalid={Boolean(errors[level.key]) || undefined}
-                      aria-describedby={`cat-${level.key}-help`}
-                      className={`${inputCls(errors[level.key])} h-11 disabled:cursor-not-allowed disabled:bg-stone-50`}
-                    />
-                    <datalist id={`cat-${level.key}-options`}>
-                      {suggestions[level.key].map((c) => (
-                        <option key={c._id} value={c.name} />
-                      ))}
-                    </datalist>
-                    <FieldHelp id={`cat-${level.key}-help`} error={errors[level.key]}>
-                      {exists && values[LEVELS[i + 1].key].trim() ? `Existing “${exists.name}”. The new category goes under it.` : level.help}
-                    </FieldHelp>
-                  </div>
-                );
-              })}
-            </fieldset>
+            <>
+              <div>
+                <label htmlFor="cat-main" className="text-sm font-medium">
+                  Main category <span className="text-red-600">*</span>
+                </label>
+                <input
+                  id="cat-main"
+                  list="cat-main-options"
+                  value={values.main}
+                  maxLength={60}
+                  placeholder="e.g. Templates"
+                  autoComplete="off"
+                  onChange={(e) => update('main', e.target.value)}
+                  aria-invalid={Boolean(errors.main) || undefined}
+                  aria-describedby="cat-main-help"
+                  className={`${inputCls(errors.main)} h-11`}
+                />
+                <datalist id="cat-main-options">
+                  {plan.mains.map((c) => (
+                    <option key={c._id} value={c.name} />
+                  ))}
+                </datalist>
+                <FieldHelp id="cat-main-help" error={errors.main}>
+                  {plan.main
+                    ? `“${plan.main.name}” already exists. The sub categories below are added under it.`
+                    : 'Type a new main category, or pick an existing one to add more under it.'}
+                </FieldHelp>
+              </div>
+
+              <fieldset>
+                <legend className="text-sm font-medium">
+                  Sub categories <span className="text-red-600">*</span> <span className="font-normal text-stone-400">(at least one)</span>
+                </legend>
+                {plan.existingSubs.length > 0 && (
+                  <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
+                    Already under {plan.main.name}: {plan.existingSubs.map((c) => c.name).join(', ')}.
+                  </p>
+                )}
+                <datalist id="cat-sub-options">
+                  {plan.existingSubs.map((c) => (
+                    <option key={c._id} value={c.name} />
+                  ))}
+                </datalist>
+                <ol className="mt-3 space-y-3">
+                  {subs.map((sub, i) => {
+                    const row = plan.rows[i];
+                    return (
+                      <li key={sub.key} className="rounded-xl border border-stone-200 bg-stone-50/60 p-3.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label htmlFor={`cat-sub-${i}`} className="text-sm font-medium">
+                            Sub category {i + 1}
+                          </label>
+                          {subs.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeSub(i)}
+                              aria-label={`Remove sub category ${i + 1}${sub.name ? ` (${sub.name})` : ''}`}
+                              className="-mr-1 grid size-8 place-items-center rounded-full text-stone-500 hover:bg-stone-200 hover:text-black"
+                            >
+                              <X size={16} strokeWidth={2} aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          id={`cat-sub-${i}`}
+                          list="cat-sub-options"
+                          value={sub.name}
+                          maxLength={60}
+                          placeholder={i === 0 ? 'e.g. Business' : 'e.g. Wedding'}
+                          autoComplete="off"
+                          onChange={(e) => updateSub(i, { name: e.target.value })}
+                          aria-invalid={Boolean(errors[`sub-${i}`]) || undefined}
+                          aria-describedby={`cat-sub-${i}-help`}
+                          className={`${inputCls(errors[`sub-${i}`])} h-11`}
+                        />
+                        <FieldHelp id={`cat-sub-${i}-help`} error={errors[`sub-${i}`]}>
+                          {row?.existing && `Already exists. Its new inner categories are added under it.`}
+                        </FieldHelp>
+                        <InnerCategories
+                          index={i}
+                          sub={sub}
+                          options={row?.innerOptions ?? []}
+                          existing={row?.inners ?? []}
+                          error={errors[`inners-${i}`]}
+                          onChange={(patch) => updateSub(i, patch)}
+                        />
+                      </li>
+                    );
+                  })}
+                </ol>
+                <button type="button" onClick={addSub} className="btn btn-sm btn-outline mt-3">
+                  <Plus size={16} strokeWidth={2} aria-hidden="true" />
+                  Add another sub category
+                </button>
+                <FieldHelp error={errors.subs} />
+              </fieldset>
+            </>
           )}
 
-          <div>
-            <label htmlFor="cat-slug" className="text-sm font-medium">
-              Slug
-            </label>
-            <input
-              id="cat-slug"
-              value={values.slug}
-              maxLength={80}
-              onChange={(e) => {
-                setSlugTouched(true);
-                update('slug', e.target.value.toLowerCase().replace(/\s+/g, '-'));
-              }}
-              onBlur={() => setValues((v) => ({ ...v, slug: categorySlug(v.slug) }))}
-              aria-invalid={Boolean(errors.slug) || undefined}
-              aria-describedby="cat-slug-help"
-              className={`${inputCls(errors.slug)} h-11 font-mono text-[13px]`}
-            />
-            <FieldHelp id="cat-slug-help" error={errors.slug}>
-              The URL-friendly version of the {editingId ? 'name' : 'deepest category you typed'}: lowercase letters, numbers and hyphens. Filled in
-              automatically until you edit it.
-              {editingId && ' Changing it changes the category’s link.'}
-            </FieldHelp>
-          </div>
+          {editingId && (
+            <div>
+              <label htmlFor="cat-slug" className="text-sm font-medium">
+                Slug
+              </label>
+              <input
+                id="cat-slug"
+                value={values.slug}
+                maxLength={80}
+                onChange={(e) => {
+                  setSlugTouched(true);
+                  update('slug', e.target.value.toLowerCase().replace(/\s+/g, '-'));
+                }}
+                onBlur={() => setValues((v) => ({ ...v, slug: categorySlug(v.slug) }))}
+                aria-invalid={Boolean(errors.slug) || undefined}
+                aria-describedby="cat-slug-help"
+                className={`${inputCls(errors.slug)} h-11 font-mono text-[13px]`}
+              />
+              <FieldHelp id="cat-slug-help" error={errors.slug}>
+                The URL-friendly version of the name: lowercase letters, numbers and hyphens. Changing it changes the category’s link.
+              </FieldHelp>
+            </div>
+          )}
 
           {editingId && (
             <div>
@@ -356,96 +544,104 @@ export default function CategoryManager({ categories }) {
             </div>
           )}
 
-          <div>
-            <label htmlFor="cat-description" className="text-sm font-medium">
-              Description <span className="font-normal text-stone-400">(optional)</span>
-            </label>
-            <textarea
-              id="cat-description"
-              rows={4}
-              maxLength={300}
-              value={values.description}
-              onChange={(e) => update('description', e.target.value)}
-              aria-invalid={Boolean(errors.description) || undefined}
-              aria-describedby="cat-description-help"
-              className={`${inputCls(errors.description)} resize-y py-2.5 leading-relaxed`}
-            />
-            <FieldHelp id="cat-description-help" error={errors.description}>
-              {values.description.length}/300 · Shown on the category page and in the Shop menu.
-            </FieldHelp>
-          </div>
+          {/* Adding: these describe a new main category (an existing one keeps its own; edit it from the list). */}
+          {(editingId || !plan.main) && (
+            <>
+              {!editingId && (
+                <p className="border-t border-stone-200 pt-5 text-sm font-medium">
+                  About the main category <span className="font-normal text-stone-400">(optional)</span>
+                </p>
+              )}
+              <div>
+                <label htmlFor="cat-description" className="text-sm font-medium">
+                  Description <span className="font-normal text-stone-400">(optional)</span>
+                </label>
+                <textarea
+                  id="cat-description"
+                  rows={4}
+                  maxLength={300}
+                  value={values.description}
+                  onChange={(e) => update('description', e.target.value)}
+                  aria-invalid={Boolean(errors.description) || undefined}
+                  aria-describedby="cat-description-help"
+                  className={`${inputCls(errors.description)} resize-y py-2.5 leading-relaxed`}
+                />
+                <FieldHelp id="cat-description-help" error={errors.description}>
+                  {values.description.length}/300 · Shown on the category page and in the Shop menu.
+                </FieldHelp>
+              </div>
 
-          <div>
-            <label htmlFor="cat-type" className="text-sm font-medium">
-              What can be listed here
-            </label>
-            <select id="cat-type" value={values.type} onChange={(e) => update('type', e.target.value)} className={`${inputCls()} h-11`}>
-              {CATEGORY_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-            <FieldHelp>Shown as a badge when sellers search for a category.</FieldHelp>
-          </div>
+              <div>
+                <label htmlFor="cat-type" className="text-sm font-medium">
+                  What can be listed here
+                </label>
+                <select id="cat-type" value={values.type} onChange={(e) => update('type', e.target.value)} className={`${inputCls()} h-11`}>
+                  {CATEGORY_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <FieldHelp>
+                  {editingId ? 'Shown as a badge when sellers search for a category.' : 'Its new sub and inner categories get the same.'}
+                </FieldHelp>
+              </div>
 
-          {/* ---------- SEO ---------- */}
-          <fieldset className="space-y-4 rounded-xl border border-stone-200 p-4">
-            <legend className="px-1 text-sm font-medium">Search engines (SEO)</legend>
-            <p className="break-all rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-600">
-              {siteHost}
-              {categoryHref({
-                slugPath: editingId
-                  ? [
-                      ...(byId.get(values.parent)?.slugPath ? [byId.get(values.parent).slugPath] : []),
-                      categorySlug(values.slug || values.name) || 'slug',
-                    ].join('/')
-                  : [values.main, values.sub, values.inner]
-                      .map((n) => n.trim())
-                      .filter(Boolean)
-                      .map((n, i, all) => (i === all.length - 1 ? categorySlug(values.slug || n) : categorySlug(n)))
-                      .join('/') || 'slug',
-              })}
-            </p>
-            <div>
-              <label htmlFor="cat-metaTitle" className="text-sm font-medium">
-                SEO title <span className="font-normal text-stone-400">(optional)</span>
-              </label>
-              <input
-                id="cat-metaTitle"
-                value={values.metaTitle}
-                maxLength={70}
-                placeholder={(editingId ? values.name : deepest(values)) || 'Defaults to the name'}
-                onChange={(e) => update('metaTitle', e.target.value)}
-                aria-invalid={Boolean(errors.metaTitle) || undefined}
-                className={`${inputCls(errors.metaTitle)} h-11`}
-              />
-              <FieldHelp error={errors.metaTitle}>{values.metaTitle.length}/70 · The page title in Google results.</FieldHelp>
-            </div>
-            <div>
-              <label htmlFor="cat-metaDescription" className="text-sm font-medium">
-                SEO description <span className="font-normal text-stone-400">(optional)</span>
-              </label>
-              <textarea
-                id="cat-metaDescription"
-                rows={3}
-                maxLength={160}
-                value={values.metaDescription}
-                placeholder={values.description || 'Defaults to the description'}
-                onChange={(e) => update('metaDescription', e.target.value)}
-                aria-invalid={Boolean(errors.metaDescription) || undefined}
-                className={`${inputCls(errors.metaDescription)} resize-y py-2.5 leading-relaxed`}
-              />
-              <FieldHelp error={errors.metaDescription}>
-                {values.metaDescription.length}/160 · The snippet under the title in Google results.
-              </FieldHelp>
-            </div>
-          </fieldset>
+              {/* ---------- SEO ---------- */}
+              <fieldset className="space-y-4 rounded-xl border border-stone-200 p-4">
+                <legend className="px-1 text-sm font-medium">Search engines (SEO)</legend>
+                <p className="break-all rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs text-stone-600">
+                  {siteHost}
+                  {categoryHref({
+                    slugPath: editingId
+                      ? [
+                          ...(byId.get(values.parent)?.slugPath ? [byId.get(values.parent).slugPath] : []),
+                          categorySlug(values.slug || values.name) || 'slug',
+                        ].join('/')
+                      : categorySlug(values.main) || 'slug',
+                  })}
+                </p>
+                <div>
+                  <label htmlFor="cat-metaTitle" className="text-sm font-medium">
+                    SEO title <span className="font-normal text-stone-400">(optional)</span>
+                  </label>
+                  <input
+                    id="cat-metaTitle"
+                    value={values.metaTitle}
+                    maxLength={70}
+                    placeholder={(editingId ? values.name : values.main) || 'Defaults to the name'}
+                    onChange={(e) => update('metaTitle', e.target.value)}
+                    aria-invalid={Boolean(errors.metaTitle) || undefined}
+                    className={`${inputCls(errors.metaTitle)} h-11`}
+                  />
+                  <FieldHelp error={errors.metaTitle}>{values.metaTitle.length}/70 · The page title in Google results.</FieldHelp>
+                </div>
+                <div>
+                  <label htmlFor="cat-metaDescription" className="text-sm font-medium">
+                    SEO description <span className="font-normal text-stone-400">(optional)</span>
+                  </label>
+                  <textarea
+                    id="cat-metaDescription"
+                    rows={3}
+                    maxLength={160}
+                    value={values.metaDescription}
+                    placeholder={values.description || 'Defaults to the description'}
+                    onChange={(e) => update('metaDescription', e.target.value)}
+                    aria-invalid={Boolean(errors.metaDescription) || undefined}
+                    className={`${inputCls(errors.metaDescription)} resize-y py-2.5 leading-relaxed`}
+                  />
+                  <FieldHelp error={errors.metaDescription}>
+                    {values.metaDescription.length}/160 · The snippet under the title in Google results.
+                  </FieldHelp>
+                </div>
+              </fieldset>
+            </>
+          )}
 
           <div className="flex flex-wrap gap-2 pt-1">
             <button type="submit" disabled={saving} className="btn btn-md btn-primary">
               {saving && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-              {saving ? 'Saving…' : editingId ? 'Update' : 'Add New Category'}
+              {saving ? 'Saving…' : editingId ? 'Update' : plan.newCount > 1 ? `Add ${plan.newCount} categories` : 'Add New Category'}
             </button>
             {editingId && (
               <button type="button" onClick={resetForm} className="btn btn-md btn-outline">
@@ -582,6 +778,14 @@ export default function CategoryManager({ categories }) {
                                   {c.depth === 1 ? 'Sub' : 'Inner'}
                                 </span>
                               )}
+                              {c.depth === 0 && !hasChildren.has(c._id) && (
+                                <span
+                                  title="Every main category needs at least one sub category"
+                                  className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
+                                >
+                                  No subs
+                                </span>
+                              )}
                               {/* Row actions: shown on hover / keyboard focus (always on touch screens). */}
                               <div className="mt-1 flex items-center gap-1.5 text-xs opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
                                 <button type="button" onClick={() => startEdit(c)} className="font-medium text-brand-700 hover:underline">
@@ -590,6 +794,16 @@ export default function CategoryManager({ categories }) {
                                 <span aria-hidden="true" className="text-stone-300">
                                   |
                                 </span>
+                                {c.depth < 2 && (
+                                  <>
+                                    <button type="button" onClick={() => startAddUnder(c)} className="font-medium text-brand-700 hover:underline">
+                                      {c.depth === 0 ? 'Add sub' : 'Add inner'}
+                                    </button>
+                                    <span aria-hidden="true" className="text-stone-300">
+                                      |
+                                    </span>
+                                  </>
+                                )}
                                 <button type="button" onClick={() => askDelete([c._id])} className="font-medium text-red-600 hover:underline">
                                   Delete
                                 </button>
