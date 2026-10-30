@@ -159,7 +159,7 @@ export default async function ProfilePage({ searchParams }) {
 
   return (
     <div className="bg-canvas">
-      <div className="container-page grid gap-8 py-8 sm:py-12 lg:grid-cols-[15rem_1fr] lg:items-start">
+      <div className="container-page grid grid-cols-1 gap-8 py-8 sm:py-12 lg:grid-cols-[15rem_1fr] lg:items-start">
         {/* Account menu: on the tinted canvas, like the dashboards' sidebar. */}
         <aside className="lg:sticky lg:top-24">
           <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-card ring-1 ring-black/[0.04]">

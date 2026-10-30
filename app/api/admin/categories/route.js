@@ -1,18 +1,19 @@
 import { authorizeAdminRequest } from '@/lib/auth';
 import { json, unauthorized, readJson, errorResponse } from '@/lib/api';
-import { createCategory, createCategoryFromPath } from '@/lib/data/admin-categories';
+import { createCategory, createCategoryGroup } from '@/lib/data/admin-categories';
 import { refreshCategories } from '@/lib/revalidate';
 
 /**
  * POST /api/admin/categories — adds a category. Admin session or API key. Either
- *  - { main, sub?, inner?, slug?, description?, … }: typed names; missing levels above the new one are created, or
- *  - { name, slug?, parent?, description?, … }: under an existing parent id.
+ *  - { main, subs: [{ name, inners: [name] }], description?, … }: a main category with at least one sub category
+ *    (and optional inner categories), as typed names; existing ones are reused (lib/data/admin-categories.js), or
+ *  - { name, slug?, parent?, description?, … }: one category under an existing parent id.
  */
 export async function POST(request) {
   if (!(await authorizeAdminRequest(request))) return unauthorized('Admin access required.');
   try {
     const body = await readJson(request);
-    const category = 'main' in body ? await createCategoryFromPath(body) : await createCategory(body);
+    const category = 'main' in body ? await createCategoryGroup(body) : await createCategory(body);
     refreshCategories();
     return json(category, 201);
   } catch (err) {

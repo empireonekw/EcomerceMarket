@@ -100,7 +100,7 @@ export default async function AdminUserPage({ params }) {
         </div>
       )}
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1fr_1.4fr] xl:items-start">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.4fr] xl:items-start">
         {/* ---------- Account + shop ---------- */}
         <div className="space-y-6">
           <Panel title="Account">

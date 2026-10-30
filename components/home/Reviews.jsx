@@ -104,7 +104,7 @@ export default async function Reviews() {
           </span>
         </p>
       </SectionHeading>
-      <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+      <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
         {reviews.items.map((review) => (
           <ReviewCard key={review._id} review={review} />
         ))}

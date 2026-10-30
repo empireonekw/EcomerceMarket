@@ -71,6 +71,7 @@ const LEGAL_BAR = [
 
 // Line-style brand marks (24px grid, stroked like the Lucide icons used elsewhere).
 const SOCIAL_ICONS = {
+  tiktok: <path d="M16 3a5 5 0 0 0 5 5v3a8 8 0 0 1-5-1.6V15a6 6 0 1 1-6-6v3.2a2.8 2.8 0 1 0 3 2.8V3z" strokeLinejoin="round" />,
   instagram: (
     <>
       <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -135,7 +136,7 @@ export default async function Footer() {
                 </Link>
               </div>
 
-              <ul className="mt-12 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+              <ul className="mt-12 grid grid-cols-1 gap-x-8 gap-y-5 sm:grid-cols-2">
                 {TRUST.map(({ icon: Icon, title, text }) => (
                   <li key={title} className="flex gap-3">
                     <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-gray-900">
@@ -252,10 +253,11 @@ export default async function Footer() {
               © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
             </p>
             <nav aria-label="Legal">
-              <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {/* Dots only from sm up: on phones the links can wrap, and a dot would then start the second line. */}
+              <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 sm:gap-x-3">
                 {LEGAL_BAR.map((l, i) => (
                   <li key={l.href} className="flex items-center gap-3">
-                    {i > 0 && <span aria-hidden="true" className="size-1 rounded-full bg-stone-400" />}
+                    {i > 0 && <span aria-hidden="true" className="hidden size-1 rounded-full bg-stone-400 sm:block" />}
                     <Link href={l.href} className="transition-colors hover:text-black">
                       {l.label}
                     </Link>

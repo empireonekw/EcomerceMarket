@@ -140,7 +140,7 @@ export default async function CheckoutSuccessPage({ searchParams }) {
         <h2 id="receipt-heading" className="headline text-2xl">
           Receipt
         </h2>
-        <dl className="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+        <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
           <div className="flex justify-between gap-4">
             <dt className="text-stone-500">Order number</dt>
             <dd className="font-medium">#{orderNumber}</dd>
@@ -164,7 +164,7 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           <tbody className="divide-y divide-stone-100 border-y border-stone-200">
             {order.items.map((item) => (
               <tr key={item.product}>
-                <th scope="row" className="py-2.5 pr-4 text-left font-normal">
+                <th scope="row" className="py-2.5 pr-4 text-left font-normal break-words">
                   {item.title}
                 </th>
                 <td className="py-2.5 text-right font-medium">{item.price === 0 ? 'Free' : money(item.price)}</td>

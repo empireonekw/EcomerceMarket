@@ -149,8 +149,10 @@ function useHoverPopover() {
   };
 }
 
+// Desktop: a 20rem card under the icon. Phones: the icon isn't at the right edge (cart and menu follow it), so a
+// card hung off it would leave the screen; there the menu's root is static and the card spans the header row instead.
 const panelClass =
-  'absolute right-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-stone-200 bg-white shadow-xl transition-[opacity,translate] duration-150 ease-out starting:-translate-y-1 starting:opacity-0';
+  'absolute top-full z-50 mt-2 max-sm:inset-x-3 sm:right-0 sm:w-80 rounded-2xl border border-stone-200 bg-white shadow-xl transition-[opacity,translate] duration-150 ease-out starting:-translate-y-1 starting:opacity-0';
 
 /**
  * Header account control (hover or click):
@@ -179,7 +181,7 @@ export default function UserMenu() {
 
   const item = 'flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-stone-100';
   return (
-    <div {...rootProps} className="relative">
+    <div {...rootProps} className="sm:relative">
       <button
         {...buttonProps}
         type="button"

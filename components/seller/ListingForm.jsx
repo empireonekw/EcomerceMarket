@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Eye, FileArchive, FileText, Info, Link2, Pin, Plus, Upload, X } from 'lucide-react';
@@ -28,7 +28,6 @@ import {
   validateListing,
 } from '@/lib/listing';
 import { uploadFile } from '@/lib/upload-client';
-import { searchCategories } from '@/lib/category-tree';
 import { formatPrice } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
@@ -190,7 +189,7 @@ function RadioList({ name, options, value, onChange, error }) {
 
 function OptionCards({ name, options, value, onChange, error }) {
   return (
-    <div role="radiogroup" aria-invalid={Boolean(error) || undefined} className="mt-3 grid gap-3 sm:grid-cols-2">
+    <div role="radiogroup" aria-invalid={Boolean(error) || undefined} className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
       {options.map((o, i) => (
         <label
           key={o.value}
@@ -233,108 +232,96 @@ function UploadingTile({ upload, video = false }) {
   );
 }
 
+const selectCls = (err) =>
+  `${inputCls(err)} appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-400`;
+
+/** The main › sub › inner ids of category `id` (empty strings below it). */
+function levelsOf(id, categories) {
+  const c = categories.find((x) => x._id === id);
+  if (!c) return ['', '', ''];
+  const ids = [...c.ancestors, c._id];
+  return [ids[0] ?? '', ids[1] ?? '', ids[2] ?? ''];
+}
+
 /**
- * Category search: type anything (typos are fine — "rsuem" finds "Résumé Templates"), then pick a result. Sellers see
- * plain category names; the main › sub › inner structure is the admin's (it only shapes category pages and SEO).
- * A name used in two places gets its parent in brackets so the two can be told apart. Stores the id.
+ * Category: Main, then Sub, then Inner, each a dropdown of what's under the one before (set up by the admin under
+ * Admin → Categories), so every product sits in its place on the category pages. A sub category is required when the
+ * main has any; the inner one is optional. Stores the deepest picked id, or '' while a required sub is still missing.
  */
-function CategoryPicker({ categories, value, onChange, error }) {
-  const id = useId();
-  const selected = categories.find((c) => c._id === value);
-  const [query, setQuery] = useState(selected?.name ?? '');
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
-  const typed = selected && query === selected.name ? '' : query; // showing the picked name ≠ searching for it
-  const matches = typed.trim() ? searchCategories(typed, categories, 12) : [...categories].sort((a, b) => a.name.localeCompare(b.name));
-  const label = (c) => {
-    const twin = categories.some((o) => o._id !== c._id && o.name.toLowerCase() === c.name.toLowerCase());
-    return twin && c.path.includes(' › ') ? `${c.name} (${c.path.split(' › ').at(-2)})` : c.name;
-  };
-
+function CategorySelect({ categories, value, onChange, error }) {
+  const [levels, setLevels] = useState(() => levelsOf(value, categories));
+  // A new value from outside (the form loading a listing): show it. The form's own '' (sub missing) keeps the picks.
   useEffect(() => {
-    if (selected) setQuery(selected.name);
-  }, [selected]);
+    if (value) setLevels(levelsOf(value, categories));
+  }, [value, categories]);
 
-  function pick(c) {
-    onChange(c._id);
-    setQuery(c.name);
-    setOpen(false);
+  const childrenOf = (parentId) => categories.filter((c) => (c.parent ?? null) === parentId);
+  const [main, sub, inner] = levels;
+  const options = [childrenOf(null), main ? childrenOf(main) : [], sub ? childrenOf(sub) : []];
+  const needsSub = Boolean(main) && options[1].length > 0 && !sub;
+
+  function pick(level, id) {
+    const next = [...levels.slice(0, level), id, '', ''].slice(0, 3);
+    setLevels(next);
+    const [m, s] = next;
+    const deepest = next.findLast(Boolean) ?? '';
+    // A main that has sub categories only groups them: nothing to store until a sub is picked.
+    onChange(m && !s && childrenOf(m).length ? '' : deepest);
   }
-  function clear() {
-    onChange('');
-    setQuery('');
-    setOpen(true);
-    document.getElementById('category')?.focus();
-  }
+
+  // Which dropdown the error belongs to: the one the seller still has to fill in.
+  const errorAt = error ? (!main ? 0 : needsSub ? 1 : -1) : -1;
+  const fields = [
+    { id: 'category', label: 'Main category', required: true, placeholder: 'Choose a main category' },
+    { id: 'category-sub', label: 'Sub category', required: options[1].length > 0, placeholder: main ? 'Choose a sub category' : 'Choose a main category first' },
+    { id: 'category-inner', label: 'Inner category', required: false, placeholder: sub ? 'Choose an inner category' : 'Choose a sub category first' },
+  ];
+  const message = errorAt === 1 ? 'Choose a sub category.' : error;
 
   return (
-    <div className="relative max-w-xl">
-      <input
-        id="category"
-        role="combobox"
-        aria-expanded={open}
-        aria-controls={`${id}-list`}
-        aria-autocomplete="list"
-        aria-activedescendant={open && matches[active] ? `${id}-${matches[active]._id}` : undefined}
-        aria-invalid={Boolean(error) || undefined}
-        aria-describedby={error ? 'category-error' : undefined}
-        autoComplete="off"
-        spellCheck={false}
-        placeholder="Type to search, e.g. résumé, crochet, logo"
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setOpen(true);
-          setActive(0);
-          if (value) onChange('');
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setTimeout(() => setOpen(false), 120)}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowDown') (e.preventDefault(), setOpen(true), setActive((a) => Math.min(a + 1, matches.length - 1)));
-          else if (e.key === 'ArrowUp') (e.preventDefault(), setActive((a) => Math.max(a - 1, 0)));
-          else if (e.key === 'Enter' && open && matches[active]) (e.preventDefault(), pick(matches[active]));
-          else if (e.key === 'Escape') setOpen(false);
-        }}
-        className={`${inputCls(error)} pr-12`}
-      />
-      {query ? (
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={clear}
-          aria-label="Clear category"
-          className="absolute right-2.5 top-8 grid size-8 -translate-y-1/2 place-items-center rounded-full text-stone-600 hover:bg-stone-100 hover:text-black"
-        >
-          <X size={18} strokeWidth={2} aria-hidden="true" />
-        </button>
-      ) : (
-        <ChevronDown size={18} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute right-4 top-8 -translate-y-1/2 text-stone-500" />
-      )}
-      {open && (
-        <ul
-          id={`${id}-list`}
-          role="listbox"
-          className="absolute inset-x-0 top-full z-30 mt-1 max-h-80 overflow-auto rounded-xl border border-stone-200 bg-white p-1.5 shadow-lift"
-        >
-          {matches.length === 0 ? (
-            <li className="px-4 py-3 text-sm text-stone-500">No matching category. Try another word.</li>
-          ) : (
-            matches.map((c, i) => (
-              <li
-                key={c._id}
-                id={`${id}-${c._id}`}
-                role="option"
-                aria-selected={c._id === value}
-                onMouseDown={(e) => (e.preventDefault(), pick(c))}
-                onMouseEnter={() => setActive(i)}
-                className={`cursor-pointer truncate rounded-lg px-4 py-3 text-[15px] text-black ${i === active ? 'bg-stone-100' : ''}`}
+    <div className="mt-3 grid max-w-3xl grid-cols-1 gap-4 lg:grid-cols-3">
+      {fields.map((f, level) => {
+        const list = options[level];
+        // Hide the inner dropdown when the picked sub has none (it's optional anyway).
+        const empty = level > 0 && levels[level - 1] && list.length === 0;
+        return (
+          <div key={f.id} className="min-w-0">
+            <label htmlFor={f.id} className="text-sm font-medium text-stone-700">
+              {f.label}{' '}
+              {f.required ? <span className="text-red-600">*</span> : <span className="font-normal text-stone-400">(optional)</span>}
+            </label>
+            <div className="relative">
+              <select
+                id={f.id}
+                value={levels[level]}
+                disabled={level > 0 && (!levels[level - 1] || empty)}
+                onChange={(e) => pick(level, e.target.value)}
+                aria-invalid={errorAt === level || undefined}
+                aria-describedby={errorAt === level ? 'category-error' : undefined}
+                className={selectCls(errorAt === level)}
               >
-                {label(c)}
-              </li>
-            ))
-          )}
-        </ul>
+                <option value="">{empty ? `No ${level === 1 ? 'sub' : 'inner'} categories` : f.placeholder}</option>
+                {list.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={18}
+                strokeWidth={1.75}
+                aria-hidden="true"
+                className="pointer-events-none absolute right-4 top-[calc(50%+4px)] -translate-y-1/2 text-stone-500"
+              />
+            </div>
+            {errorAt === level && <ErrorText id="category-error">{message}</ErrorText>}
+          </div>
+        );
+      })}
+      {error && errorAt === -1 && (
+        <div className="lg:col-span-3">
+          <ErrorText id="category-error">{error}</ErrorText>
+        </div>
       )}
     </div>
   );
@@ -377,7 +364,7 @@ export default function ListingForm({ categories, listing, uploads }) {
   const sourceInputRef = useRef(null);
 
   const payload = useMemo(() => toPayload(values), [values]);
-  const errors = useMemo(() => ({ ...validateListing(payload, { draft: attempt === 'draft' }), ...serverErrors }), [payload, attempt, serverErrors]);
+  const errors = useMemo(() => ({ ...validateListing(payload, { draft: attempt === 'draft', categories }), ...serverErrors }), [payload, attempt, serverErrors, categories]);
   const show = (key) => (touched[key] || attempt ? errors[key] : undefined);
 
   // Warn before leaving with unsaved changes.
@@ -518,15 +505,19 @@ export default function ListingForm({ categories, listing, uploads }) {
       return;
     }
     setAttempt(mode);
-    const found = validateListing(payload, { draft: mode === 'draft' });
+    const found = validateListing(payload, { draft: mode === 'draft', categories });
     if (Object.keys(found).length) {
       const first = FIELD_ORDER.find((f) => found[f]) ?? Object.keys(found)[0];
       toast.error(mode === 'draft' ? 'Add a title to save a draft' : 'A few things need your attention', found[first]);
       scrollTo(sectionOf(first) ?? 'photos');
       const focusId =
-        { images: 'media-upload', videos: 'media-upload', downloadUrl: values.deliveryType === 'external' ? 'downloadUrl' : 'source-upload' }[
-          first
-        ] ?? first;
+        {
+          images: 'media-upload',
+          videos: 'media-upload',
+          downloadUrl: values.deliveryType === 'external' ? 'downloadUrl' : 'source-upload',
+          // Main picked but its sub missing: go to the sub dropdown.
+          category: document.getElementById('category')?.value ? 'category-sub' : 'category',
+        }[first] ?? first;
       setTimeout(() => document.getElementById(focusId)?.focus({ preventScroll: true }), 400);
       return;
     }
@@ -568,7 +559,7 @@ export default function ListingForm({ categories, listing, uploads }) {
   const priceCents = toCents(values.price);
   const split = Number.isInteger(priceCents) ? splitSale(priceCents) : null;
   const hint = downloadHint(values.linkUrl);
-  const categoryName = categories.find((c) => c._id === values.category)?.name;
+  const categoryName = categories.find((c) => c._id === values.category)?.path;
   const tagsLeft = LISTING_LIMITS.tags - values.tags.length;
   const status = isEdit ? listingStatus(listing) : null;
 
@@ -806,7 +797,7 @@ export default function ListingForm({ categories, listing, uploads }) {
               )}
 
               {(values.videos.length > 0 || uploading.some((u) => u.kind === 'video')) && (
-                <ul className="mt-4 grid gap-3 sm:grid-cols-2" aria-label="Videos">
+                <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Videos">
                   {values.videos.map((url, i) => (
                     <li key={url} className="relative aspect-video overflow-hidden rounded-xl border border-stone-200 bg-black">
                       <video
@@ -843,16 +834,17 @@ export default function ListingForm({ categories, listing, uploads }) {
         <section id="details" aria-labelledby="details-heading" className="scroll-mt-36 space-y-6 lg:scroll-mt-24">
           <Card title={<span id="details-heading">Item details</span>} description="Help buyers understand your item better.">
             <div>
-              <Label htmlFor="category" required>
+              <Label as="p" required>
                 Category
               </Label>
-              <CategoryPicker
+              <Help>Pick where your item belongs, so buyers find it under the right category.</Help>
+              <CategorySelect
                 categories={categories}
                 value={values.category}
-                onChange={(id) => (update('category', id), touch('category'))}
+                // Only a complete pick marks it touched: a main still waiting for its sub isn't an error until Publish.
+                onChange={(id) => (update('category', id), id && touch('category'))}
                 error={show('category')}
               />
-              <ErrorText id="category-error">{show('category')}</ErrorText>
             </div>
 
             <div className="max-w-2xl">

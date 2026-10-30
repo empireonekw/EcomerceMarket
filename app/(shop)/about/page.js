@@ -33,7 +33,7 @@ export default function AboutPage() {
         </Link>
       </PageIntro>
 
-      <ul className="mt-16 grid gap-5 sm:mt-20 md:grid-cols-3">
+      <ul className="mt-16 grid grid-cols-1 gap-5 sm:mt-20 md:grid-cols-3">
         {VALUES.map(({ icon: Icon, title, text }) => (
           <li key={title} className="rounded-2xl border border-stone-200 bg-white p-7">
             <span className="grid size-11 place-items-center rounded-xl bg-stone-100 text-black">
@@ -46,7 +46,7 @@ export default function AboutPage() {
       </ul>
 
       {/* ---------- Who runs the platform ---------- */}
-      <section aria-labelledby="who-heading" className="mt-16 grid gap-8 border-t border-stone-200 pt-16 sm:mt-20 sm:pt-20 lg:grid-cols-12 lg:gap-10">
+      <section aria-labelledby="who-heading" className="mt-16 grid grid-cols-1 gap-8 border-t border-stone-200 pt-16 sm:mt-20 sm:pt-20 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-5">
           <h2 id="who-heading" className="headline text-3xl leading-tight sm:text-4xl">
             Who runs {siteConfig.name}

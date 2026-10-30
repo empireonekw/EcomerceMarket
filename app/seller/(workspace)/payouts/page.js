@@ -47,7 +47,7 @@ export default async function SellerPayoutsPage() {
         <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub="Your share, all time" icon={DollarSign} tone="positive" />
       </section>
 
-      <div className="mt-8 grid gap-6 xl:grid-cols-[1.4fr_1fr] xl:items-start">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr] xl:items-start">
         <Panel title="Payout details" id="details">
           <div className="p-5 sm:p-6">
             <PayoutDetailsForm initial={data.bankDetails} />

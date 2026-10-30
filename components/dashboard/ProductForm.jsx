@@ -293,7 +293,7 @@ export default function ProductForm({ mode, categories, product }) {
             <p className="mt-0.5 text-xs text-stone-500">
               Type your own names, pick a suggestion or enter a new one and it is created when you save. Sub and inner are optional.
             </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
               {[
                 ['categoryMain', 'Main category', 'e.g. Digital Products'],
                 ['categorySub', 'Sub-category', 'e.g. Templates'],
@@ -366,7 +366,7 @@ export default function ProductForm({ mode, categories, product }) {
 
           <fieldset>
             <legend className="text-sm font-medium">Delivery type</legend>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {[
                 { value: 'file', label: 'File download', text: 'Buyers download a file (Drive, Dropbox, direct link or storage key).' },
                 { value: 'external', label: 'Access link', text: 'Buyers get a link to Notion, Figma, a course portal, etc.' },
