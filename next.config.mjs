@@ -41,9 +41,10 @@ const nextConfig = {
   experimental: {
     // Keep visited dynamic pages (dashboards, lists) in the client router cache for 30s, so going back/forward
     // between them is instant. Mutations still call router.refresh(), which bypasses this cache.
-    // `static` also covers fully prefetched links (<Link prefetch>: dashboard sidebars, sign-in): their data is at most
-    // 30s old on click, and hovering a link after that prefetches it again.
-    staleTimes: { dynamic: 30, static: 30 },
+    // `static` covers static pages (sign-in, sign-up, storefront) and fully prefetched links (<Link prefetch>: the
+    // dashboard sidebars), so a click opens them with no server round trip for 3 minutes. Every save in the dashboards
+    // calls router.refresh(), which throws all of this away, so your own changes always show at once.
+    staleTimes: { dynamic: 30, static: 180 },
   },
   poweredByHeader: false,
 

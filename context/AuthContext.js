@@ -17,7 +17,7 @@ const AuthContext = createContext(null);
 
 export const NEW_ACCOUNT_EMAIL_KEY = 'new-account-email';
 
-const hasAuthHint = () => typeof document !== 'undefined' && /(?:^|;\s*)apex_auth=1/.test(document.cookie);
+export const hasAuthHint = () => typeof document !== 'undefined' && /(?:^|;\s*)apex_auth=1/.test(document.cookie);
 
 async function postJson(url, body) {
   const res = await fetch(url, {
