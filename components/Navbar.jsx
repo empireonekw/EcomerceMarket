@@ -62,7 +62,7 @@ export default async function Navbar() {
       <FloatingHeader>
         {/* 3 columns on desktop so the centre nav stays centred regardless of logo/utility widths. */}
         <div className="container-page relative flex items-center justify-between gap-4 py-3 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-6">
-          <Logo />
+          <Logo eager height={44} />
 
           <DesktopNav categories={categories} />
 

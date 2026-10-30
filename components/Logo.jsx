@@ -1,21 +1,38 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { siteConfig } from '@/lib/site';
+import logo from '@/assets/brand/sellpify-logo.svg';
 
-const [first, ...rest] = siteConfig.name.split(' ');
-
-/** Wordmark used in the header, footer and auth pages: brand-yellow dot · serif name (first word strong, the rest light). */
-export default function Logo({ className = '' }) {
+/**
+ * The logo image at `height` px. The size is set on the <img> itself (not only through CSS classes): the SVG's own
+ * size is ~3000 px wide, so a page whose styles haven't loaded yet would otherwise show it huge and scroll sideways.
+ */
+export function LogoImage({ height = 40, className = '', eager = false }) {
+  const width = Math.round((height * logo.width) / logo.height);
   return (
-    <Link
-      href="/"
-      className={`flex shrink-0 items-center gap-2 whitespace-nowrap font-serif text-[1.375rem] leading-none tracking-tight ${className}`}
-      aria-label={`${siteConfig.name} home`}
-    >
-      <span aria-hidden="true" className="size-2 rounded-full bg-brand-500" />
-      <span>
-        <span className="font-medium text-gray-900">{first}</span>
-        {rest.length > 0 && <span className="ml-1 font-light text-stone-500">{rest.join(' ')}</span>}
-      </span>
+    <Image
+      src={logo}
+      alt=""
+      width={width}
+      height={height}
+      unoptimized
+      loading={eager ? 'eager' : 'lazy'}
+      style={{ height, width: 'auto', maxWidth: 'none' }}
+      className={`shrink-0 ${className}`}
+    />
+  );
+}
+
+/**
+ * The Sellpify logo (handwritten name + gold-handled bag, assets/brand/sellpify-logo.svg) linking home. Used in the
+ * header, footer, auth pages and seller onboarding. `eager` for the copy at the top of the page; `tagline` adds
+ * "Shop independent creators" under it (footer).
+ */
+export default function Logo({ height = 40, className = '', eager = false, tagline = false }) {
+  return (
+    <Link href="/" className="inline-flex shrink-0 flex-col items-start" aria-label={`${siteConfig.name} home`}>
+      <LogoImage height={height} className={className} eager={eager} />
+      {tagline && <span className="mt-2 text-[11px] font-medium tracking-[0.28em] text-stone-600 uppercase">Shop independent creators</span>}
     </Link>
   );
 }

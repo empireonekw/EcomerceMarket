@@ -22,6 +22,7 @@ import {
   Users,
 } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
+import { LogoImage } from '@/components/Logo';
 import SignOutButton from '@/components/SignOutButton';
 import { useMessaging } from '@/components/messages/MessagingProvider';
 import { siteConfig } from '@/lib/site';
@@ -115,12 +116,10 @@ function Brand({ area, onNavigate, compact = false }) {
       onNavigate={() => onNavigate(area.home)}
       className={`flex items-center gap-3 ${compact ? '' : 'rounded-2xl bg-white p-2.5 shadow-card ring-1 ring-black/[0.04]'}`}
     >
-      <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-500 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]">
-        <Store size={18} strokeWidth={1.9} />
-      </span>
-      <span className="min-w-0 leading-tight">
-        <span className="block truncate text-[15px] font-semibold tracking-[-0.01em] text-ink">{siteConfig.name}</span>
-        <span className="block truncate text-xs text-stone-500">{area.subtitle}</span>
+      <LogoImage height={40} eager />
+      <span className="min-w-0 truncate border-l border-black/10 pl-3 text-xs leading-tight text-stone-500">
+        <span className="sr-only">{siteConfig.name} </span>
+        {area.subtitle}
       </span>
     </Link>
   );
