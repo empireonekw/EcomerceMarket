@@ -21,7 +21,7 @@ export default async function SellerOnboardingPage() {
       <AuthBackground />
       <main id="main" className="relative flex min-h-dvh flex-col px-4 py-6 sm:px-8">
         <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4">
-          <Logo />
+          <Logo eager />
           <div className="flex items-center gap-3 text-sm text-stone-500">
             <span className="hidden truncate sm:inline">{seller.email}</span>
             <SignOutButton className="btn btn-sm btn-outline" />

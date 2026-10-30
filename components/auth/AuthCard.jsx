@@ -11,7 +11,7 @@ export default function AuthCard({ title, subtitle, eyebrow, children, footer, w
     <div className="grid min-h-dvh place-items-center px-4 py-12">
       <div className={`w-full ${wide ? 'max-w-[38rem]' : 'max-w-md'}`}>
         <div className="mb-6 flex items-center justify-between">
-          <Logo />
+          <Logo eager height={44} />
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-stone-500 transition-colors hover:text-black">
             <ArrowLeft size={15} strokeWidth={1.75} aria-hidden="true" />
             Back to store

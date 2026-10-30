@@ -172,7 +172,7 @@ export default async function Footer() {
 
             {/* ---------- Brand line (last on phones, beside the contact panel on desktop) ---------- */}
             <div className="max-w-sm max-lg:order-last lg:col-span-5 lg:self-center">
-              <Logo />
+              <Logo tagline height={56} />
               <p className="mt-3 text-sm leading-relaxed text-stone-600">{siteConfig.description}</p>
               {/* Google "Preferred sources": readers can choose to see more of this site in Google's Top Stories. */}
               <a
