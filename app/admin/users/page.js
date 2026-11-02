@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Store, UserPlus, Users, UserRound } from 'lucide-react';
 import Pagination from '@/components/Pagination';
+import JoinedFilter from '@/components/admin/JoinedFilter';
 import UsersTable from '@/components/admin/UsersTable';
 import { FilterTabs, PendingContent, PendingNavProvider, PendingSearchForm } from '@/components/dashboard/PendingNav';
 import { AdminUsersListSkeleton } from '@/components/dashboard/RouteSkeletons';
@@ -19,10 +20,11 @@ const ROLE_TABS = [
   { value: 'admin', label: 'Admins', key: 'admin' },
 ];
 
-function tabHref(role, q) {
+function tabHref(role, q, dates = {}) {
   const qs = new URLSearchParams();
   if (role) qs.set('role', role);
   if (q) qs.set('q', q);
+  for (const [k, v] of Object.entries(dates)) if (v) qs.set(k, v);
   const s = qs.toString();
   return s ? `/admin/users?${s}` : '/admin/users';
 }
@@ -30,9 +32,10 @@ function tabHref(role, q) {
 /** Every account — customers, sellers and admins — with status, purchases and selling at a glance. */
 export default async function AdminUsersPage({ searchParams }) {
   const sp = await searchParams;
-  const params = { q: (sp.q ?? '').trim(), role: sp.role ?? '', page: sp.page };
+  const params = { q: (sp.q ?? '').trim(), role: sp.role ?? '', page: sp.page, joined: sp.joined ?? '', from: sp.from ?? '', to: sp.to ?? '' };
   const [admin, { items, pagination, summary }] = await Promise.all([requireAdmin(), getAdminUsers(params)]);
-  const filtered = Boolean(params.q || params.role);
+  const dates = { joined: params.joined, from: params.from, to: params.to };
+  const filtered = Boolean(params.q || params.role || params.joined || params.from || params.to);
 
   return (
     <>
@@ -64,18 +67,29 @@ export default async function AdminUsersPage({ searchParams }) {
               key: t.value,
               label: t.label,
               count: t.key === 'total' ? summary.total : summary.byRole[t.key],
-              href: tabHref(t.value, params.q),
+              href: tabHref(t.value, params.q, dates),
             }))}
           />
 
           <PendingSearchForm
             action="/admin/users"
-            params={{ role: params.role }}
+            params={{ role: params.role, ...dates }}
             defaultValue={params.q}
             label="Search users"
             placeholder="Name, email or shop…"
             inputClassName={`${field} w-full lg:w-72`}
             buttonClassName={buttonClasses.secondary}
+          />
+        </div>
+
+        <div className="mb-5">
+          <JoinedFilter
+            base={{ role: params.role, q: params.q }}
+            joined={params.joined}
+            from={params.from}
+            to={params.to}
+            counts={{ today: summary.newToday, yesterday: summary.newYesterday }}
+            today={summary.today}
           />
         </div>
 
@@ -92,7 +106,7 @@ export default async function AdminUsersPage({ searchParams }) {
             <UsersTable items={items} currentAdminId={admin.id} />
           )}
 
-          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={{ q: params.q, role: params.role }} />
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={{ q: params.q, role: params.role, ...dates }} />
         </PendingContent>
       </PendingNavProvider>
     </>

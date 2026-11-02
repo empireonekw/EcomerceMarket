@@ -51,7 +51,8 @@ export default function NavigationProgress() {
     };
     const onSubmit = (e) => {
       const form = e.target;
-      if (!(form instanceof HTMLFormElement) || (form.method || 'get').toLowerCase() !== 'get') return;
+      // Forms handled in JS (login, signup… call preventDefault) show their own loading state: no second spinner.
+      if (e.defaultPrevented || !(form instanceof HTMLFormElement) || (form.method || 'get').toLowerCase() !== 'get') return;
       const url = new URL(form.action, location.href);
       url.search = new URLSearchParams(new FormData(form, e.submitter)).toString();
       if (internalTarget(url.href)) mark(e.submitter ?? form.querySelector('button[type=submit], button:not([type])'));

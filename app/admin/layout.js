@@ -1,4 +1,5 @@
-import DashboardShell from '@/components/dashboard/DashboardShell';
+import { cookies } from 'next/headers';
+import DashboardShell, { SIDEBAR_COOKIE } from '@/components/dashboard/DashboardShell';
 import { ToastProvider } from '@/components/dashboard/Toaster';
 import { MessagingProvider } from '@/components/messages/MessagingProvider';
 import { requireAdmin } from '@/lib/auth';
@@ -16,11 +17,13 @@ export const metadata = {
 export default async function AdminLayout({ children }) {
   const admin = await requireAdmin();
 
+  const sidebarCollapsed = (await cookies()).get(SIDEBAR_COOKIE)?.value === 'collapsed';
+
   return (
     <ToastProvider>
       {/* Live support inbox: unread chats badge in the sidebar + real-time Messages page. */}
       <MessagingProvider unreadUrl="/api/admin/support/unread" unreadEvent="support:unread">
-        <DashboardShell area="admin" user={admin}>
+        <DashboardShell area="admin" user={admin} sidebarCollapsed={sidebarCollapsed}>
           {children}
         </DashboardShell>
       </MessagingProvider>

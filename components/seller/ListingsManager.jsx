@@ -131,8 +131,8 @@ export default function ListingsManager({ items, counts, total, pagination, para
       const n = (x) => `${x} listing${x === 1 ? '' : 's'}`;
       if (action === 'delete') {
         toast.success(
-          `${n(data.done + data.archived)} deleted`,
-          data.archived ? `${n(data.archived)} already sold, so they were hidden from the store instead. Buyers keep their downloads.` : undefined,
+          `${n(data.done)} deleted`,
+          data.sold ? `${n(data.sold)} had been bought — those buyers keep their downloads.` : undefined,
         );
       } else {
         toast.success(
@@ -565,8 +565,8 @@ export default function ListingsManager({ items, counts, total, pagination, para
             {toDelete.length === 1 ? items.find((p) => p._id === toDelete[0])?.title : `${toDelete.length} listings`}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">
-            Deleted listings are removed permanently. Anything that has already been bought is hidden from the store instead, so those buyers keep
-            their downloads.
+            Listings are removed permanently with their photos, videos and reviews — this can’t be undone. People who already bought them can
+            still download their files from their orders.
           </p>
           <div className="mt-6 flex justify-end gap-2">
             <button
