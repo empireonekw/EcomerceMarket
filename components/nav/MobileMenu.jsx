@@ -7,7 +7,7 @@ import NavSearch from '@/components/nav/NavSearch';
 import { MobileAuthLinks } from '@/components/UserMenu';
 import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
-import { categoryHref } from '@/lib/category-tree';
+import { ALL_CATEGORIES_HREF, categoryHref, topCategories } from '@/lib/category-tree';
 
 /** Hamburger toggle + slide-down panel for screens below `lg`. */
 export default function MobileMenu({ categories }) {
@@ -65,13 +65,18 @@ export default function MobileMenu({ categories }) {
                   </Link>
                   {item.dropdown && (
                     <ul className="mb-1 ml-3 border-l border-stone-200 pl-2">
-                      {categories.map((c) => (
+                      {topCategories(categories, 5).map((c) => (
                         <li key={c.slug}>
                           <Link href={categoryHref(c)} className="flex items-center rounded-full px-4 py-2 text-sm text-stone-600 transition-colors hover:bg-stone-50 hover:text-black">
                             {c.name}
                           </Link>
                         </li>
                       ))}
+                      <li>
+                        <Link href={ALL_CATEGORIES_HREF} className="flex items-center rounded-full px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-stone-50">
+                          View all categories →
+                        </Link>
+                      </li>
                     </ul>
                   )}
                 </li>
