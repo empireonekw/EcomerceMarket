@@ -12,7 +12,7 @@ import { saveLocalUpload, uploadDriver } from '@/lib/uploads';
 export async function PUT(request) {
   const user = await getRequestUser(request); // same-origin enforced
   if (!user) return unauthorized();
-  if (user.role !== 'seller') return forbidden('Seller account required.');
+  if (!['seller', 'admin'].includes(user.role)) return forbidden('Seller account required.'); // admins upload for platform products
   if (uploadDriver() !== 'local') return json({ error: 'Uploads go to cloud storage on this site.' }, 409);
   if (!rateLimit(`upload:${user.id}`, { limit: 120, windowMs: 60 * 60 * 1000 }).ok) {
     return json({ error: 'Too many uploads in a short time. Please try again later.' }, 429);
@@ -26,7 +26,7 @@ export async function PUT(request) {
   if (!request.body) return json({ error: 'The file is empty.' }, 400);
 
   try {
-    return json(await saveLocalUpload(kind, name, request.body), 201);
+    return json(await saveLocalUpload(kind, name, request.body, Number.isFinite(size) ? size : undefined), 201);
   } catch (err) {
     return errorResponse(err, 'PUT /api/seller/uploads/local');
   }

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { slugify } from '../lib/utils.js';
 import { isAllowedImageUrl } from '../lib/image-hosts.js';
-import { isUploadedVideo, ITEM_TYPES, LICENSES, LISTING_LIMITS, MADE_BY, MADE_WHEN } from '../lib/listing.js';
+import { isUploadedSource, isUploadedVideo, ITEM_TYPES, LICENSES, LISTING_LIMITS, MADE_BY, MADE_WHEN } from '../lib/listing.js';
 
 const { Schema } = mongoose;
 
@@ -111,6 +111,25 @@ const productSchema = new Schema(
     fileFormat: { type: String, trim: true, maxlength: 40 }, // e.g. "PDF", "Figma", "ZIP (SVG, AI, EPS)"
     fileSize: { type: Number, min: 0 }, // bytes
     sourceFileName: { type: String, trim: true, maxlength: 200 }, // original name of an uploaded PDF/ZIP (download filename)
+    // deliveryType 'file': the uploaded files buyers get, in order (each a separate download). Private like
+    // downloadUrl, which mirrors files[0] (and sourceFileName / fileSize its name and the total) so single-file code
+    // paths and older listings keep working. `name` is what buyers see; it can't be renamed after upload.
+    files: {
+      type: [
+        new Schema(
+          {
+            url: { type: String, required: true, validate: { validator: isUploadedSource, message: 'Files must be uploaded here' } },
+            name: { type: String, required: true, trim: true, maxlength: 200 },
+            size: { type: Number, min: 0 },
+            uploadedAt: { type: Date, default: Date.now },
+          },
+          { _id: false },
+        ),
+      ],
+      default: undefined,
+      select: false,
+      validate: { validator: (v) => !v || v.length <= LISTING_LIMITS.files, message: `Add up to ${LISTING_LIMITS.files} files` },
+    },
 
     // How it's made + licence (seller listing form). Optional for platform products and drafts.
     madeBy: { type: String, enum: MADE_BY.map((o) => o.value) },

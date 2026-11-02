@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Eye, FileArchive, FileText, Info, Link2, Pin, Plus, Upload, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Eye, Info, Link2, Pin, Plus, Upload, X } from 'lucide-react';
 import CategorySelect from '@/components/CategorySelect';
+import DigitalFilesInput from '@/components/DigitalFilesInput';
 import RichText from '@/components/RichText';
 import RichTextEditor from '@/components/seller/RichTextEditor';
 import { StatusBadge } from '@/components/dashboard/ui';
@@ -38,7 +39,7 @@ import { formatPrice } from '@/lib/utils';
 const SECTIONS = [
   { id: 'photos', label: 'Photo & Video', fields: ['images', 'videos'] },
   { id: 'details', label: 'Item Details', fields: ['category', 'title', 'description', 'shortDescription', 'tags'] },
-  { id: 'pricing', label: 'Pricing & Delivery', fields: ['price', 'compareAtPrice', 'deliveryType', 'downloadUrl', 'fileFormat'] },
+  { id: 'pricing', label: 'Pricing & Delivery', fields: ['price', 'compareAtPrice', 'deliveryType', 'files', 'downloadUrl', 'fileFormat'] },
   { id: 'made', label: 'How It’s Made', fields: ['madeBy', 'itemType', 'madeWhen'] },
   { id: 'legal', label: 'Legal and compliance', fields: ['license', 'rightsConfirmed'] },
   { id: 'settings', label: 'Settings', fields: ['shopFeatured', 'isPublished'] },
@@ -55,13 +56,12 @@ const ALLOWED_HOSTS = REMOTE_IMAGE_PATTERNS.filter((p) => !/avatars|googleuserco
   .join(', ');
 
 const MEDIA_ACCEPT = [...new Set([...Object.values(UPLOAD_RULES.photo.types), ...Object.values(UPLOAD_RULES.video.types)])].join(',');
-const SOURCE_ACCEPT = '.pdf,.zip,application/pdf,application/zip';
 const isVideoFile = (file) => file.type.startsWith('video/') || Boolean(UPLOAD_RULES.video.types[extensionOf(file.name)]);
 
 function initialValues(listing) {
-  // An uploaded PDF/ZIP is "Upload a file"; any other saved link (Canva, Dropbox…) is "Add a link".
+  // Uploaded files are "Upload files"; any other saved link (Canva, Dropbox…) is "Add a link".
   const location = listing?.downloadUrl ?? '';
-  const uploaded = isUploadedSource(location);
+  const external = listing?.deliveryType === 'external' || Boolean(location && !isUploadedSource(location) && !listing?.files?.length);
   return {
     images: listing?.images?.length ? listing.images : listing?.coverImage ? [listing.coverImage] : [],
     videos: listing?.videos ?? [],
@@ -72,11 +72,9 @@ function initialValues(listing) {
     tags: listing?.tags ?? [],
     price: toDollars(listing?.price),
     compareAtPrice: toDollars(listing?.compareAtPrice),
-    deliveryType: location && !uploaded ? 'external' : (listing?.deliveryType ?? 'file'),
-    fileUrl: uploaded ? location : '', // uploaded PDF/ZIP
-    sourceFileName: uploaded ? (listing?.sourceFileName ?? '') : '',
-    fileSize: uploaded ? (listing?.fileSize ?? null) : null, // display only — the server measures it
-    linkUrl: uploaded ? '' : location, // Canva, Notion, Figma, Drive…
+    deliveryType: external ? 'external' : 'file',
+    files: external ? [] : (listing?.files ?? []), // { url, name, size, uploadedAt }; older single-file listings arrive as one
+    linkUrl: external ? location : '', // Canva, Notion, Figma, Drive…
     fileFormat: listing?.fileFormat ?? '',
     madeBy: listing?.madeBy ?? '',
     itemType: listing?.itemType ?? '',
@@ -101,8 +99,8 @@ function toPayload(v) {
     price: toCents(v.price),
     compareAtPrice: toCents(v.compareAtPrice),
     deliveryType: v.deliveryType,
-    downloadUrl: (v.deliveryType === 'external' ? v.linkUrl.trim() : v.fileUrl) || null,
-    sourceFileName: v.deliveryType === 'external' ? null : v.sourceFileName || null,
+    files: v.deliveryType === 'external' ? [] : v.files,
+    downloadUrl: v.deliveryType === 'external' ? v.linkUrl.trim() || null : null, // uploaded files set it on the server
     fileFormat: v.fileFormat.trim() || null,
     madeBy: v.madeBy || null,
     itemType: v.itemType || null,
@@ -262,12 +260,11 @@ export default function ListingForm({ categories, listing, uploads }) {
   const [tagInput, setTagInput] = useState('');
   const [uploading, setUploading] = useState([]); // photo/video uploads in flight: { id, kind, name, progress }
   const [mediaError, setMediaError] = useState(null);
-  const [dropActive, setDropActive] = useState(null); // 'media' | 'source' while files are dragged over a drop zone
+  const [dropActive, setDropActive] = useState(null); // 'media' while photos/videos are dragged over the drop zone
   const [showPhotoLink, setShowPhotoLink] = useState(!uploads);
-  const [sourceProgress, setSourceProgress] = useState(null);
-  const [sourceError, setSourceError] = useState(null);
+  const [filesBusy, setFilesBusy] = useState(false); // digital file uploads in flight (DigitalFilesInput)
+  const [newMediaBytes, setNewMediaBytes] = useState({}); // url → size of photos/videos uploaded in this session
   const mediaInputRef = useRef(null);
-  const sourceInputRef = useRef(null);
 
   const payload = useMemo(() => toPayload(values), [values]);
   const errors = useMemo(() => ({ ...validateListing(payload, { draft: attempt === 'draft', categories }), ...serverErrors }), [payload, attempt, serverErrors, categories]);
@@ -339,12 +336,13 @@ export default function ListingForm({ categories, listing, uploads }) {
     const limit = kind === 'video' ? LISTING_LIMITS.videos : LISTING_LIMITS.photos;
     setUploading((u) => [...u, { id, kind, name: file.name, progress: 0 }]);
     try {
-      const { url } = await uploadFile(file, {
+      const { url, size } = await uploadFile(file, {
         kind,
         driver: uploads,
         onProgress: (progress) => setUploading((u) => u.map((x) => (x.id === id ? { ...x, progress } : x))),
       });
       update(key, (list) => (list.length >= limit ? list : [...list, url]));
+      setNewMediaBytes((m) => ({ ...m, [url]: size }));
     } catch (err) {
       setMediaError((prev) => (prev ? `${prev} ${err.message}` : err.message));
     } finally {
@@ -375,24 +373,6 @@ export default function ListingForm({ categories, listing, uploads }) {
     if (problems.size) setMediaError([...problems].join(' '));
   }
 
-  // ---- Source file (PDF / ZIP) ----
-  async function uploadSource(file) {
-    setSourceError(null);
-    const problem = uploadProblem('source', file);
-    if (problem) return setSourceError(problem);
-    setSourceProgress(0);
-    try {
-      const { url, size } = await uploadFile(file, { kind: 'source', driver: uploads, onProgress: setSourceProgress });
-      setValues((v) => ({ ...v, fileUrl: url, sourceFileName: file.name, fileSize: size, fileFormat: extensionOf(file.name).toUpperCase() }));
-      setDirty(true);
-      if (serverErrors.downloadUrl) setServerErrors(({ downloadUrl: _, ...rest }) => rest);
-    } catch (err) {
-      setSourceError(err.message);
-    } finally {
-      setSourceProgress(null);
-    }
-  }
-
   // ---- Tags ----
   function addTags(raw) {
     const incoming = String(raw)
@@ -406,7 +386,7 @@ export default function ListingForm({ categories, listing, uploads }) {
 
   // ---- Save ----
   async function save(mode) {
-    if (uploading.length || sourceProgress != null) {
+    if (uploading.length || filesBusy) {
       toast.error('Uploads still in progress', 'Wait for your files to finish uploading, then try again.');
       return;
     }
@@ -420,7 +400,8 @@ export default function ListingForm({ categories, listing, uploads }) {
         {
           images: 'media-upload',
           videos: 'media-upload',
-          downloadUrl: values.deliveryType === 'external' ? 'downloadUrl' : 'source-upload',
+          downloadUrl: 'downloadUrl',
+          files: 'source-upload',
           // Main picked but its sub missing: go to the sub dropdown.
           category: document.getElementById('category')?.value ? 'category-sub' : 'category',
         }[first] ?? first;
@@ -463,6 +444,9 @@ export default function ListingForm({ categories, listing, uploads }) {
   }
 
   const priceCents = toCents(values.price);
+  const filesBytes = values.files.reduce((sum, f) => sum + (Number(f.size) || 0), 0);
+  // Photos and videos count towards the listing's upload limit: the saved ones (measured by the server) plus this visit's.
+  const mediaBytes = (listing?.mediaBytes ?? 0) + [...values.images, ...values.videos].reduce((sum, url) => sum + (newMediaBytes[url] ?? 0), 0);
   const split = Number.isInteger(priceCents) ? splitSale(priceCents) : null;
   const hint = downloadHint(values.linkUrl);
   const categoryName = categories.find((c) => c._id === values.category)?.path;
@@ -979,117 +963,25 @@ export default function ListingForm({ categories, listing, uploads }) {
             ) : (
               <div className="max-w-2xl">
                 <Label as="p" required>
-                  Source file
+                  Digital files
                 </Label>
                 <Help>
-                  {UPLOAD_RULES.source.label}, up to {formatBytes(UPLOAD_RULES.source.maxBytes)}. Buyers download it from a private link after paying.
+                  Up to {LISTING_LIMITS.files} files, {formatBytes(UPLOAD_RULES.source.maxBytes)} each: {UPLOAD_RULES.source.label}. Name them before
+                  uploading (letters, numbers, periods, underscores or hyphens, up to 70): buyers see the same names, and they can’t be changed
+                  afterwards.
                 </Help>
-                <input
-                  ref={sourceInputRef}
-                  type="file"
-                  accept={SOURCE_ACCEPT}
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  className="hidden"
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) uploadSource(e.target.files[0]);
-                    e.target.value = '';
+                <DigitalFilesInput
+                  files={values.files}
+                  onChange={(change) => {
+                    setValues((v) => ({ ...v, files: change(v.files) }));
+                    setDirty(true);
+                    if (serverErrors.files) setServerErrors(({ files: _, ...rest }) => rest);
                   }}
+                  onBusy={setFilesBusy}
+                  driver={uploads}
+                  error={show('files')}
+                  otherBytes={mediaBytes}
                 />
-                {sourceProgress != null ? (
-                  <div className="mt-3 rounded-xl border border-stone-200 p-4" role="status">
-                    <div className="flex justify-between text-sm">
-                      <span className="font-medium">Uploading…</span>
-                      <span className="tabular-nums text-stone-500">{sourceProgress}%</span>
-                    </div>
-                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-100">
-                      <div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${sourceProgress}%` }} />
-                    </div>
-                  </div>
-                ) : values.fileUrl ? (
-                  <div className="mt-3 flex items-center gap-4 rounded-xl border border-stone-200 p-4">
-                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-stone-100 text-stone-700">
-                      {extensionOf(values.fileUrl) === 'zip' ? (
-                        <FileArchive size={20} strokeWidth={1.75} aria-hidden="true" />
-                      ) : (
-                        <FileText size={20} strokeWidth={1.75} aria-hidden="true" />
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
-                        {values.sourceFileName || `Your ${extensionOf(values.fileUrl).toUpperCase()} file`}
-                      </p>
-                      <p className="text-xs text-stone-500">
-                        {extensionOf(values.fileUrl).toUpperCase()}
-                        {values.fileSize ? ` · ${formatBytes(values.fileSize)}` : ''} · Uploaded
-                      </p>
-                    </div>
-                    <button
-                      id="source-upload"
-                      type="button"
-                      onClick={() => sourceInputRef.current?.click()}
-                      disabled={!uploads}
-                      className="btn btn-sm btn-outline disabled:opacity-40"
-                    >
-                      Replace
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setValues((v) => ({ ...v, fileUrl: '', sourceFileName: '', fileSize: null }));
-                        setDirty(true);
-                      }}
-                      aria-label="Remove file"
-                      className="grid size-8 place-items-center rounded-full text-stone-500 hover:bg-red-50 hover:text-red-600"
-                    >
-                      <X size={16} strokeWidth={2} aria-hidden="true" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onDragOver={(e) => (e.preventDefault(), setDropActive('source'))}
-                    onDragLeave={() => setDropActive(null)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDropActive(null);
-                      const file = e.dataTransfer.files?.[0];
-                      if (file && uploads) uploadSource(file);
-                    }}
-                    className={`mt-3 rounded-xl border-2 border-dashed px-5 py-7 text-center transition-colors ${
-                      dropActive === 'source'
-                        ? 'border-brand-600 bg-brand-50/60'
-                        : show('downloadUrl')
-                          ? 'border-red-300 bg-red-50/40'
-                          : 'border-stone-300 bg-stone-50'
-                    }`}
-                  >
-                    {uploads ? (
-                      <>
-                        <p className="font-medium">Drag and drop your PDF or ZIP, or</p>
-                        <button
-                          id="source-upload"
-                          type="button"
-                          onClick={() => sourceInputRef.current?.click()}
-                          className="btn btn-md mt-3 bg-stone-200/80 text-black hover:bg-stone-300"
-                        >
-                          <Upload size={17} strokeWidth={2} aria-hidden="true" />
-                          Upload file
-                        </button>
-                      </>
-                    ) : (
-                      <p className="text-sm text-stone-600">
-                        File uploads aren’t set up on this site yet. Choose <span className="font-medium">Add a link</span> to deliver your file from
-                        Canva, Google Drive, Dropbox or similar.
-                      </p>
-                    )}
-                  </div>
-                )}
-                {sourceError && (
-                  <p role="alert" className="mt-2 text-sm font-medium text-red-600">
-                    {sourceError}
-                  </p>
-                )}
-                <ErrorText id="downloadUrl-error">{show('downloadUrl')}</ErrorText>
               </div>
             )}
           </Card>
@@ -1333,7 +1225,7 @@ export default function ListingForm({ categories, listing, uploads }) {
               {[
                 ['Delivery', values.deliveryType === 'external' ? 'Instant access link' : 'Instant digital download'],
                 ['Format', values.fileFormat],
-                ['Size', values.deliveryType === 'file' && values.fileSize ? formatBytes(values.fileSize) : null],
+                ['Size', values.deliveryType === 'file' && filesBytes ? formatBytes(filesBytes) : null],
                 ['Licence', labelOf(LICENSES, values.license)],
                 ['Made by', labelOf(MADE_BY, values.madeBy)],
               ]
