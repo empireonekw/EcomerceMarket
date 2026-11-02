@@ -9,6 +9,7 @@ import { Avatar } from '@/components/UserMenu';
 import { DeleteAccount, NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
 import ReviewButton from '@/components/profile/ReviewButton';
 import Pagination from '@/components/Pagination';
+import FileDownloads from '@/components/FileDownloads';
 import SignOutButton from '@/components/SignOutButton';
 
 export const metadata = { title: 'My account', robots: { index: false } };
@@ -52,7 +53,7 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
     <>
       <ul className="space-y-3">
         {shown.map((p) => (
-          <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 shadow-card sm:flex-row sm:items-center">
+          <li key={`${p.orderId}-${p.productId}`} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 shadow-card sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex min-w-0 flex-1 items-center gap-4">
               <Link href={`/products/${p.slug}`} className="relative aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-xl bg-stone-100">
                 {p.coverImage && <Image src={p.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
@@ -75,14 +76,17 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-3 sm:flex-col sm:items-end">
-              <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Download File
-              </a>
+              {!(p.files?.length > 1) && (
+                <a href={p.downloadUrl} rel="noreferrer" className="btn btn-md btn-primary">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M12 3v12m0 0-4-4m4 4 4-4M5 19h14" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Download File
+                </a>
+              )}
               <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
             </div>
+            {p.files?.length > 1 && <FileDownloads files={p.files} />}
           </li>
         ))}
       </ul>

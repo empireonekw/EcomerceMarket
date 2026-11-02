@@ -11,7 +11,7 @@ export const revalidate = 3600;
 /** /sitemap.xml: the home page, main pages, every category page (/main/sub/inner), tag pages and every live product. */
 export default async function sitemap() {
   const url = (path) => `${siteConfig.url}${path}`;
-  const pages = ['/', '/products', '/sell/signup', '/about', '/blog', '/contact', '/how-it-works', '/help', '/legal', '/terms', '/privacy', ...Object.keys(POLICIES).map((s) => `/legal/${s}`)].map((path) => ({
+  const pages = ['/', '/products', '/categories', '/sell/signup', '/about', '/blog', '/contact', '/how-it-works', '/help', '/legal', '/terms', '/privacy', ...Object.keys(POLICIES).map((s) => `/legal/${s}`)].map((path) => ({
     url: url(path),
     changeFrequency: path === '/' || path === '/products' ? 'daily' : 'monthly',
     priority: path === '/' ? 1 : 0.6,

@@ -6,16 +6,16 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/dashboard/Toaster';
 import { slugify, formatPrice } from '@/lib/utils';
 import { isAllowedImageUrl, isLocalMediaPath } from '@/lib/image-hosts';
-import { downloadHint } from '@/lib/listing';
+import { downloadHint, filesProblem, isUploadedSource } from '@/lib/listing';
 import { listingCategoryProblem } from '@/lib/category-tree';
 import CategorySelect from '@/components/CategorySelect';
+import DigitalFilesInput from '@/components/DigitalFilesInput';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const STORAGE_KEY_RE = /^[\w\-./]+$/; // e.g. products/pack.zip (private bucket key)
 const MONEY_RE = /^\d{1,6}(\.\d{1,2})?$/;
 
 const isHttpsUrl = (v) => {
@@ -53,11 +53,12 @@ function validate(v, categories) {
     }
   }
 
-  if (!v.downloadUrl.trim()) e.downloadUrl = 'A download URL is required.';
-  else if (v.downloadUrl.startsWith('http://')) e.downloadUrl = 'Use a secure https:// link.';
-  else if (!isHttpsUrl(v.downloadUrl) && !(v.deliveryType === 'file' && STORAGE_KEY_RE.test(v.downloadUrl))) {
-    e.downloadUrl = v.deliveryType === 'external' ? 'Access links must be https:// URLs.' : 'Enter an https:// link or a storage key like products/file.zip.';
-  }
+  if (v.deliveryType === 'external') {
+    if (!v.downloadUrl.trim()) e.downloadUrl = 'An access link is required.';
+    else if (!isHttpsUrl(v.downloadUrl)) e.downloadUrl = 'Access links must be secure https:// URLs.';
+  } else if (!v.files.length && !v.legacyFile) {
+    e.files = 'Upload at least one file buyers will download.';
+  } else if (filesProblem(v.files)) e.files = filesProblem(v.files);
 
   if (v.shortDescription.length > 280) e.shortDescription = 'Keep the summary under 280 characters.';
   if (v.description.trim().length < 20) e.description = 'Write at least 20 characters so buyers know what they get.';
@@ -113,9 +114,9 @@ const DONE_URL = '/admin/products';
 
 /**
  * Admin product form (sellers use components/seller/ListingForm.jsx).
- * @param {{ mode: 'create' | 'edit', categories: Array<{ _id, name, slug }>, product?: object }} props
+ * @param {{ mode: 'create' | 'edit', categories: Array<{ _id, name, slug }>, product?: object, uploads: 'blob' | 'local' | null }} props
  */
-export default function ProductForm({ mode, categories, product }) {
+export default function ProductForm({ mode, categories, product, uploads }) {
   const router = useRouter();
   const toast = useToast();
   const isEdit = mode === 'edit';
@@ -129,7 +130,11 @@ export default function ProductForm({ mode, categories, product }) {
       compareAtPrice: toDollars(product?.compareAtPrice),
       coverImage: product?.coverImage ?? '',
       deliveryType: product?.deliveryType ?? 'file',
-      downloadUrl: product?.downloadUrl ?? '',
+      // Access link (deliveryType 'external'); uploaded files are in `files`.
+      downloadUrl: product?.deliveryType === 'external' ? (product?.downloadUrl ?? '') : '',
+      files: product?.deliveryType === 'external' ? [] : (product?.files ?? []),
+      // An older product delivering a typed link or storage key: kept until files are uploaded.
+      legacyFile: product?.deliveryType !== 'external' && product?.downloadUrl && !isUploadedSource(product.downloadUrl) ? product.downloadUrl : '',
       fileFormat: product?.fileFormat ?? '',
       shortDescription: product?.shortDescription ?? '',
       description: product?.description ?? '',
@@ -145,6 +150,7 @@ export default function ProductForm({ mode, categories, product }) {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [previewBroken, setPreviewBroken] = useState(false);
+  const [filesBusy, setFilesBusy] = useState(false); // file uploads still running
 
   const errors = useMemo(() => ({ ...validate(values, categories), ...serverErrors }), [values, categories, serverErrors]);
   const show = (key) => (touched[key] || submitted ? errors[key] : undefined);
@@ -171,13 +177,18 @@ export default function ProductForm({ mode, categories, product }) {
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (filesBusy) {
+      toast.error('Uploads still in progress', 'Wait for your files to finish uploading, then save.');
+      return;
+    }
     setSubmitted(true);
     const clientErrors = validate(values, categories);
     if (Object.keys(clientErrors).length) {
       toast.error('Please fix the highlighted fields');
       const first = Object.keys(clientErrors)[0];
       // Category: focus the dropdown still to be filled in (the sub one once a main is picked).
-      document.getElementById(first === 'category' && document.getElementById('category')?.value ? 'category-sub' : first)?.focus();
+      const focusId = first === 'files' ? 'source-upload' : first === 'category' && document.getElementById('category')?.value ? 'category-sub' : first;
+      document.getElementById(focusId)?.focus();
       return;
     }
 
@@ -193,7 +204,11 @@ export default function ProductForm({ mode, categories, product }) {
       tags: parseTags(values.tags),
       slug: values.slug || undefined,
       deliveryType: values.deliveryType,
-      downloadUrl: values.downloadUrl.trim(),
+      ...(values.deliveryType === 'external'
+        ? { downloadUrl: values.downloadUrl.trim() }
+        : values.files.length || !values.legacyFile
+          ? { files: values.files } // the server sets downloadUrl from these
+          : {}), // nothing uploaded yet: the older delivery stays as it is
       isPublished: values.isPublished,
       isFeatured: values.isFeatured,
     };
@@ -351,8 +366,8 @@ export default function ProductForm({ mode, categories, product }) {
             <legend className="text-sm font-medium">Delivery type</legend>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {[
-                { value: 'file', label: 'File download', text: 'Buyers download a file (Drive, Dropbox, direct link or storage key).' },
-                { value: 'external', label: 'Access link', text: 'Buyers get a link to Notion, Figma, a course portal, etc.' },
+                { value: 'file', label: 'File download', text: 'Upload up to 5 files (20 MB each) that buyers download.' },
+                { value: 'external', label: 'Access link', text: 'Buyers get a link: Notion, Figma, Google Drive, Dropbox, a course portal…' },
               ].map((opt) => (
                 <label
                   key={opt.value}
@@ -377,15 +392,36 @@ export default function ProductForm({ mode, categories, product }) {
             </div>
           </fieldset>
 
-          <Field
-            id="downloadUrl"
-            label={values.deliveryType === 'external' ? 'Secure access URL' : 'Secure file download URL'}
-            error={show('downloadUrl')}
-            hint="Private: only revealed through signed, expiring links after purchase."
-          >
-            <input {...bind('downloadUrl')} placeholder="https://www.dropbox.com/s/…?dl=1" className={inputCls(show('downloadUrl'))} autoComplete="off" />
-          </Field>
-          {hint && !show('downloadUrl') && (
+          {values.deliveryType === 'external' ? (
+            <Field id="downloadUrl" label="Secure access URL" error={show('downloadUrl')} hint="Private: only revealed to buyers after purchase.">
+              <input {...bind('downloadUrl')} placeholder="https://www.notion.so/…" className={inputCls(show('downloadUrl'))} autoComplete="off" />
+            </Field>
+          ) : (
+            <div>
+              <p className="text-sm font-medium">Digital files</p>
+              <p className="mt-0.5 text-xs text-stone-500">
+                Up to 5 files, 20 MB each. File names (letters, numbers, periods, underscores, hyphens; up to 70) are what buyers see and can’t be
+                changed after upload. Private: delivered only through signed links after purchase.
+              </p>
+              {values.legacyFile && !values.files.length && (
+                <p className="mt-2 break-all rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  Currently delivers <span className="font-mono">{values.legacyFile}</span>. It stays until you upload files here.
+                </p>
+              )}
+              <DigitalFilesInput
+                files={values.files}
+                onChange={(change) => {
+                  setValues((v) => ({ ...v, files: change(v.files) }));
+                  if (serverErrors.files) setServerErrors(({ files: _, ...rest }) => rest);
+                }}
+                onBusy={setFilesBusy}
+                driver={uploads}
+                error={show('files')}
+                otherBytes={product?.mediaBytes ?? 0}
+              />
+            </div>
+          )}
+          {values.deliveryType === 'external' && hint && !show('downloadUrl') && (
             <div className="-mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-sky-50 px-3.5 py-2.5 text-xs text-sky-800">
               {hint.text}
               {hint.fix && (

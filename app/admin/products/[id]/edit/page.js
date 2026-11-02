@@ -5,6 +5,7 @@ import DeleteProductButton from '@/components/admin/DeleteProductButton';
 import { PageHeader } from '@/components/dashboard/ui';
 import { getAdminProduct } from '@/lib/data/admin';
 import { getCategories } from '@/lib/data/categories';
+import { uploadDriver } from '@/lib/uploads';
 
 export const metadata = { title: 'Edit Product' };
 
@@ -38,7 +39,7 @@ export default async function EditProductPage({ params }) {
         }
       />
       {/* key: remount the form if navigating between two products' edit pages */}
-      <ProductForm key={product._id} mode="edit" categories={categories} product={product} />
+      <ProductForm key={product._id} mode="edit" categories={categories} product={product} uploads={uploadDriver()} />
     </>
   );
 }
