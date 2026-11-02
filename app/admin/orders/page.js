@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import Form from 'next/form';
 import Pagination from '@/components/Pagination';
-import { PageHeader, EmptyState, StatusBadge, ProviderBadge, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
+import OrderStatusSelect from '@/components/admin/OrderStatusSelect';
+import { PageHeader, EmptyState, ProviderBadge, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
 import { getAdminOrders } from '@/lib/data/admin';
 import { formatPrice } from '@/lib/utils';
 
@@ -10,7 +11,8 @@ export const metadata = { title: 'Orders & Sales' };
 const field = 'h-10 rounded-full border border-stone-300 bg-white px-4 text-sm focus:border-ink focus:outline-none';
 
 /**
- * Recent orders ledger. Reads through the same query as GET /api/orders (lib/data/admin.js)
+ * Recent orders ledger. Each status is a dropdown (components/admin/OrderStatusSelect.jsx): automatic from the
+ * payment until an admin changes it. Reads through the same query as GET /api/orders (lib/data/admin.js)
  * directly on the server — no HTTP round-trip to our own API.
  */
 export default async function AdminOrdersPage({ searchParams }) {
@@ -74,7 +76,7 @@ export default async function AdminOrdersPage({ searchParams }) {
                 <p className="mt-2 line-clamp-2 text-sm text-stone-600">{o.items.map((i) => i.title).join(', ')}</p>
                 <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
                   <span className="flex items-center gap-1.5">
-                    <StatusBadge status={o.status} />
+                    <OrderStatusSelect order={o} />
                     <ProviderBadge provider={o.paymentProvider} />
                   </span>
                   <span className="text-xs text-stone-500">
@@ -126,7 +128,7 @@ export default async function AdminOrdersPage({ searchParams }) {
                       </td>
                       <td className="px-4 py-3.5">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <StatusBadge status={o.status} />
+                          <OrderStatusSelect order={o} />
                           <ProviderBadge provider={o.paymentProvider} />
                         </div>
                       </td>

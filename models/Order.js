@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { autoOrderStatus } from '../lib/order-status.js';
 
 const { Schema } = mongoose;
 
@@ -51,6 +52,9 @@ const orderSchema = new Schema(
     currency: { type: String, default: 'USD', uppercase: true },
 
     status: { type: String, enum: ORDER_STATUSES, default: 'pending' },
+    // 'auto': status follows the payment (lib/order-status.js). 'admin': set by hand in Admin → Orders; kept as is.
+    statusSetBy: { type: String, enum: ['auto', 'admin'], default: 'auto' },
+    statusUpdatedAt: { type: Date },
     paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: 'pending' },
     paymentProvider: { type: String, trim: true }, // "stripe", "free", "demo"…
     paymentReference: { type: String, trim: true }, // provider session/intent ID — webhook idempotency
@@ -68,6 +72,8 @@ orderSchema.pre('validate', function computeTotals() {
     this.subtotal = this.items.reduce((sum, i) => sum + i.price * (i.quantity ?? 1), 0);
     this.totalAmount = this.subtotal + (this.taxAmount ?? 0) + (this.feeAmount ?? 0);
   }
+  // Smart default: unless an admin set it by hand, the status follows the payment.
+  if (this.statusSetBy !== 'admin') this.status = autoOrderStatus(this);
 });
 
 // ---------- Indexes ----------
