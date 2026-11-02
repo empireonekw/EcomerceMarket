@@ -17,6 +17,12 @@ const orderItemSchema = new Schema(
     quantity: { type: Number, default: 1, min: 1 },
     downloadCount: { type: Number, default: 0, min: 0 },
     lastDownloadedAt: { type: Date },
+    // Copied from the product when it is deleted, so buyers keep their lifetime downloads (lib/data/product-writes.js).
+    // Private: never sent to the browser (getOrderReceipt strips it).
+    delivery: {
+      type: new Schema({ deliveryType: String, downloadUrl: String, sourceFileName: String }, { _id: false }),
+      default: undefined,
+    },
   },
   { _id: false },
 );

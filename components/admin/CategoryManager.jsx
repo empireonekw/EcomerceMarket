@@ -3,10 +3,20 @@
 import { useEffect, useId, useMemo, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowDown, ArrowUp, ChevronsUpDown, Plus, Search, Trash2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsUpDown, Plus, Search, Trash2, X } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
 import { siteConfig } from '@/lib/site';
-import { CATEGORY_TYPES, categoryHref, categorySlug, categoryTypeLabel, MAX_CATEGORY_LEVELS, orderTree, subtreeLevels } from '@/lib/category-tree';
+import {
+  CATEGORY_PAGE_SIZE,
+  CATEGORY_TYPES,
+  categoryHref,
+  categorySlug,
+  categoryTypeLabel,
+  MAX_CATEGORY_LEVELS,
+  orderTree,
+  paginate,
+  subtreeLevels,
+} from '@/lib/category-tree';
 
 const siteHost = siteConfig.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const EMPTY = { main: '', name: '', slug: '', parent: '', description: '', type: 'digital', metaTitle: '', metaDescription: '' };
@@ -126,9 +136,10 @@ const SORTS = {
 /**
  * Admin → Categories (WordPress-style): "Add New Category" form on the left (it becomes "Edit Category" when a row
  * is edited) and every category on the right — tree-indented, sortable, searchable, with bulk delete and
- * Edit / Delete / View row actions. Writes go to /api/admin/categories; the page re-renders from the server.
+ * Edit / Delete / View row actions, 30 rows per page (?page=). Writes go to /api/admin/categories; the page
+ * re-renders from the server.
  */
-export default function CategoryManager({ categories }) {
+export default function CategoryManager({ categories, initialPage = 1 }) {
   const router = useRouter();
   const toast = useToast();
   const dialogRef = useRef(null);
@@ -145,6 +156,7 @@ export default function CategoryManager({ categories }) {
 
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState({ key: 'name', dir: 'asc' });
+  const [page, setPage] = useState(initialPage);
   const [selected, setSelected] = useState(() => new Set());
   const [bulkAction, setBulkAction] = useState('');
   const [toDelete, setToDelete] = useState([]);
@@ -159,6 +171,17 @@ export default function CategoryManager({ categories }) {
     return ordered.filter((c) => [c.name, c.slug, c.description ?? ''].some((v) => v.toLowerCase().includes(term)));
   }, [categories, sort, query]);
   const tree = useMemo(() => orderTree(categories), [categories]);
+  const { items: pageRows, pagination } = paginate(rows, page);
+
+  // Keep ?page= in the address bar (shareable, survives a reload) without re-rendering on the server.
+  function goToPage(next) {
+    setPage(next);
+    const url = new URL(window.location.href);
+    if (next > 1) url.searchParams.set('page', String(next));
+    else url.searchParams.delete('page');
+    window.history.replaceState(window.history.state, '', url);
+    document.getElementById('categories-table')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
   const byId = useMemo(() => new Map(tree.map((c) => [c._id, c])), [tree]);
 
   // A category was deleted elsewhere (or by bulk): drop it from the selection / edit form.
@@ -335,7 +358,7 @@ export default function CategoryManager({ categories }) {
     setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: key === 'count' ? 'desc' : 'asc' }));
   }
 
-  const visibleIds = rows.map((c) => c._id);
+  const visibleIds = pageRows.map((c) => c._id);
   const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
   const someSelected = !allSelected && visibleIds.some((id) => selected.has(id));
   const pendingDelete = toDelete.map((id) => byId.get(id)).filter(Boolean);
@@ -653,7 +676,7 @@ export default function CategoryManager({ categories }) {
       </section>
 
       {/* ---------- Table ---------- */}
-      <section aria-label="Categories" className={`min-w-0 transition-opacity ${refreshing ? 'opacity-60' : ''}`}>
+      <section id="categories-table" aria-label="Categories" className={`min-w-0 scroll-mt-6 transition-opacity ${refreshing ? 'opacity-60' : ''}`}>
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <label htmlFor="cat-bulk" className="sr-only">
@@ -692,7 +715,7 @@ export default function CategoryManager({ categories }) {
               id="cat-search"
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => (setQuery(e.target.value), goToPage(1))}
               placeholder="Search categories"
               className="h-10 w-full rounded-full border border-stone-300 bg-white pl-10 pr-4 text-sm focus:border-ink focus:outline-none"
             />
@@ -736,7 +759,7 @@ export default function CategoryManager({ categories }) {
                     </td>
                   </tr>
                 ) : (
-                  rows.map((c) => {
+                  pageRows.map((c) => {
                     const isSelected = selected.has(c._id);
                     const isEditing = editingId === c._id;
                     return (
@@ -848,6 +871,7 @@ export default function CategoryManager({ categories }) {
             </table>
           </div>
         </div>
+        {pagination.pages > 1 && <TablePagination pagination={pagination} onPage={goToPage} />}
         <p className="mt-3 text-xs text-stone-500">
           {categories.length} categor{categories.length === 1 ? 'y' : 'ies'} · Count = products directly in that category. Deleting a category moves
           its sub-categories and products up to its parent.
@@ -907,5 +931,63 @@ export default function CategoryManager({ categories }) {
         </div>
       </dialog>
     </div>
+  );
+}
+
+/** Page numbers to show: always the first and last, the current one and its neighbours, "…" for gaps. */
+function pageList(page, pages) {
+  const keep = new Set([1, pages, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pages));
+  const out = [];
+  for (const n of [...keep].sort((a, b) => a - b)) {
+    if (out.length && n - out[out.length - 1] > 1) out.push('…');
+    out.push(n);
+  }
+  return out;
+}
+
+/** "Showing 31–60 of 176" with Previous / page numbers / Next, under the categories table. */
+function TablePagination({ pagination: { page, limit, total, pages }, onPage }) {
+  const btn = 'grid h-9 min-w-9 place-items-center rounded-lg px-2.5 text-sm transition-colors disabled:pointer-events-none disabled:opacity-40';
+  return (
+    <nav aria-label="Categories pages" className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+      <p className="text-sm text-stone-500">
+        Showing <span className="font-medium text-ink tabular-nums">{(page - 1) * limit + 1}</span>–
+        <span className="font-medium text-ink tabular-nums">{Math.min(page * limit, total)}</span> of{' '}
+        <span className="font-medium text-ink tabular-nums">{total}</span> · Page {page} of {pages}
+      </p>
+      <ul className="flex items-center gap-1">
+        <li>
+          <button type="button" onClick={() => onPage(page - 1)} disabled={page === 1} className={`${btn} gap-1 border border-stone-200 bg-white hover:border-stone-400`}>
+            <ChevronLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+            <span className="sr-only sm:not-sr-only sm:pr-1">Previous</span>
+          </button>
+        </li>
+        {pageList(page, pages).map((n, i) =>
+          n === '…' ? (
+            <li key={`gap-${i}`} aria-hidden="true" className="px-1 text-sm text-stone-400">
+              …
+            </li>
+          ) : (
+            <li key={n}>
+              <button
+                type="button"
+                onClick={() => onPage(n)}
+                aria-current={n === page ? 'page' : undefined}
+                aria-label={`Page ${n}`}
+                className={`${btn} tabular-nums ${n === page ? 'bg-ink font-medium text-white' : 'text-stone-600 hover:bg-stone-100 hover:text-ink'}`}
+              >
+                {n}
+              </button>
+            </li>
+          ),
+        )}
+        <li>
+          <button type="button" onClick={() => onPage(page + 1)} disabled={page === pages} className={`${btn} gap-1 border border-stone-200 bg-white hover:border-stone-400`}>
+            <span className="sr-only sm:not-sr-only sm:pl-1">Next</span>
+            <ChevronRight size={16} strokeWidth={1.75} aria-hidden="true" />
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }

@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Trash2, X } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import DeleteUsersDialog from '@/components/admin/DeleteUsersDialog';
-import { StatusBadge, RoleBadge, formatDateTime } from '@/components/dashboard/ui';
+import { BlockUserButton, RoleSelect } from '@/components/admin/UserAccessControls';
+import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { formatPrice } from '@/lib/utils';
 
 const usd = (cents) => formatPrice(cents, 'USD');
@@ -44,14 +45,22 @@ function RowCheckbox({ u, selectable, checked, onToggle }) {
   return <input type="checkbox" checked={checked} onChange={() => onToggle(u.id)} aria-label={`Select ${u.name}`} className={checkbox} />;
 }
 
+/** Block first, Delete as the stronger option. Admins (change their role first), you and the owner have neither. */
 function Actions({ u, selectable, isYou }) {
-  if (!selectable) return <span className="text-xs text-stone-400">{isYou ? 'You' : 'Protected'}</span>;
-  return <DeleteUserButton id={u.id} name={u.name} role={u.role} />;
+  if (!selectable) return <span className="text-xs text-stone-400">{isYou ? 'You' : u.isOwner ? 'Owner' : 'Admin'}</span>;
+  return (
+    <span className="inline-flex items-center justify-end gap-1">
+      {/* Icons with tooltips; the words come back on very wide screens. */}
+      <BlockUserButton user={u} labelClassName="hidden 2xl:inline" />
+      <DeleteUserButton id={u.id} name={u.name} role={u.role} labelClassName="hidden 2xl:inline" />
+    </span>
+  );
 }
 
 /**
- * Admin → Users table with row checkboxes, "Select all" (this page's deletable accounts) and bulk delete.
- * Admin accounts — including yours — are never selectable (the API refuses them too).
+ * Admin → Users table with row checkboxes, "Select all" (this page's deletable accounts) and bulk delete, a role
+ * dropdown per row and Block / Delete actions. Admin accounts — including yours — are never selectable or blockable
+ * (the API refuses them too); your own role and the owner's are locked.
  */
 export default function UsersTable({ items, currentAdminId }) {
   const deletable = useMemo(() => items.filter((u) => u.role !== 'admin' && u.id !== currentAdminId), [items, currentAdminId]);
@@ -126,7 +135,7 @@ export default function UsersTable({ items, currentAdminId }) {
                     </Link>
                     <p className="truncate text-sm text-stone-500">{u.selling?.storeName ?? u.email}</p>
                   </div>
-                  <RoleBadge role={u.role} />
+                  <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
                 </div>
                 <p className="mt-2 text-xs text-stone-500">
                   {u.selling ? `${plural(u.selling.sales, 'product')} sold` : `${plural(u.purchases.items, 'item')} purchased`} · Joined{' '}
@@ -145,7 +154,7 @@ export default function UsersTable({ items, currentAdminId }) {
       {/* ---------- Desktop: table ---------- */}
       <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[940px] text-left text-sm">
+          <table className="w-full min-w-[820px] text-left text-sm">
             <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
               <tr>
                 <th scope="col" className="w-10 py-3 pl-4">
@@ -154,8 +163,7 @@ export default function UsersTable({ items, currentAdminId }) {
                 <th scope="col" className="px-4 py-3">User</th>
                 <th scope="col" className="px-4 py-3">Role</th>
                 <th scope="col" className="px-4 py-3">Status</th>
-                <th scope="col" className="px-4 py-3 text-right">Purchases</th>
-                <th scope="col" className="px-4 py-3 text-right">Selling</th>
+                <th scope="col" className="px-4 py-3 text-right">Activity</th>
                 <th scope="col" className="px-4 py-3">Joined</th>
                 <th scope="col" className="px-4 py-3 text-right">
                   <span className="sr-only">Actions</span>
@@ -184,22 +192,18 @@ export default function UsersTable({ items, currentAdminId }) {
                     </div>
                   </td>
                   <td className="px-4 py-3.5">
-                    <RoleBadge role={u.role} />
+                    <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
                   </td>
                   <td className="px-4 py-3.5">
                     <StatusBadge status={u.status.tone} label={u.status.label} />
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right">
-                    <Purchases p={u.purchases} />
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right">
-                    <Selling s={u.selling} />
-                  </td>
+                  {/* Sellers: what they sold; everyone else: what they bought. */}
+                  <td className="whitespace-nowrap px-4 py-3.5 text-right">{u.selling ? <Selling s={u.selling} /> : <Purchases p={u.purchases} />}</td>
                   <td className="whitespace-nowrap px-4 py-3.5 text-stone-600">
                     {formatDateTime(u.createdAt).date}
                     <span className="block text-xs text-stone-400">Active {lastActive(u)}</span>
                   </td>
-                  <td className="px-4 py-3.5 text-right">
+                  <td className="whitespace-nowrap py-3.5 pl-2 pr-3 text-right">
                     <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
                   </td>
                 </tr>
