@@ -45,6 +45,9 @@ const nextConfig = {
     // dashboard sidebars), so a click opens them with no server round trip for 3 minutes. Every save in the dashboards
     // calls router.refresh(), which throws all of this away, so your own changes always show at once.
     staleTimes: { dynamic: 30, static: 180 },
+    // proxy.js runs on every API request and buffers its body, by default only the first 10 MB: anything larger
+    // reached the upload route cut short. Just above the largest upload allowed (20 MB, lib/listing.js UPLOAD_RULES).
+    proxyClientMaxBodySize: '21mb',
   },
   poweredByHeader: false,
 
