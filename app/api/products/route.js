@@ -6,6 +6,8 @@ import { authorizeAdminRequest } from '@/lib/auth';
 import { ensureCategoryPath } from '@/lib/data/admin-categories';
 import { getCategories } from '@/lib/data/categories';
 import { listingCategoryProblem } from '@/lib/category-tree';
+import { filesProblem } from '@/lib/listing';
+import { checkListingUploads } from '@/lib/uploads';
 import { parseProductQuery } from '@/lib/utils';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -54,6 +56,14 @@ export async function POST(request) {
     // A main category that has sub categories only groups them: the product goes in a sub (lib/category-tree.js).
     const categoryProblem = payload?.category && listingCategoryProblem(String(payload.category), await getCategories());
     if (categoryProblem) throw new InputError('Please fix the highlighted fields.', { category: categoryProblem });
+    // Uploaded files (admin form): real files of their type, measured here, within the listing's upload limit.
+    if (Array.isArray(payload?.files) && payload.deliveryType !== 'external') {
+      const problem = filesProblem(payload.files);
+      if (problem) throw new InputError('Please fix the highlighted fields.', { files: problem });
+      const checked = await checkListingUploads({ files: payload.files, images: [payload.coverImage].filter(Boolean), previous: [] });
+      payload.files = checked.files;
+      payload.fileFormat ||= checked.format;
+    }
     const product = await createProduct(payload);
 
     // Refresh cached storefront views that list products / category counts.

@@ -9,7 +9,7 @@ const notFound = () => new Response('Not found', { status: 404 });
 
 /**
  * GET /api/files/media/<file> — listing photos and videos stored on this server (when Vercel Blob isn't set up).
- * Only the public `media` folder is served; buyers' PDF/ZIP files are private and only go out via /api/downloads.
+ * Only the public `media` folder is served; buyers' files are private and only go out via /api/downloads.
  * Supports Range requests so videos can seek.
  */
 export async function GET(request, { params }) {

@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { refreshStorefront } from '@/lib/revalidate';
 import { getProductBySlug, getProductById } from '@/lib/data/products';
-import { updateProduct, deleteProduct, InputError } from '@/lib/data/product-writes';
+import { updateProduct, deleteProduct, savedUploads, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
 import { ensureCategoryPath } from '@/lib/data/admin-categories';
 import { getCategories } from '@/lib/data/categories';
 import { listingCategoryProblem } from '@/lib/category-tree';
+import { filesProblem } from '@/lib/listing';
+import { checkListingUploads } from '@/lib/uploads';
 import { sendSystemMessage } from '@/lib/data/messages';
 import { siteConfig } from '@/lib/site';
 
@@ -53,6 +55,14 @@ export async function PUT(request, { params }) {
     // A main category that has sub categories only groups them: the product goes in a sub (lib/category-tree.js).
     const categoryProblem = payload?.category && listingCategoryProblem(String(payload.category), await getCategories());
     if (categoryProblem) throw new InputError('Please fix the highlighted fields.', { category: categoryProblem });
+    // Uploaded files (admin form): real files of their type, measured here, within the listing's upload limit.
+    if (Array.isArray(payload?.files) && payload.deliveryType !== 'external') {
+      const problem = filesProblem(payload.files);
+      if (problem) throw new InputError('Please fix the highlighted fields.', { files: problem });
+      const checked = await checkListingUploads({ files: payload.files, images: [payload.coverImage].filter(Boolean), previous: await savedUploads(id) });
+      payload.files = checked.files;
+      payload.fileFormat ||= checked.format;
+    }
     const { product, previousSlug } = await updateProduct(id, payload);
     refreshStorefront(previousSlug, product.slug);
     // Moderation decisions reach the seller's inbox ("From Sellpify").
