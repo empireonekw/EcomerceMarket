@@ -384,11 +384,13 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:items-start">
-      {/* ---------- Add / edit form ---------- */}
+      {/* ---------- Add / edit form ----------
+          Desktop: stays in view beside the table and scrolls on its own (up and down) when it's taller than the
+          screen; the Add / Update button stays pinned at its bottom. */}
       <section
         ref={formRef}
         aria-labelledby="cat-form-title"
-        className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 lg:sticky lg:top-10"
+        className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-0 lg:[scrollbar-gutter:stable] lg:[scrollbar-width:thin]"
       >
         <h2 id="cat-form-title" className="headline text-2xl">
           {editingId ? 'Edit Category' : 'Add New Category'}
@@ -661,7 +663,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
             </>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-2 pt-1 lg:sticky lg:bottom-0 lg:-mx-6 lg:border-t lg:border-stone-100 lg:bg-white/95 lg:px-6 lg:py-4 lg:backdrop-blur">
             <button type="submit" disabled={saving} className="btn btn-md btn-primary">
               {saving && <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
               {saving ? 'Saving…' : editingId ? 'Update' : plan.newCount > 1 ? `Add ${plan.newCount} categories` : 'Add New Category'}
