@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, Eye, FileArchive, FileText, Info, Link2, Pin, Plus, Upload, X } from 'lucide-react';
+import CategorySelect from '@/components/CategorySelect';
 import RichText from '@/components/RichText';
 import RichTextEditor from '@/components/seller/RichTextEditor';
 import { StatusBadge } from '@/components/dashboard/ui';
@@ -229,101 +230,6 @@ function UploadingTile({ upload, video = false }) {
       </div>
       <p className="mt-1 text-[11px] tabular-nums text-stone-500">Uploading… {upload.progress}%</p>
     </li>
-  );
-}
-
-const selectCls = (err) =>
-  `${inputCls(err)} appearance-none pr-11 disabled:cursor-not-allowed disabled:bg-stone-50 disabled:text-stone-400`;
-
-/** The main › sub › inner ids of category `id` (empty strings below it). */
-function levelsOf(id, categories) {
-  const c = categories.find((x) => x._id === id);
-  if (!c) return ['', '', ''];
-  const ids = [...c.ancestors, c._id];
-  return [ids[0] ?? '', ids[1] ?? '', ids[2] ?? ''];
-}
-
-/**
- * Category: Main, then Sub, then Inner, each a dropdown of what's under the one before (set up by the admin under
- * Admin → Categories), so every product sits in its place on the category pages. A sub category is required when the
- * main has any; the inner one is optional. Stores the deepest picked id, or '' while a required sub is still missing.
- */
-function CategorySelect({ categories, value, onChange, error }) {
-  const [levels, setLevels] = useState(() => levelsOf(value, categories));
-  // A new value from outside (the form loading a listing): show it. The form's own '' (sub missing) keeps the picks.
-  useEffect(() => {
-    if (value) setLevels(levelsOf(value, categories));
-  }, [value, categories]);
-
-  const childrenOf = (parentId) => categories.filter((c) => (c.parent ?? null) === parentId);
-  const [main, sub, inner] = levels;
-  const options = [childrenOf(null), main ? childrenOf(main) : [], sub ? childrenOf(sub) : []];
-  const needsSub = Boolean(main) && options[1].length > 0 && !sub;
-
-  function pick(level, id) {
-    const next = [...levels.slice(0, level), id, '', ''].slice(0, 3);
-    setLevels(next);
-    const [m, s] = next;
-    const deepest = next.findLast(Boolean) ?? '';
-    // A main that has sub categories only groups them: nothing to store until a sub is picked.
-    onChange(m && !s && childrenOf(m).length ? '' : deepest);
-  }
-
-  // Which dropdown the error belongs to: the one the seller still has to fill in.
-  const errorAt = error ? (!main ? 0 : needsSub ? 1 : -1) : -1;
-  const fields = [
-    { id: 'category', label: 'Main category', required: true, placeholder: 'Choose a main category' },
-    { id: 'category-sub', label: 'Sub category', required: options[1].length > 0, placeholder: main ? 'Choose a sub category' : 'Choose a main category first' },
-    { id: 'category-inner', label: 'Inner category', required: false, placeholder: sub ? 'Choose an inner category' : 'Choose a sub category first' },
-  ];
-  const message = errorAt === 1 ? 'Choose a sub category.' : error;
-
-  return (
-    <div className="mt-3 grid max-w-3xl grid-cols-1 gap-4 lg:grid-cols-3">
-      {fields.map((f, level) => {
-        const list = options[level];
-        // Hide the inner dropdown when the picked sub has none (it's optional anyway).
-        const empty = level > 0 && levels[level - 1] && list.length === 0;
-        return (
-          <div key={f.id} className="min-w-0">
-            <label htmlFor={f.id} className="text-sm font-medium text-stone-700">
-              {f.label}{' '}
-              {f.required ? <span className="text-red-600">*</span> : <span className="font-normal text-stone-400">(optional)</span>}
-            </label>
-            <div className="relative">
-              <select
-                id={f.id}
-                value={levels[level]}
-                disabled={level > 0 && (!levels[level - 1] || empty)}
-                onChange={(e) => pick(level, e.target.value)}
-                aria-invalid={errorAt === level || undefined}
-                aria-describedby={errorAt === level ? 'category-error' : undefined}
-                className={selectCls(errorAt === level)}
-              >
-                <option value="">{empty ? `No ${level === 1 ? 'sub' : 'inner'} categories` : f.placeholder}</option>
-                {list.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={18}
-                strokeWidth={1.75}
-                aria-hidden="true"
-                className="pointer-events-none absolute right-4 top-[calc(50%+4px)] -translate-y-1/2 text-stone-500"
-              />
-            </div>
-            {errorAt === level && <ErrorText id="category-error">{message}</ErrorText>}
-          </div>
-        );
-      })}
-      {error && errorAt === -1 && (
-        <div className="lg:col-span-3">
-          <ErrorText id="category-error">{error}</ErrorText>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -839,6 +745,7 @@ export default function ListingForm({ categories, listing, uploads }) {
               </Label>
               <Help>Pick where your item belongs, so buyers find it under the right category.</Help>
               <CategorySelect
+                className="mt-3 max-w-3xl"
                 categories={categories}
                 value={values.category}
                 // Only a complete pick marks it touched: a main still waiting for its sub isn't an error until Publish.

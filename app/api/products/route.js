@@ -4,6 +4,8 @@ import { getProducts } from '@/lib/data/products';
 import { createProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
 import { ensureCategoryPath } from '@/lib/data/admin-categories';
+import { getCategories } from '@/lib/data/categories';
+import { listingCategoryProblem } from '@/lib/category-tree';
 import { parseProductQuery } from '@/lib/utils';
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -47,8 +49,11 @@ export async function POST(request) {
   }
 
   try {
-    // Admin form sends typed names (Main / Sub / Inner); missing categories are created on the fly.
+    // API scripts may send typed names (Main / Sub / Inner); missing categories are created on the fly.
     if (payload?.categoryPath) payload.category = (await ensureCategoryPath(payload.categoryPath)).id;
+    // A main category that has sub categories only groups them: the product goes in a sub (lib/category-tree.js).
+    const categoryProblem = payload?.category && listingCategoryProblem(String(payload.category), await getCategories());
+    if (categoryProblem) throw new InputError('Please fix the highlighted fields.', { category: categoryProblem });
     const product = await createProduct(payload);
 
     // Refresh cached storefront views that list products / category counts.

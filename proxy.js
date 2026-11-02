@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { clientIp } from '@/lib/client-ip';
 import { rateLimit } from '@/lib/rate-limit';
+import { flagIp, HUMAN_COOKIE, needsRobotCheck, ROBOT_CHECK_HEADER, VERIFY_API, VERIFY_PAGE } from '@/lib/robot-check';
 
 // Must match SESSION_COOKIE in lib/auth.js (not imported: lib/auth.js is server-only + DB-backed).
 const SESSION_COOKIE = 'apex_session';
@@ -11,6 +12,8 @@ const PROTECTED = ['/admin', '/profile', '/seller', '/messages'];
  * Routes keep their own, stricter limits on top (login 10 per 15 min, signup 5 per hour, contact, search…).
  * Link prefetches are excluded by the matcher; requests with no client IP (the server calling itself, e.g. the image
  * optimizer, and local dev) are never limited.
+ * Going over a limit flags the IP (lib/robot-check.js): until it ticks "I'm not a robot" on /verify, its pages
+ * redirect there and its API calls get 429 { code: 'robot_check' }. Doing it again brings the check back.
  */
 const LIMITS = {
   auth: { limit: 30, windowMs: 60_000 }, // /api/auth/* — sign-in, sign-up, session
@@ -26,26 +29,35 @@ function tierOf(request) {
   return ['GET', 'HEAD'].includes(request.method) ? 'apiRead' : 'apiWrite';
 }
 
-function tooManyRequests(tier, retryAfterMs) {
-  const headers = { 'Retry-After': String(Math.ceil(retryAfterMs / 1000)), 'Cache-Control': 'no-store' };
+/** The robot check: pages go to /verify (and come back to `next` after), API calls get a 429 the browser acts on. */
+function robotCheck(request, tier) {
+  const headers = { 'Cache-Control': 'no-store', [ROBOT_CHECK_HEADER]: 'required' };
   if (tier !== 'page') {
-    return NextResponse.json({ error: 'Too many requests. Please slow down and try again in a minute.' }, { status: 429, headers });
+    return NextResponse.json(
+      { error: 'Too many requests. Please confirm you’re not a robot to continue.', code: 'robot_check', verify: VERIFY_PAGE },
+      { status: 429, headers },
+    );
   }
-  return new NextResponse(
-    '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Slow down</title>' +
-      '<body style="font-family:system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;color:#141414">' +
-      '<div style="text-align:center;padding:24px"><h1 style="font-weight:400">Too many requests</h1>' +
-      '<p style="color:#57534e">You’re going a little fast. Please wait a minute and try again.</p></div></body>',
-    { status: 429, headers: { ...headers, 'Content-Type': 'text/html; charset=utf-8' } },
-  );
+  const back = new URLSearchParams(request.nextUrl.search);
+  back.delete('_rsc'); // client-side navigations carry Next's own cache-busting parameter
+  const verify = new URL(VERIFY_PAGE, request.url);
+  verify.searchParams.set('next', request.nextUrl.pathname + (back.size ? `?${back}` : ''));
+  return NextResponse.redirect(verify, { headers });
 }
 
 export function proxy(request) {
   const ip = clientIp(request);
-  if (ip !== 'local') {
+  const { pathname: path } = request.nextUrl;
+  // The check itself stays reachable (POST /api/robot-check has its own, stricter limit).
+  const isVerify = path === VERIFY_PAGE || path === VERIFY_API;
+  if (ip !== 'local' && !isVerify) {
     const tier = tierOf(request);
+    if (needsRobotCheck(ip, request.cookies.get(HUMAN_COOKIE)?.value)) return robotCheck(request, tier);
     const result = rateLimit(`global:${tier}:${ip}`, LIMITS[tier]);
-    if (!result.ok) return tooManyRequests(tier, result.retryAfterMs);
+    if (!result.ok) {
+      flagIp(ip);
+      return robotCheck(request, tier);
+    }
   }
 
   // Optimistic gate for signed-in areas: no session cookie → straight to /login?next=…, before any rendering.

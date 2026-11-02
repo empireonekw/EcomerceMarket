@@ -4,6 +4,8 @@ import { getProductBySlug, getProductById } from '@/lib/data/products';
 import { updateProduct, deleteProduct, InputError } from '@/lib/data/product-writes';
 import { authorizeAdminRequest } from '@/lib/auth';
 import { ensureCategoryPath } from '@/lib/data/admin-categories';
+import { getCategories } from '@/lib/data/categories';
+import { listingCategoryProblem } from '@/lib/category-tree';
 import { sendSystemMessage } from '@/lib/data/messages';
 import { siteConfig } from '@/lib/site';
 
@@ -46,8 +48,11 @@ export async function PUT(request, { params }) {
 
   try {
     const { id } = await params;
-    // Admin form sends typed names (Main / Sub / Inner); missing categories are created on the fly.
+    // API scripts may send typed names (Main / Sub / Inner); missing categories are created on the fly.
     if (payload?.categoryPath) payload.category = (await ensureCategoryPath(payload.categoryPath)).id;
+    // A main category that has sub categories only groups them: the product goes in a sub (lib/category-tree.js).
+    const categoryProblem = payload?.category && listingCategoryProblem(String(payload.category), await getCategories());
+    if (categoryProblem) throw new InputError('Please fix the highlighted fields.', { category: categoryProblem });
     const { product, previousSlug } = await updateProduct(id, payload);
     refreshStorefront(previousSlug, product.slug);
     // Moderation decisions reach the seller's inbox ("From Sellpify").

@@ -13,17 +13,26 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
  * · support:new { threadId } (admins) plus local ones: resync (socket reconnected — refetch everything) and poll (fallback tick).
  *
  * The admin portal counts its support inbox instead: unreadUrl="/api/admin/support/unread" unreadEvent="support:unread".
+ *
+ * Connected only while someone is there: the socket closes when the tab has been hidden for HIDDEN_MS or nobody has
+ * touched the page for IDLE_MS (and polling stops too), and opens again on the next mouse move, key, tap or return
+ * to the tab, followed by a `resync` so open views fetch whatever arrived in between. Idle tabs hold no connection.
  */
 const MessagingContext = createContext({ unread: 0, live: false, enabled: false, subscribe: () => () => {}, sendTyping: () => {}, refreshUnread: () => {} });
 
 const POLL_MS = 20_000;
 const RETRY_MS = 5_000;
+const HIDDEN_MS = 2 * 60_000; // a background tab keeps its connection this long (quick tab switches don't reconnect)
+const IDLE_MS = 10 * 60_000; // no mouse, keyboard, touch or scroll on a visible tab
+const ACTIVITY_EVENTS = ['pointerdown', 'pointermove', 'keydown', 'scroll', 'touchstart', 'focus'];
 
 export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/unread', unreadEvent = 'inbox:unread', children }) {
   const [unread, setUnread] = useState(0);
   const [live, setLive] = useState(false);
+  const [asleep, setAsleep] = useState(false); // tab hidden / user away: no socket, no polling
   const listeners = useRef(new Map()); // event → Set<fn>
   const socketRef = useRef(null);
+  const sleepingRef = useRef(false); // the sleep / wake effect below; read by the socket's own retry logic
 
   const dispatch = useCallback((event, payload) => {
     for (const fn of listeners.current.get(event) ?? []) fn(payload);
@@ -61,6 +70,7 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
       const socket = io({
         path: '/socket.io',
         transports: ['websocket', 'polling'],
+        autoConnect: !sleepingRef.current,
         // A fresh one-time ticket for every (re)connection attempt.
         auth: (cb) => {
           if (firstTicket) {
@@ -89,9 +99,9 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
       // Rejected by the server's auth (e.g. expired ticket): Socket.IO won't retry on its own.
       socket.on('connect_error', () => {
         setLive(false);
-        if (!socket.active) {
+        if (!socket.active && !sleepingRef.current) {
           clearTimeout(retryTimer);
-          retryTimer = setTimeout(() => !cancelled && socket.connect(), RETRY_MS);
+          retryTimer = setTimeout(() => !cancelled && !sleepingRef.current && socket.connect(), RETRY_MS);
         }
       });
       socket.on(unreadEvent, ({ count }) => setUnread(count ?? 0));
@@ -107,9 +117,61 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
     };
   }, [enabled, unreadEvent, dispatch, refreshUnread]);
 
-  // Polling fallback while there's no live connection.
+  // Sleep / wake: close the socket when the tab is hidden for a while or the user is away, reopen it on return.
   useEffect(() => {
-    if (!enabled || live) return undefined;
+    if (!enabled) return undefined;
+    let lastActive = Date.now();
+    let hiddenTimer;
+
+    const sleep = () => {
+      if (sleepingRef.current) return;
+      sleepingRef.current = true;
+      setAsleep(true);
+      socketRef.current?.disconnect(); // a manual disconnect: Socket.IO won't reconnect by itself
+    };
+    const wake = () => {
+      lastActive = Date.now();
+      clearTimeout(hiddenTimer);
+      if (!sleepingRef.current) return;
+      sleepingRef.current = false;
+      setAsleep(false);
+      if (socketRef.current) socketRef.current.connect(); // 'connect' then refreshes the count and sends resync
+      else {
+        // No live server (polling mode): catch up straight away instead of waiting for the next tick.
+        refreshUnread();
+        dispatch('resync');
+      }
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') wake();
+      else {
+        clearTimeout(hiddenTimer);
+        hiddenTimer = setTimeout(sleep, HIDDEN_MS);
+      }
+    };
+    // Activity only records a time (cheap enough for pointermove); waking is the rare case.
+    const onActivity = () => {
+      lastActive = Date.now();
+      if (sleepingRef.current && document.visibilityState === 'visible') wake();
+    };
+    const idleCheck = setInterval(() => {
+      if (document.visibilityState === 'visible' && Date.now() - lastActive > IDLE_MS) sleep();
+    }, 30_000);
+
+    document.addEventListener('visibilitychange', onVisibility);
+    for (const event of ACTIVITY_EVENTS) window.addEventListener(event, onActivity, { passive: true, capture: true });
+    if (document.visibilityState !== 'visible') hiddenTimer = setTimeout(sleep, HIDDEN_MS);
+    return () => {
+      clearInterval(idleCheck);
+      clearTimeout(hiddenTimer);
+      document.removeEventListener('visibilitychange', onVisibility);
+      for (const event of ACTIVITY_EVENTS) window.removeEventListener(event, onActivity, { capture: true });
+    };
+  }, [enabled, dispatch, refreshUnread]);
+
+  // Polling fallback while there's no live connection (and someone is there to see it).
+  useEffect(() => {
+    if (!enabled || live || asleep) return undefined;
     const tick = () => {
       if (document.visibilityState !== 'visible') return;
       refreshUnread();
@@ -117,7 +179,7 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
     };
     const timer = setInterval(tick, POLL_MS);
     return () => clearInterval(timer);
-  }, [enabled, live, dispatch, refreshUnread]);
+  }, [enabled, live, asleep, dispatch, refreshUnread]);
 
   const sendTyping = useCallback((conversationId, typing) => {
     socketRef.current?.connected && socketRef.current.emit('typing', { conversationId, typing });
