@@ -41,7 +41,11 @@ export default async function AdminUsersPage({ searchParams }) {
     <>
       <PageHeader
         title="Users"
-        description={`${pagination.total} account${pagination.total === 1 ? '' : 's'}${filtered ? ' match your filters' : ''} · newest first`}
+        description={`${pagination.total} account${pagination.total === 1 ? '' : 's'}${filtered ? ' match your filters' : ''} · newest first${
+          pagination.totalPages > 1
+            ? ` · showing ${(pagination.page - 1) * pagination.limit + 1}–${Math.min(pagination.page * pagination.limit, pagination.total)} (page ${pagination.page} of ${pagination.totalPages})`
+            : ''
+        }`}
       />
 
       <section aria-label="User totals" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
