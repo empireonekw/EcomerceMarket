@@ -3,11 +3,14 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LayoutGrid } from 'lucide-react';
 import CategoryIcon from '@/components/CategoryIcon';
 import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
-import { categoryHref } from '@/lib/category-tree';
+import { ALL_CATEGORIES_HREF, browsableCategories, categoryHref, topCategories } from '@/lib/category-tree';
 
+// The menu stays the same size however many categories the admin adds; the rest are on /categories.
+const MENU_CATEGORIES = 5;
 // Same pastel order as the homepage category panels.
 const TINTS = ['bg-brand-50', 'bg-tint-mint', 'bg-tint-butter', 'bg-tint-sky', 'bg-tint-blush', 'bg-tint-sage'];
 
@@ -25,19 +28,24 @@ function NavLink({ href, active, children, className = '' }) {
 }
 
 /**
- * "Shop" with a hover dropdown of categories.
- * - Mouse: opens on hover (short close delay so the pointer can travel into the panel).
+ * "Shop" with a hover dropdown of the MENU_CATEGORIES best-stocked categories and a "View all categories" tile.
+ * Descriptions are cut to two lines.
+ * - Mouse: opens on hover (short close delay so the pointer can travel into the panel). Touch never "hovers".
  * - Keyboard: opens when focus enters, closes on Escape or when focus leaves.
  * - Touch: the chevron button toggles it; tapping "Shop" itself goes to /products.
  */
 function ShopMenu({ categories, active }) {
+  const shown = topCategories(categories, MENU_CATEGORIES);
+  const total = browsableCategories(categories).length;
   const [open, setOpen] = useState(false);
   const closeTimer = useRef(null);
+  const openedAt = useRef(0);
   const pathname = usePathname();
   const panelId = useId();
 
   const show = () => {
     clearTimeout(closeTimer.current);
+    if (!open) openedAt.current = Date.now();
     setOpen(true);
   };
   const hide = () => {
@@ -51,8 +59,10 @@ function ShopMenu({ categories, active }) {
   return (
     <div
       className="relative flex items-center"
-      onMouseEnter={show}
-      onMouseLeave={hide}
+      // Hover is for a real mouse only: a tap also fires "enter", which would open the menu just before the
+      // tap's click toggles it shut again.
+      onPointerEnter={(e) => e.pointerType === 'mouse' && show()}
+      onPointerLeave={(e) => e.pointerType === 'mouse' && hide()}
       onFocus={show}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setOpen(false)}
       onKeyDown={(e) => {
@@ -67,7 +77,10 @@ function ShopMenu({ categories, active }) {
       </NavLink>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        // No focus on press: focusing opens the menu (onFocus), and the click would then toggle it straight shut.
+        onMouseDown={(e) => e.preventDefault()}
+        // A click right after hovering onto the arrow keeps the menu open instead of toggling it shut.
+        onClick={() => (open && Date.now() - openedAt.current < 500 ? null : open ? setOpen(false) : show())}
         aria-expanded={open}
         aria-controls={panelId}
         aria-label="Shop categories"
@@ -87,7 +100,7 @@ function ShopMenu({ categories, active }) {
       >
         <div className="w-[34rem] rounded-2xl border border-stone-200 bg-white p-3 shadow-xl">
           <ul className="grid grid-cols-2 gap-1">
-            {categories.map((c, i) => (
+            {shown.map((c, i) => (
               <li key={c.slug}>
                 <Link href={categoryHref(c)} className="group/item flex gap-3 rounded-xl p-3 transition-colors hover:bg-stone-50">
                   <span className={`grid size-10 shrink-0 place-items-center rounded-full text-gray-900 transition-colors group-hover/item:bg-gray-900 group-hover/item:text-white ${TINTS[i % TINTS.length]}`}>
@@ -95,11 +108,28 @@ function ShopMenu({ categories, active }) {
                   </span>
                   <span className="min-w-0">
                     <span className="block text-sm font-medium">{c.name}</span>
-                    {c.description && <span className="mt-0.5 line-clamp-2 block text-xs text-stone-500">{c.description}</span>}
+                    {/* No `block` here: it would override line-clamp's own display and show the whole text. */}
+                    {c.description && <span className="mt-0.5 line-clamp-2 text-xs text-stone-500">{c.description}</span>}
                   </span>
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href={ALL_CATEGORIES_HREF}
+                className="group/item flex h-full items-center gap-3 rounded-xl border border-dashed border-stone-300 p-3 transition-colors hover:border-ink hover:bg-stone-50"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-stone-100 text-gray-900 transition-colors group-hover/item:bg-gray-900 group-hover/item:text-white">
+                  <LayoutGrid size={18} strokeWidth={1.75} aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">View all categories</span>
+                  <span className="text-xs text-stone-500">
+                    {total > shown.length ? `${total - shown.length} more to explore` : 'Browse every category'}
+                  </span>
+                </span>
+              </Link>
+            </li>
           </ul>
           <div className="mt-2 flex items-center justify-between border-t border-stone-100 px-3 pb-1 pt-3 text-sm">
             <div className="flex gap-4 text-stone-600">
