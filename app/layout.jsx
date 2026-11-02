@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Fraunces, Inter } from 'next/font/google';
 
 import NavigationProgress from '@/components/NavigationProgress';
+import RobotCheckRedirect from '@/components/RobotCheckRedirect';
 import { REVEAL_SCRIPT } from '@/components/Reveal';
 import { siteConfig } from '@/lib/site';
 
@@ -66,6 +67,7 @@ export default function RootLayout({ children }) {
           <NavigationProgress />
         </Suspense>
         {children}
+        <RobotCheckRedirect />
       </body>
     </html>
   );
