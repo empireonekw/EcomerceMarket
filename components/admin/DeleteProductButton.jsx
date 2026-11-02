@@ -23,14 +23,13 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
       if (!res.ok) throw new Error(data.error || 'Delete failed');
 
       dialogRef.current?.close();
-      if (data.result === 'archived') {
-        toast.info(`“${title}” was unpublished`, `It has ${data.orderCount} order(s), so it was hidden instead of deleted. Buyers keep their downloads.`);
-      } else {
-        toast.success(`“${title}” deleted`);
-      }
+      toast.success(
+        `“${title}” deleted`,
+        data.orderCount ? `Its ${data.orderCount} past order(s) keep their downloads.` : undefined,
+      );
       startTransition(() => {
         // From the edit page, a deleted product has nothing left to show — go back to the list.
-        if (redirectTo && data.result === 'deleted') router.push(redirectTo);
+        if (redirectTo) router.push(redirectTo);
         router.refresh();
       });
     } catch (err) {
@@ -63,14 +62,14 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
             <Trash2 size={20} strokeWidth={1.9} />
           </span>
           <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
-            Delete this product?
+            Delete this product permanently?
           </h2>
           <p className="mt-3 truncate rounded-xl bg-stone-50 px-3.5 py-2.5 text-sm font-medium text-stone-800 ring-1 ring-stone-200/70" title={title}>
             {title}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">
-            It will be removed from the store for good. If someone has already bought it, it is{' '}
-            <strong className="font-medium text-ink">unpublished instead</strong>, so buyers keep their downloads.
+            The product, its reviews, photos and videos are <strong className="font-medium text-ink">removed for good</strong>. This can’t be
+            undone. People who already bought it can still download their files from their orders.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 border-t border-stone-100 bg-stone-50/60 px-6 py-4 sm:flex sm:justify-end sm:px-7">

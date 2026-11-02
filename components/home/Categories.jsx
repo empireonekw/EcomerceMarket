@@ -7,18 +7,24 @@ import { categoryHref } from '@/lib/category-tree';
 
 // Quick catalog searches shown under the list (each runs a real search).
 const SEARCHES = ['Notion', 'Canva', 'Figma', 'PDF', 'Planner', 'Icons'];
+// The index stays short however many categories the admin adds; the rest are one click away in the shop.
+const MAX_ROWS = 8;
 
 /**
  * "Shop by category" as a calm index: heading and a short line on the left, one row per category on the right
- * (icon, name, product count, arrow), then a few popular searches. Reads the same with one category or twenty.
+ * (icon, name, product count, arrow), then a few popular searches. The best-stocked categories come first and the
+ * list stops at MAX_ROWS, so it reads the same with one category or twenty.
  */
 export default function Categories({ categories, productCount }) {
+  const rows = [...categories].sort((a, b) => (b.totalCount ?? 0) - (a.totalCount ?? 0)).slice(0, MAX_ROWS);
+  const more = categories.length - rows.length;
   return (
     <section className="container-page relative isolate pt-24 sm:pt-32" aria-labelledby="categories-heading">
       <Glow className="top-28 left-16 size-64 bg-brand-100/80" />
       <Sparkle className="top-32 left-[30%] hidden size-5 text-brand-500 lg:block" />
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">
-        <Reveal>
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-20">
+        {/* minmax(0,1fr): a long one-line description must never widen the list and squeeze this column. */}
+        <Reveal className="lg:sticky lg:top-28 lg:self-start">
           <Eyebrow>Browse the catalog</Eyebrow>
           <h2 id="categories-heading" className="mt-4 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink sm:text-[3rem]">
             Shop by category
@@ -30,16 +36,16 @@ export default function Categories({ categories, productCount }) {
           </Link>
         </Reveal>
 
-        <div>
+        <div className="min-w-0">
           <ul className="border-t border-stone-200">
-            {categories.map((c, i) => (
+            {rows.map((c, i) => (
               <Reveal as="li" key={c._id} delay={80 + i * 70} className="border-b border-stone-200">
                 <Link href={categoryHref(c)} className="group flex items-center gap-3 py-5 transition-colors sm:gap-5">
                   <span className="grid size-11 shrink-0 place-items-center rounded-full sm:size-12 bg-brand-50 text-brand-700 transition-colors group-hover:bg-brand-500 group-hover:text-ink">
                     <CategoryIcon slug={c.slug} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-serif text-xl tracking-[-0.02em] break-words text-ink sm:text-2xl">{c.name}</span>
+                    <span className="block font-serif text-xl tracking-[-0.02em] break-words text-ink first-letter:uppercase sm:text-2xl">{c.name}</span>
                     {c.description && <span className="mt-0.5 block truncate text-sm text-stone-500">{c.description}</span>}
                   </span>
                   <span className="shrink-0 text-sm text-stone-500 tabular-nums">
@@ -50,6 +56,12 @@ export default function Categories({ categories, productCount }) {
               </Reveal>
             ))}
           </ul>
+          {more > 0 && (
+            <Link href="/products" className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
+              See {more} more {more === 1 ? 'category' : 'categories'}
+              <ArrowRight size={15} strokeWidth={2} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          )}
 
           <Reveal delay={200} className="mt-8">
             <p className="text-sm text-stone-500">Popular searches</p>

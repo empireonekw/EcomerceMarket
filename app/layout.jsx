@@ -55,7 +55,8 @@ export default function RootLayout({ children }) {
         {/* Scroll reveals start as soon as the HTML arrives, not after the JS bundle (components/Reveal.jsx). */}
         <script dangerouslySetInnerHTML={{ __html: REVEAL_SCRIPT }} />
       </head>
-      <body className="flex min-h-dvh flex-col font-sans">
+      {/* Browser extensions (Grammarly etc.) add attributes to <body> before React loads; not a real mismatch. */}
+      <body className="flex min-h-dvh flex-col font-sans" suppressHydrationWarning>
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-white"

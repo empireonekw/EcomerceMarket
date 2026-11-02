@@ -16,6 +16,8 @@ import {
   Menu,
   MessageSquare,
   Package,
+  PanelLeftClose,
+  PanelLeftOpen,
   Plus,
   Receipt,
   Store,
@@ -105,11 +107,28 @@ const AREAS = {
 };
 
 const ICON = { size: 18, strokeWidth: 1.75, 'aria-hidden': true };
+// Desktop sidebar preference, read by app/admin/layout.js and app/seller/(workspace)/layout.js.
+export const SIDEBAR_COOKIE = 'dashboard_sidebar';
 // The active page: a white pill lifted off the tinted sidebar.
 const ACTIVE = 'bg-white font-medium text-ink shadow-[0_1px_2px_rgba(16,16,16,0.06),0_6px_16px_-8px_rgba(16,16,16,0.18)]';
 const IDLE = 'text-stone-600 hover:bg-black/[0.04] hover:text-ink';
 
-function Brand({ area, onNavigate, compact = false }) {
+function Brand({ area, onNavigate, compact = false, collapsed = false }) {
+  if (collapsed) {
+    return (
+      <Link
+        href={area.home}
+        onNavigate={() => onNavigate(area.home)}
+        title={`${siteConfig.name} ${area.subtitle}`}
+        className="grid size-11 place-items-center rounded-2xl bg-white font-serif text-xl text-ink shadow-card ring-1 ring-black/[0.04]"
+      >
+        <span aria-hidden="true">{siteConfig.name.charAt(0)}</span>
+        <span className="sr-only">
+          {siteConfig.name} {area.subtitle}
+        </span>
+      </Link>
+    );
+  }
   return (
     <Link
       href={area.home}
@@ -137,10 +156,27 @@ function Badge({ count }) {
 }
 
 /** A group that opens to its pages, drawn on a guide line with a curved branch to each. */
-function NavGroup({ item, pathname, onNavigate }) {
+function NavGroup({ item, pathname, onNavigate, collapsed }) {
   const { label, icon: Icon, children } = item;
   const activeChild = children.some((c) => c.match(pathname));
   const [open, setOpen] = useState(true);
+  if (collapsed) {
+    return (
+      <li>
+        <Link
+          href={children[0].href}
+          prefetch
+          onNavigate={() => onNavigate(children[0].href)}
+          title={label}
+          aria-current={activeChild ? 'page' : undefined}
+          className={`mx-auto grid size-11 place-items-center rounded-xl transition ${activeChild ? ACTIVE : IDLE}`}
+        >
+          <Icon {...ICON} className={activeChild ? 'text-brand-700' : ''} />
+          <span className="sr-only">{label}</span>
+        </Link>
+      </li>
+    );
+  }
   const id = `nav-${label.toLowerCase().replace(/\W+/g, '-')}`;
   return (
     <li>
@@ -180,21 +216,53 @@ function NavGroup({ item, pathname, onNavigate }) {
   );
 }
 
-function SidebarBody({ pathname, area, user, onNavigate }) {
+function SidebarBody({ pathname, area, user, onNavigate, collapsed = false, onToggle }) {
   const { unread } = useMessaging();
-  return (
-    <div className="flex h-full flex-col gap-5 overflow-y-auto p-4">
-      <Brand area={area} onNavigate={onNavigate} />
+  const toggle = onToggle && (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={collapsed}
+      title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      className="grid size-9 shrink-0 place-items-center rounded-xl text-stone-500 transition-colors hover:bg-white hover:text-ink"
+    >
+      {collapsed ? <PanelLeftOpen {...ICON} /> : <PanelLeftClose {...ICON} />}
+      <span className="sr-only">{collapsed ? 'Expand sidebar' : 'Collapse sidebar'}</span>
+    </button>
+  );
 
-      <nav aria-label={`${area.label} navigation`} className="flex-1 space-y-5">
-        {area.sections.map((section) => (
+  return (
+    <div className={`flex h-full flex-col gap-5 overflow-x-hidden overflow-y-auto ${collapsed ? 'items-center px-2 py-4' : 'p-4'}`}>
+      {collapsed ? (
+        <div className="flex flex-col items-center gap-2">
+          <Brand area={area} onNavigate={onNavigate} collapsed />
+          {toggle}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <Brand area={area} onNavigate={onNavigate} />
+          </div>
+          {toggle}
+        </div>
+      )}
+
+      <nav aria-label={`${area.label} navigation`} className={`flex-1 ${collapsed ? 'w-full space-y-3' : 'space-y-5'}`}>
+        {area.sections.map((section, i) => (
           <div key={section.label}>
-            <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">{section.label}</p>
+            {collapsed ? (
+              i > 0 && <hr className="mx-auto mb-3 w-6 border-black/10" />
+            ) : (
+              <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">{section.label}</p>
+            )}
             <ul className="space-y-0.5">
               {section.items.map((item) => {
-                if (item.children) return <NavGroup key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} />;
+                if (item.children) {
+                  return <NavGroup key={item.label} item={item} pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />;
+                }
                 const { href, label, icon: Icon, match, badge } = item;
                 const active = match(pathname);
+                const count = badge === 'unread' ? unread : 0;
                 return (
                   <li key={href}>
                     <Link
@@ -202,11 +270,24 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
                       prefetch
                       onNavigate={() => onNavigate(href)}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition ${active ? ACTIVE : IDLE}`}
+                      title={collapsed ? label : undefined}
+                      className={`${collapsed ? 'relative mx-auto grid size-11 place-items-center' : 'flex items-center gap-3 px-3 py-2 text-[13.5px]'} rounded-xl transition ${active ? ACTIVE : IDLE}`}
                     >
                       <Icon {...ICON} className={`shrink-0 ${active ? 'text-brand-700' : ''}`} />
-                      <span className="flex-1">{label}</span>
-                      <Badge count={badge === 'unread' ? unread : 0} />
+                      {collapsed ? (
+                        <>
+                          <span className="sr-only">
+                            {label}
+                            {count > 0 && `, ${count} unread`}
+                          </span>
+                          {count > 0 && <span aria-hidden="true" className="absolute top-2 right-2 size-2 rounded-full bg-brand-500 ring-2 ring-canvas" />}
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex-1">{label}</span>
+                          <Badge count={count} />
+                        </>
+                      )}
                     </Link>
                   </li>
                 );
@@ -216,20 +297,36 @@ function SidebarBody({ pathname, area, user, onNavigate }) {
         ))}
       </nav>
 
-      <div className="flex items-center gap-3 rounded-2xl p-2">
-        <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-medium text-ink uppercase">
-          {user.name?.charAt(0) ?? '?'}
-          <span aria-hidden="true" className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-canvas bg-emerald-500" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{user.name}</p>
-          <p className="truncate text-xs text-stone-500">{user.email}</p>
+      {collapsed ? (
+        <div className="flex flex-col items-center gap-2">
+          <span
+            title={`${user.name} · ${user.email}`}
+            className="relative grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-medium text-ink uppercase"
+          >
+            {user.name?.charAt(0) ?? '?'}
+            <span aria-hidden="true" className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-canvas bg-emerald-500" />
+          </span>
+          <SignOutButton className="grid size-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-white hover:text-ink">
+            <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+            <span className="sr-only">Sign out</span>
+          </SignOutButton>
         </div>
-        <SignOutButton className="grid size-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-white hover:text-ink">
-          <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
-          <span className="sr-only">Sign out</span>
-        </SignOutButton>
-      </div>
+      ) : (
+        <div className="flex items-center gap-3 rounded-2xl p-2">
+          <span className="relative grid size-9 shrink-0 place-items-center rounded-full bg-brand-500 text-sm font-medium text-ink uppercase">
+            {user.name?.charAt(0) ?? '?'}
+            <span aria-hidden="true" className="absolute -right-0.5 -bottom-0.5 size-3 rounded-full border-2 border-canvas bg-emerald-500" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="truncate text-xs text-stone-500">{user.email}</p>
+          </div>
+          <SignOutButton className="grid size-8 place-items-center rounded-lg text-stone-500 transition-colors hover:bg-white hover:text-ink">
+            <LogOut size={16} strokeWidth={1.75} aria-hidden="true" />
+            <span className="sr-only">Sign out</span>
+          </SignOutButton>
+        </div>
+      )}
     </div>
   );
 }
@@ -268,10 +365,17 @@ function TopBar({ area, user, onNavigate }) {
  * Sidebar clicks feel instant: the moment a link is clicked, the sidebar highlights it and the main area shows that
  * page's skeleton (the same one its loading.jsx renders), instead of waiting for the server to answer first.
  */
-export default function DashboardShell({ area: areaKey, user, children }) {
+export default function DashboardShell({ area: areaKey, user, sidebarCollapsed = false, children }) {
   const area = AREAS[areaKey];
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(sidebarCollapsed);
+
+  function toggleSidebar() {
+    const next = !collapsed;
+    setCollapsed(next);
+    document.cookie = `${SIDEBAR_COOKIE}=${next ? 'collapsed' : 'expanded'}; path=/; max-age=31536000; samesite=lax`;
+  }
   // { to, from }: a sidebar navigation that has started but not landed yet. Only valid while still on `from`,
   // so the real page replaces the skeleton in the same render the URL changes.
   const [pending, setPending] = useState(null);
@@ -300,10 +404,12 @@ export default function DashboardShell({ area: areaKey, user, children }) {
   }
 
   return (
-    <div className="min-h-dvh bg-canvas lg:grid lg:grid-cols-[17rem_1fr]">
-      {/* Desktop sidebar: on the tinted canvas, no border. */}
+    <div
+      className={`min-h-dvh bg-canvas lg:grid lg:transition-[grid-template-columns] lg:duration-300 lg:ease-out ${collapsed ? 'lg:grid-cols-[4.75rem_1fr]' : 'lg:grid-cols-[17rem_1fr]'}`}
+    >
+      {/* Desktop sidebar: on the tinted canvas, no border. Collapses to icons only (toggle in its header). */}
       <aside className="sticky top-0 hidden h-dvh lg:block">
-        <SidebarBody pathname={currentPath} area={area} user={user} onNavigate={onNavigate} />
+        <SidebarBody pathname={currentPath} area={area} user={user} onNavigate={onNavigate} collapsed={collapsed} onToggle={toggleSidebar} />
       </aside>
 
       {/* Mobile top bar + slide-in sidebar */}

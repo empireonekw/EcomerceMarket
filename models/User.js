@@ -67,6 +67,10 @@ const userSchema = new Schema(
     // instantly invalidates all previously issued sessions.
     tokenVersion: { type: Number, default: 0 },
     lastLoginAt: { type: Date },
+    // Blocked by an admin (Admin → Users): can't sign in, existing sessions end. Data is kept; unblocking restores it.
+    blockedAt: { type: Date },
+    // Listings that were live when the seller was blocked, so unblocking can put exactly those back in the store.
+    blockedListings: { type: [Schema.Types.ObjectId], select: false, default: undefined },
     seller: { type: sellerSchema }, // present for seller accounts (created at seller sign-up)
     // Inbox preferences (lib/data/messages.js): the user's own labels and an optional away message.
     messaging: {
