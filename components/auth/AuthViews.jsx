@@ -7,11 +7,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import AuthSkeleton from '@/components/auth/AuthSkeleton';
 import LoginForm from '@/components/auth/LoginForm';
 import SignupForm from '@/components/auth/SignupForm';
-<<<<<<< HEAD
 import { GOOGLE_ERRORS } from '@/components/auth/GoogleButton';
-import SwitchToSellerButton from '@/components/seller/SwitchToSellerButton';
-=======
->>>>>>> 4a1c55cea91bb9b3b215b940124d34a70e3a2d4b
 import { hasAuthHint, useAuth } from '@/context/AuthContext';
 import { safeNext } from '@/lib/redirects';
 import { siteConfig } from '@/lib/site';
