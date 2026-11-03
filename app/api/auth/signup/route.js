@@ -11,7 +11,7 @@ const noStore = { 'Cache-Control': 'no-store' };
 
 /**
  * POST /api/auth/signup — { name, email, password, acceptTerms, accountType?, countryCode?, phone? } → creates the account.
- * The phone number is optional; when given it's stored as E.164 ("+923001234567").
+ * The phone number is required and stored as E.164 ("+923001234567").
  * No session is started: the client sends the new user to /login (email prefilled) to sign in.
  *   accountType 'seller'   → seller account (from /sell/signup); shop setup happens after first login.
  *   anything else          → customer.

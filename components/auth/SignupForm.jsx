@@ -138,9 +138,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
       </div>
 
       <div>
-        <AuthLabel htmlFor="phone">
-          Phone number <span className="font-normal text-stone-400">(optional)</span>
-        </AuthLabel>
+        <AuthLabel htmlFor="phone">Phone number</AuthLabel>
         {/* Country code | number. Each sits in its own box: inputClass is full width. */}
         <div className="flex gap-2">
           <div className="w-[7.5rem] shrink-0">
@@ -158,6 +156,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
               autoComplete="tel-national"
               inputMode="tel"
               maxLength={20}
+              required
               placeholder="300 1234567"
               aria-invalid={Boolean(show('phone')) || undefined}
               aria-describedby={show('phone') ? 'phone-error' : undefined}

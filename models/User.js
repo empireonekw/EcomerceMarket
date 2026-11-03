@@ -58,7 +58,7 @@ const userSchema = new Schema(
       select: false, // never returned unless explicitly requested with .select('+password')
     },
     termsAcceptedAt: { type: Date }, // set when the user accepts the Terms at signup
-    phone: { type: String, trim: true, maxlength: 20 }, // optional, E.164 ("+923001234567") from the sign-up form; never public
+    phone: { type: String, trim: true, maxlength: 20 }, // E.164 ("+923001234567"), required at email sign-up (Google sign-ups may not have one); never public
     googleId: { type: String, select: false }, // "Continue with Google" account id (app/api/auth/google/callback)
     role: {
       type: String,
