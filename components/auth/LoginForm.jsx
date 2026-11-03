@@ -8,17 +8,18 @@ import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
 import { validateEmail } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
 import Recaptcha, { recaptchaEnabled } from '@/components/auth/Recaptcha';
+import GoogleButton from '@/components/auth/GoogleButton';
 
 // Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /sell-on-sellpify.
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
 
 /** `registered` = arriving straight from sign-up: email prefilled. A `next` (e.g. checkout) always wins. */
-export default function LoginForm({ next, registered = false }) {
+export default function LoginForm({ next, registered = false, oauthError = null }) {
   const router = useRouter();
   const { login } = useAuth();
   const [values, setValues] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
-  const [formError, setFormError] = useState(null);
+  const [formError, setFormError] = useState(oauthError); // e.g. a Google sign-in that didn't go through
   const [pending, setPending] = useState(false);
   const [captcha, setCaptcha] = useState(null); // reCAPTCHA token (single-use)
   const [captchaError, setCaptchaError] = useState(null);
@@ -76,6 +77,7 @@ export default function LoginForm({ next, registered = false }) {
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
+      {!registered && <GoogleButton next={next} />}
       {registered && !formError && (
         <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
           <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />

@@ -38,6 +38,9 @@ const nextConfig = {
 
   reactStrictMode: true,
 
+  // Lets the login and sign-up pages show "Continue with Google" only when the OAuth client is configured.
+  env: { NEXT_PUBLIC_GOOGLE_SIGNIN: process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? '1' : '' },
+
   experimental: {
     // Keep visited dynamic pages (dashboards, lists) in the client router cache for 30s, so going back/forward
     // between them is instant. Mutations still call router.refresh(), which bypasses this cache.
