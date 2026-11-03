@@ -11,6 +11,7 @@ import EmptyInbox from '@/components/messages/EmptyInbox';
 import { Initial } from '@/components/messages/ThreadView';
 import { inboxApi } from '@/components/messages/inbox-api';
 import { useMessaging, useMessagingEvents } from '@/components/messages/MessagingProvider';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const FILTERS = [
   { key: '', label: 'All' },
@@ -121,6 +122,7 @@ function NewMessageDialog({ dialogRef, prefillUser, onSent }) {
                       <span className="block truncate text-sm font-medium">
                         {u.name}
                         {u.storeName && <span className="font-normal text-stone-500"> · {u.storeName}</span>}
+                        {u.verified && <VerifiedBadge size={13} className="ml-1" />}
                       </span>
                       <span className="block truncate text-xs text-stone-500">{u.email}</span>
                     </span>
@@ -240,7 +242,8 @@ function SupportThread({ threadId, onBack, onChanged }) {
               </p>
               <p className="truncate text-xs text-stone-500">
                 {user.email}
-                {user.storeName && ` · ${user.storeName}`} ·{' '}
+                {user.storeName && ` · ${user.storeName}`}
+                {user.verified && <VerifiedBadge size={13} className="ml-1" />} ·{' '}
                 <Link href={`/admin/users/${user.id}`} className="text-brand-700 hover:underline">
                   View user
                 </Link>

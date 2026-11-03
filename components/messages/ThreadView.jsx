@@ -8,6 +8,7 @@ import { MESSAGE_LIMITS } from '@/lib/validation';
 import { siteConfig } from '@/lib/site';
 import { inboxApi } from '@/components/messages/inbox-api';
 import { useMessaging, useMessagingEvents } from '@/components/messages/MessagingProvider';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const dayLabel = (d) => {
   const date = new Date(d);
@@ -239,7 +240,10 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
             <div className="flex min-w-[11rem] flex-1 items-center gap-3">
               <Initial name={name} className="size-9 text-sm" />
               <div className="min-w-0">
-                <p className="truncate text-[15px] font-semibold">{name}</p>
+                <p className="flex min-w-0 items-center gap-1 text-[15px] font-semibold">
+                  <span className="truncate">{name}</span>
+                  {conv?.other?.verified && <VerifiedBadge size={15} />}
+                </p>
                 <p className="truncate text-xs text-stone-500">
                   {conv.kind === 'system'
                     ? 'Notices and chat with our team'
@@ -379,8 +383,13 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
               <div className="flex items-center gap-3">
                 <Initial name={name} className="size-12 text-base" />
                 <div className="min-w-0">
-                  <p className="truncate font-semibold">{name}</p>
-                  <p className="text-sm text-stone-500">{conv.side === 'seller' ? (conv.buyerIsCustomer ? 'Customer' : 'Potential buyer') : 'Seller'}</p>
+                  <p className="flex min-w-0 items-center gap-1 font-semibold">
+                    <span className="truncate">{name}</span>
+                    {conv.other?.verified && <VerifiedBadge size={15} />}
+                  </p>
+                  <p className="text-sm text-stone-500">
+                    {conv.side === 'seller' ? (conv.buyerIsCustomer ? 'Customer' : 'Potential buyer') : conv.other?.verified ? 'Verified seller' : 'Seller'}
+                  </p>
                 </div>
               </div>
               {conv.product && (

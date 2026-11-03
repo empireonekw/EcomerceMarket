@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutGrid } from 'lucide-react';
 import CategoryIcon from '@/components/CategoryIcon';
-import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
 import { ALL_CATEGORIES_HREF, browsableCategories, categoryHref, topCategories } from '@/lib/category-tree';
 
@@ -150,7 +149,7 @@ function ShopMenu({ categories, active }) {
   );
 }
 
-/** Centre navigation (desktop): Home · Shop ▾ · About Us · Blog · (Sell With Us) */
+/** Centre navigation (desktop): Home · Shop ▾ · About Us · Blog (selling starts from the shop icon in the header). */
 export default function DesktopNav({ categories }) {
   const pathname = usePathname();
 
@@ -165,7 +164,6 @@ export default function DesktopNav({ categories }) {
           </NavLink>
         ),
       )}
-      <SellCta className="btn btn-sm btn-dark ml-3" />
     </nav>
   );
 }

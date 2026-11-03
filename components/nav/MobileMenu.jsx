@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NavSearch from '@/components/nav/NavSearch';
 import { MobileAuthLinks } from '@/components/UserMenu';
-import SellCta from '@/components/nav/SellCta';
 import { siteConfig } from '@/lib/site';
 import { ALL_CATEGORIES_HREF, categoryHref, topCategories } from '@/lib/category-tree';
 
@@ -83,7 +82,6 @@ export default function MobileMenu({ categories }) {
               ))}
             </ul>
           </nav>
-          <SellCta className="btn btn-lg btn-dark mt-4 w-full" />
           <div className="mt-4">
             <MobileAuthLinks />
           </div>

@@ -1,16 +1,46 @@
 import { getRequestUser } from '@/lib/auth';
-import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
-import { setupStore } from '@/lib/data/seller';
+import { errorResponse, json, readJson, unauthorized } from '@/lib/api';
+import { rateLimit } from '@/lib/rate-limit';
+import { getOnboarding, saveOnboardingStep, submitOnboarding } from '@/lib/data/seller-onboarding';
 
-/** POST /api/seller/onboarding — { storeName, storeDescription } names the signed-in seller's shop (once). */
-export async function POST(request) {
-  const user = await getRequestUser(request); // same-origin enforced
+/**
+ * The shop-opening wizard (/sell-on-sellpify, lib/data/seller-onboarding.js), for the signed-in account:
+ *   GET  → { step, data } saved progress
+ *   PUT  { step, data } → saves one step (after checking it) → { step, data }
+ *   POST { agreeTerms: true } → opens the shop → { storeName }
+ */
+export async function GET(request) {
+  const user = await getRequestUser(request);
   if (!user) return unauthorized();
-  if (user.role !== 'seller') return forbidden('Seller account required.');
-
   try {
-    const body = await readJson(request);
-    return json(await setupStore(user.id, { storeName: body.storeName, storeDescription: body.storeDescription }), 201);
+    return json(await getOnboarding(user.id));
+  } catch (err) {
+    return errorResponse(err, 'GET /api/seller/onboarding');
+  }
+}
+
+export async function PUT(request) {
+  const user = await getRequestUser(request); // same-origin enforced for writes
+  if (!user) return unauthorized();
+  if (!rateLimit(`onboarding:${user.id}`, { limit: 60, windowMs: 10 * 60_000 }).ok) {
+    return json({ error: 'Too many saves in a short time. Please wait a minute.' }, 429);
+  }
+  try {
+    const body = await readJson(request, 16 * 1024);
+    return json(await saveOnboardingStep(user.id, body?.step, body?.data));
+  } catch (err) {
+    return errorResponse(err, 'PUT /api/seller/onboarding');
+  }
+}
+
+export async function POST(request) {
+  const user = await getRequestUser(request);
+  if (!user) return unauthorized();
+  if (!rateLimit(`onboarding:${user.id}`, { limit: 60, windowMs: 10 * 60_000 }).ok) {
+    return json({ error: 'Too many attempts in a short time. Please wait a minute.' }, 429);
+  }
+  try {
+    return json(await submitOnboarding(user.id, await readJson(request, 4 * 1024)), 201);
   } catch (err) {
     return errorResponse(err, 'POST /api/seller/onboarding');
   }
