@@ -93,15 +93,12 @@ const userSchema = new Schema(
       select: false, // never returned unless explicitly requested with .select('+password')
     },
     termsAcceptedAt: { type: Date }, // set when the user accepts the Terms at signup
-<<<<<<< HEAD
     phone: { type: String, trim: true, maxlength: 20 }, // E.164 ("+923001234567"), required at email sign-up (Google sign-ups may not have one); never public
     googleId: { type: String, select: false }, // "Continue with Google" account id (app/api/auth/google/callback)
-=======
     // The shop-opening wizard's saved steps until it's submitted (lib/data/seller-onboarding.js), so a seller can
     // leave and pick up where they stopped. Payout details in it are encrypted like bankDetailsEnc. Private.
     sellerOnboarding: { type: Schema.Types.Mixed, select: false },
     sellerTermsAcceptedAt: { type: Date }, // agreed to the Seller Agreement when opening the shop
->>>>>>> 4a1c55cea91bb9b3b215b940124d34a70e3a2d4b
     role: {
       type: String,
       enum: USER_ROLES,
