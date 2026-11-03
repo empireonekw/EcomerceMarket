@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { GOOGLE_FLOW_COOKIE, googleAuthRequest, googleRedirectUri, googleSignInEnabled } from '@/lib/google-auth';
+import { GOOGLE_FLOW_COOKIE, googleAuthRequest, googleRedirectUri, googleSignInEnabled, siteOrigin } from '@/lib/google-auth';
 import { safeNext } from '@/lib/redirects';
 
 /** GET /api/auth/google?next=/checkout — starts "Continue with Google" (sign-in and sign-up are the same flow). */
 export async function GET(request) {
   const url = new URL(request.url);
-  if (!googleSignInEnabled()) return NextResponse.redirect(new URL('/login?error=google_unavailable', url));
+  if (!googleSignInEnabled()) return NextResponse.redirect(new URL('/login?error=google_unavailable', siteOrigin(request.url)));
 
   const { url: consentUrl, state, verifier } = googleAuthRequest(googleRedirectUri(request.url));
   const res = NextResponse.redirect(consentUrl);
