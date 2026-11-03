@@ -10,7 +10,7 @@ import { AuthLabel, inputClass, FieldError, PasswordInput, SubmitButton, FormAle
 import Recaptcha, { recaptchaEnabled } from '@/components/auth/Recaptcha';
 import GoogleButton from '@/components/auth/GoogleButton';
 
-// Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /seller/onboarding.
+// Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /sell-on-sellpify.
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
 
 /** `registered` = arriving straight from sign-up: email prefilled. A `next` (e.g. checkout) always wins. */

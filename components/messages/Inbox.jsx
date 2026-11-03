@@ -12,6 +12,7 @@ import ReplyPreferences from '@/components/messages/ReplyPreferences';
 import ThreadView, { Initial } from '@/components/messages/ThreadView';
 import { inboxApi } from '@/components/messages/inbox-api';
 import { useMessaging, useMessagingEvents } from '@/components/messages/MessagingProvider';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 /** The inbox view as encoded in the URL: ?folder=…|label=… &q=… &page=… &c=<open conversation>. */
 function readView(sp) {
@@ -54,6 +55,7 @@ function ConversationRow({ conv, checked, onCheck, onOpen, onStar }) {
           <span className="flex items-center gap-2">
             {conv.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-500" />}
             <span className={`truncate text-[15px] ${conv.unread ? 'font-bold text-ink' : 'font-medium text-stone-800'}`}>{name}</span>
+            {conv.other?.verified && <VerifiedBadge size={14} className="-ml-1" />}
             {conv.side === 'seller' && conv.kind === 'direct' && (
               <span className={`hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline ${conv.buyerIsCustomer ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-200/70 text-stone-600'}`}>
                 {conv.buyerIsCustomer ? 'Customer' : 'Potential buyer'}

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { handleUpload } from '@vercel/blob/client';
 import { getRequestUser } from '@/lib/auth';
 import { json, unauthorized, forbidden } from '@/lib/api';
-import { extensionOf, UPLOAD_RULES, ZIP_MIME_ALIASES } from '@/lib/listing';
+import { extensionOf, ONBOARDING_UPLOAD_KINDS, UPLOAD_RULES, ZIP_MIME_ALIASES } from '@/lib/listing';
 import { rateLimit } from '@/lib/rate-limit';
 import { uploadDriver } from '@/lib/uploads';
 
@@ -14,7 +14,9 @@ import { uploadDriver } from '@/lib/uploads';
 export async function POST(request) {
   const user = await getRequestUser(request); // same-origin enforced
   if (!user) return unauthorized();
-  if (!['seller', 'admin'].includes(user.role)) return forbidden('Seller account required.'); // admins upload for platform products
+  // Sellers and admins (platform products) upload anything; shoppers opening a shop only its images and their ID.
+  const kinds = ['seller', 'admin'].includes(user.role) ? Object.keys(UPLOAD_RULES) : user.role === 'customer' ? ONBOARDING_UPLOAD_KINDS : [];
+  if (!kinds.length) return forbidden('Seller account required.');
   if (uploadDriver() !== 'blob') return json({ error: 'File uploads aren’t set up on this site yet.' }, 409);
   if (!rateLimit(`upload:${user.id}`, { limit: 120, windowMs: 60 * 60 * 1000 }).ok) {
     return json({ error: 'Too many uploads in a short time. Please try again later.' }, 429);
@@ -27,7 +29,7 @@ export async function POST(request) {
       request,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
         const { kind } = JSON.parse(clientPayload || '{}');
-        const rule = UPLOAD_RULES[kind];
+        const rule = kinds.includes(kind) && UPLOAD_RULES[kind];
         if (!rule) throw new Error('Unknown upload type.');
         if (!pathname.startsWith(`${kind}/`) || !rule.types[extensionOf(pathname)]) throw new Error(`Only ${rule.label} files can be uploaded here.`);
         const types = new Set(Object.values(rule.types));

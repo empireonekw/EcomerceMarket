@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2, CheckCircle2, Smartphone } from 'lucide-react';
-import { validateBankDetails, WALLET_OPTIONS } from '@/lib/validation';
+import { validateBankDetails, walletIdLabel, WALLET_OPTIONS } from '@/lib/validation';
 import { inputClass, FieldError, FormAlert, SubmitButton } from '@/components/auth/AuthFields';
 
 const validate = (v) => validateBankDetails(v);
@@ -139,9 +139,13 @@ export default function PayoutDetailsForm({ initial = {} }) {
           </div>
           <div>
             <label htmlFor="walletNumber" className="text-sm font-medium">
-              Wallet number
+              {walletIdLabel(values.walletProvider)}
             </label>
-            <input {...bind('walletNumber')} inputMode="tel" autoComplete="tel" maxLength={15} placeholder="03001234567" />
+            {WALLET_OPTIONS.find((w) => w.value === values.walletProvider)?.id === 'email' ? (
+              <input {...bind('walletNumber')} type="email" inputMode="email" autoComplete="email" maxLength={254} placeholder="you@example.com" />
+            ) : (
+              <input {...bind('walletNumber')} inputMode="tel" autoComplete="tel" maxLength={15} placeholder="03001234567" />
+            )}
             <FieldError id="walletNumber-error">{errors.walletNumber}</FieldError>
           </div>
         </div>

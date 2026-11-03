@@ -8,6 +8,7 @@ import { CheckCircle2, MessageSquare, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { MESSAGE_LIMITS } from '@/lib/validation';
 import { inboxApi } from '@/components/messages/inbox-api';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const STARTERS = ['Is this still available?', 'Can I use this for commercial projects?', 'Do you offer custom versions?', 'What file formats are included?'];
 
@@ -73,8 +74,9 @@ export default function MessageSellerButton({ product, shop, className = 'btn bt
         <div className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 id={`${textId}-title`} className="text-xl font-semibold">
+              <h2 id={`${textId}-title`} className="flex items-center gap-1.5 text-xl font-semibold">
                 Message {shop.name}
+                {shop.verified && <VerifiedBadge size={18} />}
               </h2>
               <p className="mt-1 text-sm text-stone-500">Ask about this listing. Replies arrive in your Messages.</p>
             </div>

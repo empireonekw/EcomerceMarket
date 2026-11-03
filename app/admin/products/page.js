@@ -10,6 +10,7 @@ import { PageHeader, StatusBadge, EmptyState, formatDateTime } from '@/component
 import { getAdminProducts } from '@/lib/data/admin';
 import { getCategories } from '@/lib/data/categories';
 import { formatPrice } from '@/lib/utils';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export const metadata = { title: 'Products' };
 
@@ -148,7 +149,8 @@ export default async function AdminProductsPage({ searchParams }) {
                               {p.title}
                             </Link>
                             <p className="mt-0.5 truncate text-xs text-stone-500" title={`/${p.slug}`}>
-                              <span className="font-medium text-stone-600">{p.sellerId?.seller?.storeName ?? 'Platform'}</span> · /{p.slug}
+                              <span className="font-medium text-stone-600">{p.sellerId?.seller?.storeName ?? 'Platform'}</span>
+                              {p.sellerId?.seller?.verification?.status === 'verified' && <VerifiedBadge size={12} className="ml-1" />} · /{p.slug}
                             </p>
                           </div>
                         </div>

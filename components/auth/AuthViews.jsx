@@ -7,8 +7,11 @@ import AuthCard from '@/components/auth/AuthCard';
 import AuthSkeleton from '@/components/auth/AuthSkeleton';
 import LoginForm from '@/components/auth/LoginForm';
 import SignupForm from '@/components/auth/SignupForm';
+<<<<<<< HEAD
 import { GOOGLE_ERRORS } from '@/components/auth/GoogleButton';
 import SwitchToSellerButton from '@/components/seller/SwitchToSellerButton';
+=======
+>>>>>>> 4a1c55cea91bb9b3b215b940124d34a70e3a2d4b
 import { hasAuthHint, useAuth } from '@/context/AuthContext';
 import { safeNext } from '@/lib/redirects';
 import { siteConfig } from '@/lib/site';
@@ -146,29 +149,15 @@ export function SellerSignupGate({ children }) {
   if (checking) return <AuthSkeleton />;
   if (arrival?.role === 'seller') return <Redirect to="/seller/dashboard" />;
   if (!arrival) return children;
+  // A shopping account opens its shop on the same account (it keeps its purchases), like Etsy.
+  if (arrival.role === 'customer') return <Redirect to="/sell-on-sellpify" />;
 
-  const isAdmin = arrival.role === 'admin';
+  // Only admins are left: they manage the marketplace and can't open a shop.
   return (
-    <AuthCard
-      title={isAdmin ? 'You’re signed in as an admin' : 'Selling needs a seller account'}
-      subtitle={
-        isAdmin
-          ? 'Admin accounts manage the marketplace and can’t open a store.'
-          : `You’re signed in as ${arrival.email}, a shopping account. Seller accounts are separate, so your purchases and your shop never mix. Create one with a different email.`
-      }
-    >
-      {isAdmin ? (
-        <Link href="/admin/payouts" className="btn btn-lg btn-dark w-full">
-          Go to seller payouts
-        </Link>
-      ) : (
-        <div className="space-y-2">
-          <SwitchToSellerButton className="btn btn-lg btn-primary w-full" />
-          <Link href="/products" className="btn btn-lg btn-outline w-full">
-            Keep shopping
-          </Link>
-        </div>
-      )}
+    <AuthCard title="You’re signed in as an admin" subtitle="Admin accounts manage the marketplace and can’t open a store.">
+      <Link href="/admin/payouts" className="btn btn-lg btn-dark w-full">
+        Go to seller payouts
+      </Link>
     </AuthCard>
   );
 }
