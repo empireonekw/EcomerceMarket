@@ -8,6 +8,7 @@ import DeleteUsersDialog from '@/components/admin/DeleteUsersDialog';
 import { BlockUserButton, RoleSelect } from '@/components/admin/UserAccessControls';
 import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { formatPrice } from '@/lib/utils';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const usd = (cents) => formatPrice(cents, 'USD');
 const plural = (n, word) => `${n.toLocaleString('en-US')} ${word}${n === 1 ? '' : 's'}`;
@@ -133,7 +134,10 @@ export default function UsersTable({ items, currentAdminId }) {
                     <Link href={`/admin/users/${u.id}`} className="block truncate font-medium after:absolute after:inset-0 after:rounded-2xl">
                       {u.name}
                     </Link>
-                    <p className="truncate text-sm text-stone-500">{u.selling?.storeName ?? u.email}</p>
+                    <p className="flex min-w-0 items-center gap-1 text-sm text-stone-500">
+                      <span className="truncate">{u.selling?.storeName ?? u.email}</span>
+                      {u.selling?.verification === 'verified' && <VerifiedBadge size={14} />}
+                    </p>
                   </div>
                   <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
                 </div>
@@ -187,7 +191,15 @@ export default function UsersTable({ items, currentAdminId }) {
                           {u.name}
                         </Link>
                         <p className="max-w-[13rem] truncate text-xs text-stone-500">{u.email}</p>
-                        {u.selling?.storeName && <p className="max-w-[13rem] truncate text-xs text-brand-700">{u.selling.storeName}</p>}
+                        {u.selling?.storeName && (
+                          <p className="flex max-w-[13rem] items-center gap-1 text-xs text-brand-700">
+                            <span className="truncate">{u.selling.storeName}</span>
+                            {u.selling.verification === 'verified' && <VerifiedBadge size={13} />}
+                            {u.selling.verification === 'pending' && (
+                              <span className="shrink-0 rounded-full bg-amber-50 px-1.5 text-[10px] font-medium text-amber-800">ID to review</span>
+                            )}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </td>

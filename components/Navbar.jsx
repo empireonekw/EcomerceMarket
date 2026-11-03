@@ -7,7 +7,7 @@ import CartBadge from '@/components/CartBadge';
 import Logo from '@/components/Logo';
 import FloatingHeader from '@/components/nav/FloatingHeader';
 import UserMenu from '@/components/UserMenu';
-import InboxLink from '@/components/messages/InboxLink';
+import ShopLink from '@/components/nav/ShopLink';
 import { getCategories } from '@/lib/data/categories';
 import { siteConfig } from '@/lib/site';
 
@@ -68,7 +68,7 @@ export default async function Navbar() {
 
           <div className="flex items-center justify-end gap-0.5">
             <NavSearch className="mr-2 hidden md:block" />
-            <InboxLink />
+            <ShopLink />
             <UserMenu />
             <CartBadge />
             <MobileMenu categories={categories} />

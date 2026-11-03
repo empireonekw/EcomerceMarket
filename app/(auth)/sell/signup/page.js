@@ -15,10 +15,10 @@ const PERKS = [
 ];
 
 /**
- * Seller sign-up (step 1 of 2) — where every "Sell With Us" link points. Creates a seller account, then
- * continues on /login with the email prefilled; after logging in the seller names their shop at
- * /seller/onboarding (step 2). Static, so "Sell With Us" opens it instantly; SellerSignupGate sends sellers to their
- * workspace and explains to other signed-in accounts.
+ * Seller sign-up — for visitors without an account who want to sell ("Create an account" on /sell-on-sellpify).
+ * Creates a seller account, then continues on /login with the email prefilled; after logging in the seller opens their
+ * shop with the wizard at /sell-on-sellpify. SellerSignupGate sends sellers to their workspace and signed-in shoppers
+ * straight to the wizard (they open a shop on the same account).
  */
 export default function SellerSignupPage() {
   return (
@@ -27,7 +27,7 @@ export default function SellerSignupPage() {
         wide
         eyebrow={<SellerSteps current={0} />}
         title="Create your seller account"
-        subtitle="Takes about a minute. You’ll name your shop right after you log in."
+        subtitle="Takes about a minute. You’ll set up your shop right after you log in."
         footer={
           <div className="space-y-2">
             <p>

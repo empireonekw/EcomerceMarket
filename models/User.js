@@ -13,7 +13,35 @@ const bankDetailsSchema = new Schema(
     accountTitle: { type: String, trim: true, maxlength: 80 },
     accountNumber: { type: String, trim: true, uppercase: true, maxlength: 34 }, // IBAN or local account number
     walletProvider: { type: String, enum: WALLET_OPTIONS.map((w) => w.value) },
-    walletNumber: { type: String, trim: true, maxlength: 15 },
+    walletNumber: { type: String, trim: true, maxlength: 254 }, // mobile number, or the email for Payoneer / PayPal
+  },
+  { _id: false },
+);
+
+// Set when the seller opens their shop (/sell-on-sellpify, lib/data/seller-onboarding.js). Private: never selected
+// unless explicitly requested, and only shown to the seller and admins.
+const addressSchema = new Schema(
+  {
+    line1: { type: String, trim: true, maxlength: 120 },
+    line2: { type: String, trim: true, maxlength: 120 },
+    city: { type: String, trim: true, maxlength: 60 },
+    state: { type: String, trim: true, maxlength: 60 },
+    postalCode: { type: String, trim: true, maxlength: 10 },
+    country: { type: String, trim: true, maxlength: 2 }, // ISO code, from the shop preferences
+  },
+  { _id: false },
+);
+const phoneSchema = new Schema({ dial: { type: String, maxlength: 5 }, number: { type: String, maxlength: 14 } }, { _id: false });
+// Government ID (front and back) the seller uploaded: private files (uploads/private/…) only admins can open.
+export const VERIFICATION_STATUSES = ['pending', 'verified', 'rejected'];
+const verificationSchema = new Schema(
+  {
+    idFront: { type: String },
+    idBack: { type: String },
+    status: { type: String, enum: VERIFICATION_STATUSES, default: 'pending' },
+    submittedAt: { type: Date },
+    reviewedAt: { type: Date },
+    note: { type: String, trim: true, maxlength: 300 }, // why it was rejected (shown to the seller)
   },
   { _id: false },
 );
@@ -23,6 +51,13 @@ const sellerSchema = new Schema(
   {
     storeName: { type: String, trim: true, maxlength: 60 }, // set during shop setup; absent = setup not finished
     storeDescription: { type: String, trim: true, maxlength: 500 },
+    logo: { type: String, trim: true }, // shop profile picture (public media)
+    banner: { type: String, trim: true }, // shop cover banner (public media)
+    country: { type: String, trim: true, maxlength: 2 }, // shop preferences
+    currency: { type: String, trim: true, maxlength: 3 },
+    address: { type: addressSchema, select: false },
+    phone: { type: phoneSchema, select: false },
+    verification: { type: verificationSchema, select: false },
     bankDetails: { type: bankDetailsSchema, select: false }, // bank account and/or EasyPaisa / JazzCash wallet (legacy, plain)
     // The same details encrypted (AES-256-GCM, lib/field-encryption.js). Replaces bankDetails once DATA_ENCRYPTION_KEY is set.
     bankDetailsEnc: { type: String, select: false },
@@ -58,6 +93,10 @@ const userSchema = new Schema(
       select: false, // never returned unless explicitly requested with .select('+password')
     },
     termsAcceptedAt: { type: Date }, // set when the user accepts the Terms at signup
+    // The shop-opening wizard's saved steps until it's submitted (lib/data/seller-onboarding.js), so a seller can
+    // leave and pick up where they stopped. Payout details in it are encrypted like bankDetailsEnc. Private.
+    sellerOnboarding: { type: Schema.Types.Mixed, select: false },
+    sellerTermsAcceptedAt: { type: Date }, // agreed to the Seller Agreement when opening the shop
     role: {
       type: String,
       enum: USER_ROLES,

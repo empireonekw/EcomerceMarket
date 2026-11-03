@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, DollarSign, MessageSquare, Package, ShoppingBag, Wallet } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
+import SellerVerificationPanel from '@/components/admin/SellerVerificationPanel';
 import PagedList from '@/components/dashboard/PagedList';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { ActivityLog, EarningsPanel, ProductMonthlyPanel } from '@/components/dashboard/SellerAnalytics';
@@ -9,6 +10,7 @@ import { getAdminUserDetail } from '@/lib/data/admin-users';
 import { getMonthlyEarnings, getProductMonthlyEarnings, getSellerActivity } from '@/lib/data/seller-analytics';
 import { listingStatus } from '@/lib/listing';
 import { formatPrice } from '@/lib/utils';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export const metadata = { title: 'User details' };
 
@@ -52,6 +54,7 @@ export default async function AdminUserPage({ params }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="headline truncate text-3xl sm:text-4xl">{u.name}</h1>
+            {u.shop?.verification?.status === 'verified' && <VerifiedBadge size={24} />}
             <RoleBadge role={u.role} />
             <StatusBadge status={u.status.tone} label={u.status.label} />
           </div>
@@ -120,9 +123,19 @@ export default async function AdminUserPage({ params }) {
             <Panel title="Shop">
               {u.shop.storeName ? (
                 <>
-                  <div className="border-b border-stone-100 px-5 py-4">
-                    <p className="font-medium">{u.shop.storeName}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-stone-600">{u.shop.storeDescription || 'No description.'}</p>
+                  {u.shop.banner && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={u.shop.banner} alt="" className="aspect-[4/1] w-full border-b border-stone-100 object-cover" />
+                  )}
+                  <div className="flex items-start gap-3 border-b border-stone-100 px-5 py-4">
+                    {u.shop.logo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={u.shop.logo} alt="" className="size-12 shrink-0 rounded-full object-cover" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-medium">{u.shop.storeName}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-stone-600">{u.shop.storeDescription || 'No description.'}</p>
+                    </div>
                   </div>
                   <Details
                     rows={[
@@ -134,6 +147,12 @@ export default async function AdminUserPage({ params }) {
               ) : (
                 <p className="px-5 py-6 text-sm text-stone-500">This seller signed up but hasn’t set up a shop yet.</p>
               )}
+            </Panel>
+          )}
+
+          {u.shop?.verification && (
+            <Panel title="Verification">
+              <SellerVerificationPanel userId={u.id} shop={u.shop} />
             </Panel>
           )}
         </div>

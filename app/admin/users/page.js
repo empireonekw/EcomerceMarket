@@ -7,11 +7,19 @@ import { FilterTabs, PendingContent, PendingNavProvider, PendingSearchForm } fro
 import { AdminUsersListSkeleton } from '@/components/dashboard/RouteSkeletons';
 import { PageHeader, StatCard, EmptyState, buttonClasses } from '@/components/dashboard/ui';
 import { requireAdmin } from '@/lib/auth';
-import { getAdminUsers } from '@/lib/data/admin-users';
+import { getAdminUsers, VERIFICATION_FILTERS } from '@/lib/data/admin-users';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 export const metadata = { title: 'Users' };
 
 const field = 'h-11 rounded-full border border-stone-300 bg-white px-4 text-sm focus:border-black focus:outline-none';
+
+const VERIFICATION_TABS = [
+  { value: '', label: 'All' },
+  { value: 'pending', label: 'To review' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'rejected', label: 'Rejected' },
+];
 
 const ROLE_TABS = [
   { value: '', label: 'All users', key: 'total' },
@@ -32,10 +40,19 @@ function tabHref(role, q, dates = {}) {
 /** Every account — customers, sellers and admins — with status, purchases and selling at a glance. */
 export default async function AdminUsersPage({ searchParams }) {
   const sp = await searchParams;
-  const params = { q: (sp.q ?? '').trim(), role: sp.role ?? '', page: sp.page, joined: sp.joined ?? '', from: sp.from ?? '', to: sp.to ?? '' };
+  const params = {
+    q: (sp.q ?? '').trim(),
+    role: sp.role ?? '',
+    page: sp.page,
+    joined: sp.joined ?? '',
+    from: sp.from ?? '',
+    to: sp.to ?? '',
+    verification: VERIFICATION_FILTERS.includes(sp.verification) ? sp.verification : '',
+  };
   const [admin, { items, pagination, summary }] = await Promise.all([requireAdmin(), getAdminUsers(params)]);
-  const dates = { joined: params.joined, from: params.from, to: params.to };
-  const filtered = Boolean(params.q || params.role || params.joined || params.from || params.to);
+  // Filters kept when switching tabs, searching or paging (the ID check one included).
+  const dates = { joined: params.joined, from: params.from, to: params.to, verification: params.verification };
+  const filtered = Boolean(params.q || params.role || params.joined || params.from || params.to || params.verification);
 
   return (
     <>
@@ -54,9 +71,15 @@ export default async function AdminUsersPage({ searchParams }) {
         <StatCard
           label="Sellers"
           value={summary.byRole.seller.toLocaleString('en-US')}
-          sub={summary.setupPending ? `${summary.setupPending} haven’t set up a shop` : 'All shops set up'}
+          sub={
+            summary.idsToReview
+              ? `${summary.idsToReview} ID${summary.idsToReview === 1 ? '' : 's'} to review`
+              : summary.setupPending
+                ? `${summary.setupPending} haven’t set up a shop`
+                : 'All shops set up'
+          }
           icon={Store}
-          tone={summary.setupPending ? 'warning' : 'positive'}
+          tone={summary.idsToReview || summary.setupPending ? 'warning' : 'positive'}
         />
         <StatCard label="New in 30 days" value={summary.newLast30d.toLocaleString('en-US')} sub="Sign-ups this month" icon={UserPlus} tone="positive" />
       </section>
@@ -86,9 +109,30 @@ export default async function AdminUsersPage({ searchParams }) {
           />
         </div>
 
+        {/* ID check (sellers who opened their shop with the wizard): to review / verified / rejected. */}
+        <nav aria-label="Filter by ID check" className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-stone-500">ID check:</span>
+          {VERIFICATION_TABS.map((t) => (
+            <Link
+              key={t.value}
+              href={tabHref(params.role, params.q, { ...dates, verification: t.value })}
+              aria-current={params.verification === t.value ? 'page' : undefined}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors ${
+                params.verification === t.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'
+              }`}
+            >
+              {t.value === 'verified' && <VerifiedBadge size={14} decorative />}
+              {t.label}
+              {t.value === 'pending' && summary.idsToReview > 0 && (
+                <span className="rounded-full bg-amber-400 px-1.5 text-[11px] font-medium leading-4 text-ink">{summary.idsToReview}</span>
+              )}
+            </Link>
+          ))}
+        </nav>
+
         <div className="mb-5">
           <JoinedFilter
-            base={{ role: params.role, q: params.q }}
+            base={{ role: params.role, q: params.q, verification: params.verification }}
             joined={params.joined}
             from={params.from}
             to={params.to}

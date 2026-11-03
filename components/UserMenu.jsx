@@ -3,7 +3,11 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useMessaging } from '@/components/messages/MessagingProvider';
+import { ONBOARDING_PATH } from '@/lib/seller-onboarding';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 const initials = (name = '') =>
   name
@@ -14,26 +18,31 @@ const initials = (name = '') =>
     .join('') || '?';
 
 /**
- * Account-menu entries per role (desktop dropdown + mobile menu). Customers shop; sellers sell, so they get
- * their workspace instead of purchases; admins manage the marketplace.
+ * Account-menu entries per role (desktop dropdown + mobile menu). Everyone gets Account settings, Purchases and
+ * Messages (sellers' inbox lives in their workspace); shoppers also get "Sell on Sellpify" (`promo`), sellers their
+ * workspace, admins the marketplace. `inbox: true` marks the Messages entry, which shows the unread count.
  */
 function accountLinks(user) {
+  const settings = { href: '/profile', label: 'Account settings' };
+  const purchases = { href: '/profile?tab=downloads', label: 'Purchases' };
   if (user.role === 'seller') {
     if (!user.storeName) {
       return [
-        { href: '/seller/onboarding', label: 'Finish shop setup' },
-        { href: '/messages', label: 'Messages' },
-        { href: '/profile', label: 'Account settings' },
+        { href: ONBOARDING_PATH, label: 'Finish opening your shop', promo: true },
+        { href: '/messages', label: 'Messages', inbox: true },
+        purchases,
+        settings,
       ];
     }
     return [
       { href: '/seller/dashboard', label: 'Seller dashboard' },
       { href: '/seller/listings', label: 'Listings' },
-      { href: '/seller/messages', label: 'Messages' },
+      { href: '/seller/messages', label: 'Messages', inbox: true },
       { href: '/seller/sales', label: 'Sales history' },
       { href: '/seller/payouts', label: 'Payouts' },
       { href: '/seller/dashboard#shop', label: 'Shop settings' },
-      { href: '/profile', label: 'Account settings' },
+      purchases,
+      settings,
     ];
   }
   if (user.role === 'admin') {
@@ -41,15 +50,22 @@ function accountLinks(user) {
       { href: '/admin', label: 'Admin dashboard' },
       { href: '/admin/users', label: 'Users' },
       { href: '/admin/orders', label: 'Orders & sales' },
-      { href: '/messages', label: 'Messages' },
-      { href: '/profile', label: 'Account settings' },
+      { href: '/messages', label: 'Messages', inbox: true },
+      settings,
     ];
   }
-  return [
-    { href: '/profile', label: 'My profile' },
-    { href: '/profile?tab=downloads', label: 'My purchases' },
-    { href: '/messages', label: 'Messages' },
-  ];
+  return [settings, purchases, { href: '/messages', label: 'Messages', inbox: true }, { href: ONBOARDING_PATH, label: 'Sell on Sellpify', promo: true }];
+}
+
+/** "3" (or "99+") unread messages, next to the Messages entry. */
+function UnreadCount({ count }) {
+  if (!count) return null;
+  return (
+    <span className="ml-auto rounded-full bg-brand-500 px-1.5 py-0.5 text-[11px] font-medium leading-none text-ink tabular-nums">
+      {count > 99 ? '99+' : count}
+      <span className="sr-only"> unread</span>
+    </span>
+  );
 }
 
 const ROLE_BADGES = { seller: 'Seller', admin: 'Admin' };
@@ -161,6 +177,7 @@ const panelClass =
  */
 export default function UserMenu() {
   const { user, loading, logout } = useAuth();
+  const { unread } = useMessaging();
   const withNext = useLoginHref();
   const { open, close, rootProps, buttonProps } = useHoverPopover();
   const panelId = useId();
@@ -187,11 +204,22 @@ export default function UserMenu() {
         type="button"
         aria-controls={panelId}
         aria-haspopup={user ? 'menu' : 'dialog'}
-        aria-label={user ? `Account menu for ${user.name}` : 'Account: log in or create an account'}
+        aria-label={user ? `Account menu for ${user.name}${unread ? `, ${unread} unread messages` : ''}` : 'Account: log in or create an account'}
         className={`${iconBtn} relative ${open ? 'bg-white text-black' : ''}`}
       >
         <UserIcon />
-        {user && <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 rounded-full bg-emerald-500 ring-2 ring-white" />}
+        {/* Unread messages (the inbox moved into this menu); otherwise a dot that says "signed in". */}
+        {user && unread > 0 ? (
+          <span
+            key={unread}
+            aria-hidden="true"
+            className="absolute right-0.5 top-0.5 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-medium leading-none text-ink ring-2 ring-white"
+          >
+            {unread > 99 ? '99+' : unread}
+          </span>
+        ) : (
+          user && <span aria-hidden="true" className="absolute right-1.5 top-1.5 size-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+        )}
       </button>
 
       {open && !user && (
@@ -218,15 +246,32 @@ export default function UserMenu() {
                 <span className="truncate">{user.name}</span>
                 <RoleBadge role={user.role} />
               </p>
-              <p className="truncate text-xs text-stone-500">{user.role === 'seller' && user.storeName ? user.storeName : user.email}</p>
+              <p className="flex min-w-0 items-center gap-1 text-xs text-stone-500">
+                <span className="truncate">{user.role === 'seller' && user.storeName ? user.storeName : user.email}</span>
+                {user.role === 'seller' && user.verified && <VerifiedBadge size={13} />}
+              </p>
             </div>
           </div>
           <div className="pt-2">
-            {accountLinks(user).map((l) => (
-              <Link key={l.href} role="menuitem" href={l.href} onClick={close} className={item}>
-                {l.label}
-              </Link>
-            ))}
+            {accountLinks(user).map((l) =>
+              l.promo ? (
+                <Link
+                  key={l.href}
+                  role="menuitem"
+                  href={l.href}
+                  onClick={close}
+                  className="my-1 flex items-center gap-3 rounded-xl bg-brand-50 px-3 py-2.5 text-sm font-medium text-ink hover:bg-brand-100"
+                >
+                  <Store size={17} strokeWidth={1.75} aria-hidden="true" />
+                  {l.label}
+                </Link>
+              ) : (
+                <Link key={l.href} role="menuitem" href={l.href} onClick={close} className={item}>
+                  {l.label}
+                  {l.inbox && <UnreadCount count={unread} />}
+                </Link>
+              ),
+            )}
             <button role="menuitem" type="button" onClick={onLogout} className={`${item} w-full text-left text-red-600 hover:bg-red-50`}>
               Logout
             </button>
@@ -240,6 +285,7 @@ export default function UserMenu() {
 /** Account links inside the mobile menu panel. */
 export function MobileAuthLinks() {
   const { user, loading, logout } = useAuth();
+  const { unread } = useMessaging();
   const withNext = useLoginHref();
   const link = 'block rounded-full px-4 py-2 hover:bg-stone-100';
 
@@ -266,8 +312,10 @@ export function MobileAuthLinks() {
         <RoleBadge role={user.role} />
       </div>
       {accountLinks(user).map((l) => (
-        <Link key={l.href} href={l.href} className={link}>
+        <Link key={l.href} href={l.href} className={`${link} flex items-center gap-2 ${l.promo ? 'text-brand-800' : ''}`}>
+          {l.promo && <Store size={16} strokeWidth={1.75} aria-hidden="true" />}
           {l.label}
+          {l.inbox && <UnreadCount count={unread} />}
         </Link>
       ))}
       <button

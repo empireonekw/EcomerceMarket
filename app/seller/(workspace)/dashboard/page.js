@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShoppingBag } from 'lucide-react';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
+import VerifiedBadge from '@/components/VerifiedBadge';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
@@ -40,8 +41,35 @@ export default async function SellerDashboardPage() {
         </div>
       )}
 
+      {data.verification?.status === 'pending' && (
+        <p role="status" className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <Clock size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <span>
+            <span className="font-medium">We’re checking your ID.</span> It usually takes a day or two. Once it’s verified, a blue tick appears next to
+            your shop’s name for buyers. You can add listings meanwhile.
+          </span>
+        </p>
+      )}
+      {data.verification?.status === 'rejected' && (
+        <p role="alert" className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <AlertTriangle size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <span>
+            <span className="font-medium">We couldn’t verify your ID.</span> {data.verification.note}{' '}
+            <Link href="/contact" className="font-medium underline underline-offset-2">
+              Contact us
+            </Link>{' '}
+            to send a new one.
+          </span>
+        </p>
+      )}
+
       <PageHeader
-        title={data.storeName}
+        title={
+          <span className="inline-flex max-w-full items-center gap-2">
+            <span className="truncate">{data.storeName}</span>
+            {data.verification?.status === 'verified' && <VerifiedBadge size={26} />}
+          </span>
+        }
         description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees, you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
       />
 
@@ -164,7 +192,7 @@ export default async function SellerDashboardPage() {
           }
         >
           <div className="p-5 sm:p-6">
-            <ShopDetailsForm mode="update" initial={{ storeName: data.storeName, storeDescription: data.storeDescription }} />
+            <ShopDetailsForm initial={{ storeName: data.storeName, storeDescription: data.storeDescription }} />
           </div>
         </Panel>
       </div>

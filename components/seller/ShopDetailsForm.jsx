@@ -6,24 +6,20 @@ import { CheckCircle2 } from 'lucide-react';
 import { validateStoreName, validateStoreDescription, STORE_DESCRIPTION_LIMITS } from '@/lib/validation';
 import { AuthLabel, inputClass, FieldError, FormAlert, SubmitButton } from '@/components/auth/AuthFields';
 
-const MODES = {
-  setup: { url: '/api/seller/onboarding', method: 'POST', submit: 'Create shop & continue', pending: 'Creating your shop…' },
-  update: { url: '/api/seller/profile', method: 'PUT', submit: 'Save shop details', pending: 'Saving…' },
-};
+const config = { url: '/api/seller/profile', method: 'PUT', submit: 'Save shop details', pending: 'Saving…' };
 
+// The description is optional (shops opened through /sell-on-sellpify may not have one yet); when given, the usual rules.
 const validate = (v) =>
   Object.fromEntries(
-    Object.entries({ storeName: validateStoreName(v.storeName), storeDescription: validateStoreDescription(v.storeDescription) }).filter(([, m]) => m),
+    Object.entries({
+      storeName: validateStoreName(v.storeName),
+      storeDescription: v.storeDescription.trim() ? validateStoreDescription(v.storeDescription) : null,
+    }).filter(([, m]) => m),
   );
 
-/**
- * Shop name + description.
- *  - `setup`  (/seller/onboarding): creates the shop, shows a live preview, then opens the dashboard.
- *  - `update` (dashboard → Shop settings): edits them in place.
- */
-export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
+/** Shop name + description (dashboard → Shop settings). Shops are opened with the wizard at /sell-on-sellpify. */
+export default function ShopDetailsForm({ initial = {} }) {
   const router = useRouter();
-  const config = MODES[mode];
   const [values, setValues] = useState({ storeName: initial.storeName ?? '', storeDescription: initial.storeDescription ?? '' });
   const [submitted, setSubmitted] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
@@ -65,15 +61,10 @@ export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
         body: JSON.stringify({ storeName: values.storeName.trim(), storeDescription: values.storeDescription.trim() }),
       });
       const data = await res.json().catch(() => ({}));
-      if (res.status === 401) return router.push('/login?next=/seller/onboarding');
+      if (res.status === 401) return router.push('/login?next=/seller/dashboard');
       if (!res.ok) {
         setServerErrors(data.fields ?? {});
         setFormError(data.error ?? 'Something went wrong.');
-        return;
-      }
-      if (mode === 'setup') {
-        router.replace('/seller/dashboard');
-        router.refresh();
         return;
       }
       setSaved(true);
@@ -85,7 +76,6 @@ export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
     }
   }
 
-  const name = values.storeName.trim();
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <FormAlert>{formError}</FormAlert>
@@ -119,22 +109,7 @@ export default function ShopDetailsForm({ mode = 'setup', initial = {} }) {
         <FieldError id="storeDescription-error">{errors.storeDescription}</FieldError>
       </div>
 
-      {mode === 'setup' && (
-        <div aria-hidden="true" className="rounded-2xl border border-dashed border-stone-300 p-4">
-          <p className="text-xs text-stone-500">Preview: how buyers will see your shop</p>
-          <div className="mt-3 flex gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-500 text-lg font-medium text-ink">
-              {(name.charAt(0) || 'S').toUpperCase()}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate font-medium">{name || 'Your shop name'}</p>
-              <p className="line-clamp-2 text-sm text-stone-500">{values.storeDescription.trim() || 'Your description appears here.'}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className={mode === 'setup' ? 'pt-1' : 'max-w-xs'}>
+      <div className="max-w-xs">
         <SubmitButton pending={pending} pendingLabel={config.pending}>
           {config.submit}
         </SubmitButton>

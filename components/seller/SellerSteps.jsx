@@ -1,8 +1,8 @@
 import { Check } from 'lucide-react';
 
-const STEPS = ['Account', 'Shop details'];
+const STEPS = ['Account', 'Open your shop'];
 
-/** Two-step progress for becoming a seller: 1 · Account (/sell/signup) → 2 · Shop details (/seller/onboarding). */
+/** Two-step progress for becoming a seller: 1 · Account (/sell/signup) → 2 · Open your shop (/sell-on-sellpify). */
 export default function SellerSteps({ current }) {
   return (
     <ol aria-label="Seller setup progress" className="flex items-center gap-3 text-sm">
