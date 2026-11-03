@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, Search } from 'lucide-react';
 import CategoryIcon from '@/components/CategoryIcon';
 import Reveal from '@/components/Reveal';
 import { Eyebrow, Glow, Sparkle } from '@/components/home/Editorial';
-import { categoryHref } from '@/lib/category-tree';
+import { ALL_CATEGORIES_HREF, browsableCategories, categoryHref, topCategories } from '@/lib/category-tree';
 
 // Quick catalog searches shown under the list (each runs a real search).
 const SEARCHES = ['Notion', 'Canva', 'Figma', 'PDF', 'Planner', 'Icons'];
@@ -16,8 +16,8 @@ const MAX_ROWS = 8;
  * list stops at MAX_ROWS, so it reads the same with one category or twenty.
  */
 export default function Categories({ categories, productCount }) {
-  const rows = [...categories].sort((a, b) => (b.totalCount ?? 0) - (a.totalCount ?? 0)).slice(0, MAX_ROWS);
-  const more = categories.length - rows.length;
+  const rows = topCategories(categories, MAX_ROWS);
+  const more = browsableCategories(categories).length - rows.length;
   return (
     <section className="container-page relative isolate pt-24 sm:pt-32" aria-labelledby="categories-heading">
       <Glow className="top-28 left-16 size-64 bg-brand-100/80" />
@@ -57,7 +57,7 @@ export default function Categories({ categories, productCount }) {
             ))}
           </ul>
           {more > 0 && (
-            <Link href="/products" className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
+            <Link href={ALL_CATEGORIES_HREF} className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
               See {more} more {more === 1 ? 'category' : 'categories'}
               <ArrowRight size={15} strokeWidth={2} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
             </Link>

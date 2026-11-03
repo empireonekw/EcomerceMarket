@@ -27,7 +27,7 @@ export async function GET(_request, { params }) {
     const result = await consumeDownload(claims);
     if (result.error) return fail('Download not available.', 404);
 
-    const delivery = await resolveDelivery(result.product);
+    const delivery = await resolveDelivery(result.product, claims.fileIndex);
 
     if (delivery.type === 'stream') {
       const ascii = delivery.filename.replace(/[^\x20-\x7e]|["\\]/g, '_'); // plain-ASCII fallback for old browsers

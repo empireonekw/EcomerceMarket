@@ -21,7 +21,10 @@ const orderItemSchema = new Schema(
     // Copied from the product when it is deleted, so buyers keep their lifetime downloads (lib/data/product-writes.js).
     // Private: never sent to the browser (getOrderReceipt strips it).
     delivery: {
-      type: new Schema({ deliveryType: String, downloadUrl: String, sourceFileName: String }, { _id: false }),
+      type: new Schema(
+        { deliveryType: String, downloadUrl: String, sourceFileName: String, files: [{ _id: false, url: String, name: String, size: Number }] },
+        { _id: false },
+      ),
       default: undefined,
     },
   },

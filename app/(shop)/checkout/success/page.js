@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CopyLinkButton from '@/components/CopyLinkButton';
 import ClaimOrderButton from '@/components/ClaimOrderButton';
+import FileDownloads from '@/components/FileDownloads';
 import { getOrderReceipt } from '@/lib/data/orders';
 import { getCurrentUser } from '@/lib/auth';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
@@ -94,7 +95,7 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           {order.items.map((item) => {
             const link = linkFor.get(String(item.product));
             return (
-              <li key={item.product} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:items-center">
+              <li key={item.product} className="flex flex-col gap-4 rounded-2xl border border-stone-200 bg-white p-4 sm:flex-row sm:flex-wrap sm:items-center">
                 <div className="flex min-w-0 flex-1 items-center gap-4">
                   <div className="relative aspect-[4/3] w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100">
                     {item.coverImage && (
@@ -113,7 +114,9 @@ export default async function CheckoutSuccessPage({ searchParams }) {
                   </div>
                 </div>
 
-                {link ? (
+                {link?.files?.length > 1 ? (
+                  <FileDownloads files={link.files} />
+                ) : link ? (
                   <a
                     href={link.url}
                     rel="noreferrer"

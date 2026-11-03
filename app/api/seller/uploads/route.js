@@ -14,7 +14,7 @@ import { uploadDriver } from '@/lib/uploads';
 export async function POST(request) {
   const user = await getRequestUser(request); // same-origin enforced
   if (!user) return unauthorized();
-  if (user.role !== 'seller') return forbidden('Seller account required.');
+  if (!['seller', 'admin'].includes(user.role)) return forbidden('Seller account required.'); // admins upload for platform products
   if (uploadDriver() !== 'blob') return json({ error: 'File uploads aren’t set up on this site yet.' }, 409);
   if (!rateLimit(`upload:${user.id}`, { limit: 120, windowMs: 60 * 60 * 1000 }).ok) {
     return json({ error: 'Too many uploads in a short time. Please try again later.' }, 429);

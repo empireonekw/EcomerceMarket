@@ -38,6 +38,9 @@ const nextConfig = {
 
   reactStrictMode: true,
 
+  // Lets the login and sign-up pages show "Continue with Google" only when the OAuth client is configured.
+  env: { NEXT_PUBLIC_GOOGLE_SIGNIN: process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? '1' : '' },
+
   experimental: {
     // Keep visited dynamic pages (dashboards, lists) in the client router cache for 30s, so going back/forward
     // between them is instant. Mutations still call router.refresh(), which bypasses this cache.
@@ -45,6 +48,9 @@ const nextConfig = {
     // dashboard sidebars), so a click opens them with no server round trip for 3 minutes. Every save in the dashboards
     // calls router.refresh(), which throws all of this away, so your own changes always show at once.
     staleTimes: { dynamic: 30, static: 180 },
+    // proxy.js runs on every API request and buffers its body, by default only the first 10 MB: anything larger
+    // reached the upload route cut short. Just above the largest upload allowed (20 MB, lib/listing.js UPLOAD_RULES).
+    proxyClientMaxBodySize: '21mb',
   },
   poweredByHeader: false,
 

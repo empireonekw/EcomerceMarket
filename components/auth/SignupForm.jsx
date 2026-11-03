@@ -4,14 +4,17 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth, NEW_ACCOUNT_EMAIL_KEY } from '@/context/AuthContext';
-import { validateName, validateEmail, validatePassword } from '@/lib/validation';
+import { validateName, validateEmail, validatePassword, validatePhone, DEFAULT_COUNTRY_CODE } from '@/lib/validation';
+import CountryCodePicker from '@/components/auth/CountryCodePicker';
 import { AuthLabel, inputClass, FieldError, PasswordInput, PasswordChecklist, SubmitButton, FormAlert } from '@/components/auth/AuthFields';
+import GoogleButton from '@/components/auth/GoogleButton';
 import Recaptcha, { recaptchaEnabled } from '@/components/auth/Recaptcha';
 
 function validate(v) {
   const e = {
     name: validateName(v.name),
     email: validateEmail(v.email),
+    phone: validatePhone(v.countryCode, v.phone),
     password: validatePassword(v.password, { email: v.email }),
     confirm: !v.confirm ? 'Please repeat your password.' : v.confirm !== v.password ? 'Passwords don’t match.' : null,
     acceptTerms: v.acceptTerms ? null : 'Please accept the Terms of Service and Privacy Policy.',
@@ -29,7 +32,15 @@ export default function SignupForm({ next, accountType = 'customer' }) {
   const copy = COPY[accountType] ?? COPY.customer;
   const router = useRouter();
   const { signup } = useAuth();
-  const [values, setValues] = useState({ name: '', email: '', password: '', confirm: '', acceptTerms: false });
+  const [values, setValues] = useState({
+    name: '',
+    email: '',
+    countryCode: DEFAULT_COUNTRY_CODE,
+    phone: '',
+    password: '',
+    confirm: '',
+    acceptTerms: false,
+  });
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
@@ -68,6 +79,8 @@ export default function SignupForm({ next, accountType = 'customer' }) {
     const result = await signup({
       name: values.name.trim(),
       email: values.email.trim(),
+      countryCode: values.countryCode,
+      phone: values.phone.trim(),
       password: values.password,
       acceptTerms: values.acceptTerms,
       accountType,
@@ -95,7 +108,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <FormAlert>{formError}</FormAlert>
 
-      {/* Two columns from `sm`: name | email, then password | confirm. */}
+      {/* Two columns from `sm`: name | email, phone (full width), then password | confirm. */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <AuthLabel htmlFor="name">Full name</AuthLabel>
@@ -122,6 +135,37 @@ export default function SignupForm({ next, accountType = 'customer' }) {
             )}
           </FieldError>
         </div>
+      </div>
+
+      <div>
+        <AuthLabel htmlFor="phone">
+          Phone number <span className="font-normal text-stone-400">(optional)</span>
+        </AuthLabel>
+        {/* Country code | number. Each sits in its own box: inputClass is full width. */}
+        <div className="flex gap-2">
+          <div className="w-[7.5rem] shrink-0">
+            <CountryCodePicker
+              id="countryCode"
+              value={values.countryCode}
+              onChange={(code) => setValues((v) => ({ ...v, countryCode: code }))}
+              onBlur={() => setTouched((t) => ({ ...t, countryCode: true }))}
+            />
+          </div>
+          <div className="min-w-0 flex-1">
+            <input
+              {...bind('phone')}
+              type="tel"
+              autoComplete="tel-national"
+              inputMode="tel"
+              maxLength={20}
+              placeholder="300 1234567"
+              aria-invalid={Boolean(show('phone')) || undefined}
+              aria-describedby={show('phone') ? 'phone-error' : undefined}
+              className={inputClass(show('phone'))}
+            />
+          </div>
+        </div>
+        <FieldError id="phone-error">{show('phone')}</FieldError>
       </div>
 
       <div>
@@ -179,6 +223,9 @@ export default function SignupForm({ next, accountType = 'customer' }) {
           {copy.submit}
         </SubmitButton>
       </div>
+
+      {/* Google creates shopping accounts; sellers sign up with email (/sell/signup). */}
+      {accountType === 'customer' && <GoogleButton next={next} terms placement="after" />}
     </form>
   );
 }

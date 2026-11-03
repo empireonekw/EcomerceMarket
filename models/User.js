@@ -58,6 +58,8 @@ const userSchema = new Schema(
       select: false, // never returned unless explicitly requested with .select('+password')
     },
     termsAcceptedAt: { type: Date }, // set when the user accepts the Terms at signup
+    phone: { type: String, trim: true, maxlength: 20 }, // optional, E.164 ("+923001234567") from the sign-up form; never public
+    googleId: { type: String, select: false }, // "Continue with Google" account id (app/api/auth/google/callback)
     role: {
       type: String,
       enum: USER_ROLES,
@@ -101,6 +103,7 @@ const userSchema = new Schema(
 export const SELLER_WITH_BANK =
   'role seller.storeName seller.storeDescription seller.totalEarnings seller.pendingPayout seller.paidPayout seller.joinedAt seller.storeSetupAt seller.bankDetails seller.bankDetailsEnc';
 
+userSchema.index({ googleId: 1 }, { unique: true, sparse: true });
 // Admin dashboards list users by role, newest first.
 userSchema.index({ role: 1, createdAt: -1 });
 // Payout clearing queue: sellers with an outstanding balance, largest first.

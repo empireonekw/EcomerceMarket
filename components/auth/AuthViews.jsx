@@ -7,6 +7,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import AuthSkeleton from '@/components/auth/AuthSkeleton';
 import LoginForm from '@/components/auth/LoginForm';
 import SignupForm from '@/components/auth/SignupForm';
+import { GOOGLE_ERRORS } from '@/components/auth/GoogleButton';
 import SwitchToSellerButton from '@/components/seller/SwitchToSellerButton';
 import { hasAuthHint, useAuth } from '@/context/AuthContext';
 import { safeNext } from '@/lib/redirects';
@@ -52,10 +53,10 @@ function Redirect({ to }) {
 export function LoginFromUrl() {
   const params = useSearchParams();
   const registered = ['1', 'seller'].includes(params.get('registered')) ? params.get('registered') : false;
-  return <LoginView next={safeNext(params.get('next'))} registered={registered} />;
+  return <LoginView next={safeNext(params.get('next'))} registered={registered} oauthError={GOOGLE_ERRORS[params.get('error')] ?? null} />;
 }
 
-export function LoginView({ next, registered = false }) {
+export function LoginView({ next, registered = false, oauthError = null }) {
   const { arrival, checking } = useArrivalUser();
   const { logout } = useAuth();
   if (checking) return <AuthSkeleton />;
@@ -102,7 +103,7 @@ export function LoginView({ next, registered = false }) {
         </p>
       }
     >
-      <LoginForm next={next} registered={registered} />
+      <LoginForm next={next} registered={registered} oauthError={oauthError} />
     </AuthCard>
   );
 }

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { publicUser, isSameOrigin } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
-import { validateName, validateEmail, validatePassword, normalizeEmail } from '@/lib/validation';
+import { validateName, validateEmail, validatePassword, normalizeEmail, validatePhone, formatPhone, DEFAULT_COUNTRY_CODE } from '@/lib/validation';
 import { verifyCaptcha } from '@/lib/captcha';
 import { checkSignupEmail } from '@/lib/email-guard';
 import User from '@/models/User';
@@ -10,7 +10,8 @@ import User from '@/models/User';
 const noStore = { 'Cache-Control': 'no-store' };
 
 /**
- * POST /api/auth/signup — { name, email, password, acceptTerms, accountType? } → creates the account.
+ * POST /api/auth/signup — { name, email, password, acceptTerms, accountType?, countryCode?, phone? } → creates the account.
+ * The phone number is optional; when given it's stored as E.164 ("+923001234567").
  * No session is started: the client sends the new user to /login (email prefilled) to sign in.
  *   accountType 'seller'   → seller account (from /sell/signup); shop setup happens after first login.
  *   anything else          → customer.
@@ -40,9 +41,12 @@ export async function POST(request) {
   const name = String(body?.name ?? '').trim();
   const email = normalizeEmail(body?.email);
   const password = String(body?.password ?? '');
+  const countryCode = String(body?.countryCode ?? DEFAULT_COUNTRY_CODE);
+  const phone = String(body?.phone ?? '').slice(0, 30);
   const fields = Object.fromEntries(
     Object.entries({
       name: validateName(name),
+      phone: validatePhone(countryCode, phone),
       email: validateEmail(email),
       password: validatePassword(password, { email }),
       acceptTerms: body?.acceptTerms === true ? null : 'Please accept the Terms of Service and Privacy Policy.',
@@ -66,6 +70,7 @@ export async function POST(request) {
       name,
       email,
       password,
+      phone: formatPhone(countryCode, phone),
       role: isSeller ? 'seller' : 'customer',
       termsAcceptedAt: new Date(),
       ...(isSeller && { seller: { totalEarnings: 0, pendingPayout: 0, paidPayout: 0, joinedAt: new Date() } }),
