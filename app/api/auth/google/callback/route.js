@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { setSessionCookies } from '@/lib/auth';
-import { GOOGLE_FLOW_COOKIE, googleIdentity, googleRedirectUri, googleSignInEnabled, sameState } from '@/lib/google-auth';
+import { GOOGLE_FLOW_COOKIE, googleIdentity, googleRedirectUri, googleSignInEnabled, sameState, siteOrigin } from '@/lib/google-auth';
 import { isOwnerAdminEmail } from '@/lib/owner-admin';
 import { safeNext } from '@/lib/redirects';
 import User from '@/models/User';
@@ -17,8 +17,9 @@ const DASHBOARD = { seller: '/seller/dashboard', customer: '/' };
  */
 export async function GET(request) {
   const url = new URL(request.url);
+  const site = siteOrigin(request.url); // public address (not the proxy's localhost:4810)
   const fail = (code) => {
-    const res = NextResponse.redirect(new URL(`/login?error=${code}`, url));
+    const res = NextResponse.redirect(new URL(`/login?error=${code}`, site));
     res.cookies.set(GOOGLE_FLOW_COOKIE, '', { path: '/api/auth/google', maxAge: 0 });
     return res;
   };
@@ -59,7 +60,7 @@ export async function GET(request) {
     user.lastLoginAt = new Date();
     await user.save();
 
-    const res = NextResponse.redirect(new URL(safeNext(flow.next) ?? DASHBOARD[user.role] ?? '/', url));
+    const res = NextResponse.redirect(new URL(safeNext(flow.next) ?? DASHBOARD[user.role] ?? '/', site));
     setSessionCookies(res, user);
     res.cookies.set(GOOGLE_FLOW_COOKIE, '', { path: '/api/auth/google', maxAge: 0 });
     return res;
