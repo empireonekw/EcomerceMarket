@@ -80,7 +80,16 @@ export default async function HomePage() {
           </Link>
         </SectionHeading>
         <Reveal className="mt-10">
-          <ProductGrid products={latest} emptyMessage="No products yet. Run `npm run seed`." />
+          <ProductGrid
+            products={latest}
+            emptyMessage="New products are on their way"
+            emptyHint="Creators are getting their first listings ready. Have something to sell? Open your shop and be one of the first."
+            emptyAction={
+              <Link href="/sell-on-sellpify" className="btn btn-md btn-dark">
+                Open your shop
+              </Link>
+            }
+          />
         </Reveal>
       </section>
 

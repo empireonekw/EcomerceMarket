@@ -3,12 +3,14 @@ import ProductCard from '@/components/ProductCard';
 // Shop grid of tall (4:5) cards: one across on small phones, two from 480px, three on laptops, four on wide screens.
 const GRID = 'grid grid-cols-1 gap-x-5 gap-y-10 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12 xl:grid-cols-4';
 
-export default function ProductGrid({ products, preloadCount = 0, emptyMessage = 'No products found.' }) {
+/** `emptyMessage` / `emptyHint` / `emptyAction` (e.g. a link) fill the box shown when there are no products. */
+export default function ProductGrid({ products, preloadCount = 0, emptyMessage = 'No products found.', emptyHint = 'Try a different search or category.', emptyAction }) {
   if (!products?.length) {
     return (
       <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center">
         <p className="font-medium">{emptyMessage}</p>
-        <p className="mt-1 text-sm text-stone-500">Try a different search or category.</p>
+        {emptyHint && <p className="mt-1 text-sm text-stone-500">{emptyHint}</p>}
+        {emptyAction && <div className="mt-5">{emptyAction}</div>}
       </div>
     );
   }
