@@ -24,7 +24,7 @@ const LIMITS = {
 
 // Rankkw's server calls these for every seller connected to it, all from one IP: they're left out of the per-IP limits
 // and check their own Bearer token or shared secret, with per-seller limits (lib/rankkw-link.js).
-const RANKKW_SERVER_ROUTES = /^\/api\/integrations\/rankkw\/(token|me|categories|upload-ticket|products)$/;
+const RANKKW_SERVER_ROUTES = /^\/api\/integrations\/rankkw\/(token|me|categories|upload-ticket|products|products\/status)$/;
 
 function tierOf(request) {
   const { pathname } = request.nextUrl;
