@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { settlePayFastResult } from '@/lib/data/orders';
+import { siteConfig } from '@/lib/site';
 import { payfastParams } from '../params';
 
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
@@ -22,8 +23,9 @@ async function handle(request) {
 
   const { order, token } = Object.fromEntries(request.nextUrl.searchParams);
   const target = OBJECT_ID.test(order ?? '') && TOKEN.test(token ?? '') ? `/checkout/success?order=${order}&token=${token}` : '/checkout';
-  // 303: the browser follows with a GET even when PayFast returned with a POST.
-  return NextResponse.redirect(new URL(target, request.url), {
+  // 303: the browser follows with a GET even when PayFast returned with a POST. The public site URL, not request.url:
+  // behind nginx the request URL is the app's internal address (localhost:4810).
+  return NextResponse.redirect(new URL(target, siteConfig.url), {
     status: 303,
     headers: { 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' },
   });
