@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BarChart3, ChevronDown, Copy, ExternalLink, Eye, EyeOff, LayoutGrid, List, Pencil, Pin, Plus, Search, Settings, Share2, Star, Trash2, X } from 'lucide-react';
+import { BarChart3, Copy, ExternalLink, Eye, EyeOff, LayoutGrid, List, Menu, Pencil, Pin, Plus, Search, Share2, Star, Trash2, X } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { useToast } from '@/components/dashboard/Toaster';
@@ -76,7 +76,7 @@ function Switch({ checked, onChange, label }) {
 const menuItem = 'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 disabled:pointer-events-none disabled:opacity-40';
 
 /**
- * The ⚙ menu on each listing card (like Etsy's): View in store, View stats (soon), Edit, Copy, Activate/Deactivate,
+ * The ☰ menu on each listing card (like Etsy's): View in store, View stats (soon), Edit, Copy, Activate/Deactivate,
  * Share, Delete. Opens upwards from the card footer; closes on outside click or Esc.
  */
 function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
@@ -110,10 +110,9 @@ function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
         aria-expanded={open}
         aria-controls={menuId}
         aria-label={`Options for ${p.title}`}
-        className={`inline-flex h-8 items-center gap-0.5 rounded-full px-2 text-stone-600 transition-colors hover:bg-stone-100 hover:text-ink ${open ? 'bg-stone-100 text-ink' : ''}`}
+        className={`grid size-8 place-items-center rounded-full text-stone-600 transition-colors hover:bg-stone-100 hover:text-ink ${open ? 'bg-stone-100 text-ink' : ''}`}
       >
-        <Settings size={18} strokeWidth={1.9} aria-hidden="true" />
-        <ChevronDown size={13} strokeWidth={2.2} aria-hidden="true" />
+        <Menu size={19} strokeWidth={1.9} aria-hidden="true" />
       </button>
       {open && (
         <div

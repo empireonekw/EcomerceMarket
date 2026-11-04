@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Building2, Check, CheckCircle2, CreditCard, Loader2, Lock, PartyPopper, Smartphone, X } from 'lucide-react';
+import { Building2, Check, CheckCircle2, Clock, CreditCard, Loader2, Lock, PartyPopper, Smartphone, X } from 'lucide-react';
 import ImageUpload from '@/components/seller/onboarding/ImageUpload';
 import { walletIdLabel, WALLET_OPTIONS } from '@/lib/validation';
 import { checkStep, COUNTRIES, countryOf, CURRENCIES, DIAL_CODES, ONBOARDING_STEPS } from '@/lib/seller-onboarding';
@@ -535,15 +535,16 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
           <>
             <SectionTitle
               title="How you’ll get paid"
-              subtitle="Where we send your earnings. Stored encrypted, and you can change it any time from Payouts."
+              subtitle="Where we send your earnings. Optional for now: you can add or change it any time from Payouts & Bank Details."
             />
             <div className="mx-auto mt-8 max-w-3xl space-y-5">
               <fieldset>
                 <legend className="sr-only">Payout method</legend>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {[
                     { value: 'bank', label: 'Bank account', text: 'Straight to any bank in Pakistan, by IBAN or account number.', tags: ['IBAN', 'Account no.'], icon: Building2 },
                     { value: 'wallet', label: 'Mobile wallet or online service', text: 'Paid to the wallet or service you already use.', tags: WALLET_OPTIONS.map((w) => w.label), icon: Smartphone },
+                    { value: 'later', label: 'Add it later', text: 'Open your shop now and add payout details before your first payout.', tags: ['Optional'], icon: Clock },
                   ].map(({ value, label, text, tags, icon: Icon }) => {
                     const on = pay.method === value;
                     return (
@@ -695,7 +696,9 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                 [
                   'Payouts',
                   3,
-                  pay.method === 'bank'
+                  pay.method === 'later'
+                    ? 'Not added yet: add it from Payouts & Bank Details before your first payout'
+                    : pay.method === 'bank'
                     ? `${pay.bankName} · ending ${String(pay.accountNumber).slice(-4)}`
                     : `${wallet?.label ?? 'Wallet'} · ${wallet?.id === 'email' ? pay.walletNumber : `ending ${String(pay.walletNumber).slice(-4)}`}`,
                 ],
