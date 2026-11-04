@@ -12,10 +12,11 @@ import Review from '../models/Review.js';
 import ContactMessage from '../models/ContactMessage.js';
 import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
+import RankkwLink from '../models/RankkwLink.js';
 
 await connectDB();
 
-for (const Model of [User, Category, Product, Order, Transaction, Payout, Review, ContactMessage, Conversation, Message]) {
+for (const Model of [User, Category, Product, Order, Transaction, Payout, Review, ContactMessage, Conversation, Message, RankkwLink]) {
   const dropped = await Model.syncIndexes();
   const indexes = await Model.listIndexes();
   console.log(`✓ ${Model.modelName}: ${indexes.map((i) => i.name).join(', ')}${dropped.length ? ` (dropped: ${dropped.join(', ')})` : ''}`);
