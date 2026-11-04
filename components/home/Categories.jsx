@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ArrowRight, ArrowUpRight, Search } from 'lucide-react';
 import CategoryIcon from '@/components/CategoryIcon';
 import Reveal from '@/components/Reveal';

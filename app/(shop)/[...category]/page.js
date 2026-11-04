@@ -1,12 +1,12 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import BackLink from '@/components/BackLink';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-import ChipScroller from '@/components/ChipScroller';
-import FilterChip from '@/components/FilterChip';
+import { CategoryColumn, CategoryDrawerButton } from '@/components/CategorySidebar';
+import SortMenu from '@/components/SortMenu';
 import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
-import { categoryHref } from '@/lib/category-tree';
+import { categoryHref, categoryNav } from '@/lib/category-tree';
 import { getCategories } from '@/lib/data/categories';
 import { getProducts } from '@/lib/data/products';
 import { siteConfig } from '@/lib/site';
@@ -38,7 +38,8 @@ export async function generateMetadata({ params }) {
 
 /**
  * Category page — /main, /main/sub or /main/sub/inner (SEO-friendly URLs). Shows the category and everything in
- * its sub-categories, with breadcrumbs, sub-category chips, sorting and pagination.
+ * its sub-categories: breadcrumbs on top, the category column on the left (a slide-in panel on phones), sorting and
+ * pagination.
  */
 export default async function CategoryPage({ params, searchParams }) {
   const { category: segments } = await params;
@@ -51,9 +52,7 @@ export default async function CategoryPage({ params, searchParams }) {
 
   const byId = new Map(categories.map((c) => [c._id, c]));
   const trail = [...category.ancestors.map((id) => byId.get(id)).filter(Boolean), category];
-  const children = categories.filter((c) => c.parent === category._id);
-  // A category without sub-categories shows its siblings instead, so shoppers can move sideways.
-  const chips = children.length ? children : category.parent ? categories.filter((c) => c.parent === category.parent) : [];
+  const nav = categoryNav(categories, category);
   const parent = category.parent ? byId.get(category.parent) : null;
 
   const base = { tag: query.tag, sort: query.sort === 'newest' ? undefined : query.sort };
@@ -76,8 +75,8 @@ export default async function CategoryPage({ params, searchParams }) {
   };
 
   return (
-    <div className="container-page py-12 sm:py-16">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\u003c') }} />
+    <div className="container-wide py-6 sm:py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c') }} />
 
       <div className="flex items-center gap-3">
         <BackLink fallback={parent ? categoryHref(parent) : '/categories'} />
@@ -106,57 +105,48 @@ export default async function CategoryPage({ params, searchParams }) {
         </nav>
       </div>
 
-      <header className="mt-5 max-w-3xl">
-        <h1 className="headline text-4xl sm:text-5xl">{category.name}</h1>
-        {category.description && <p className="mt-3 text-lg leading-relaxed text-stone-600">{category.description}</p>}
-        <p className="mt-3 text-stone-500">
-          {pagination.total} {pagination.total === 1 ? 'product' : 'products'}
-          {query.tag && (
-            <>
-              {' '}
-              tagged <span className="font-medium text-ink">#{query.tag}</span> ·{' '}
-              <Link href={href({ tag: undefined })} className="underline">
-                clear
-              </Link>
-            </>
-          )}
-        </p>
-      </header>
+      <div className="mt-6 grid grid-cols-1 gap-x-8 lg:grid-cols-[13rem_minmax(0,1fr)] xl:grid-cols-[14rem_minmax(0,1fr)]">
+        <CategoryColumn nav={nav} />
 
-      <div className="mt-8 space-y-3">
-        <ChipScroller label={children.length ? 'Sub-categories' : 'Related categories'}>
-          {children.length > 0 ? (
-            <FilterChip href={categoryHref(category)} active>
-              All {category.name}
-            </FilterChip>
-          ) : (
-            parent && <FilterChip href={categoryHref(parent)}>All {parent.name}</FilterChip>
-          )}
-          {chips.map((c) => (
-            <FilterChip key={c._id} href={categoryHref(c)} active={c._id === category._id}>
-              {c.name}
-            </FilterChip>
-          ))}
-        </ChipScroller>
+        <div className="min-w-0">
+          {/* Title, count and the controls in one compact row, so the products start high on the page. */}
+          <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div className="min-w-0">
+              <h1 className="font-serif text-3xl leading-tight tracking-[-0.02em] text-ink sm:text-4xl">{category.name}</h1>
+              <p className="mt-1 text-sm text-stone-500">
+                {pagination.total.toLocaleString('en-US')} {pagination.total === 1 ? 'item' : 'items'}
+                {query.tag && (
+                  <>
+                    {' '}
+                    tagged <span className="font-medium text-ink">#{query.tag}</span> ·{' '}
+                    <Link href={href({ tag: undefined })} className="underline">
+                      clear
+                    </Link>
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <CategoryDrawerButton nav={nav} />
+              <SortMenu
+                current={query.sort}
+                options={Object.entries(PRODUCT_SORTS).map(([key, { label }]) => ({
+                  key,
+                  label,
+                  href: href({ sort: key === 'newest' ? undefined : key }),
+                }))}
+              />
+            </div>
+          </header>
+          {category.description && <p className="mt-3 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{category.description}</p>}
 
-        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
-          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
+          <div className="mt-6">
+            <ProductGrid wide products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
+          </div>
 
-          <ChipScroller label="Sort" bleed={false}>
-            {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
-              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-                {label}
-              </FilterChip>
-            ))}
-          </ChipScroller>
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath={categoryHref(category)} params={base} />
         </div>
       </div>
-
-      <div className="mt-8">
-        <ProductGrid products={items} preloadCount={pagination.page === 1 ? 3 : 0} />
-      </div>
-
-      <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath={categoryHref(category)} params={base} />
     </div>
   );
 }

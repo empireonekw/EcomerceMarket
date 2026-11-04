@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { notFound } from 'next/navigation';
 import CopyLinkButton from '@/components/CopyLinkButton';
 import ClaimOrderButton from '@/components/ClaimOrderButton';

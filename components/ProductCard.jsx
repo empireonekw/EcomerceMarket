@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ArrowUpRight, Download, Flame } from 'lucide-react';
 import AddToCartButton from '@/components/AddToCartButton';
 import CategoryIcon from '@/components/CategoryIcon';

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { Building2, Download, Mail, ShieldCheck, Infinity as InfinityIcon } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
 import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';

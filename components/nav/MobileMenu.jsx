@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { usePathname } from 'next/navigation';
 import NavSearch from '@/components/nav/NavSearch';
 import { MobileAuthLinks } from '@/components/UserMenu';

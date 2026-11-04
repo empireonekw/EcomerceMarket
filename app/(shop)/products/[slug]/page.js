@@ -1,7 +1,8 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import BackLink from '@/components/BackLink';
+import Link from '@/components/PrefetchLink';
 import { notFound } from 'next/navigation';
+import { BadgeCheck, Check, ChevronRight, Download, FileText, Layers, Lock, MapPin, RefreshCw, Scale, ShoppingBag, Star, Tag } from 'lucide-react';
+import BackLink from '@/components/BackLink';
+import ExpandableText from '@/components/ExpandableText';
 import ProductGallery from '@/components/ProductGallery';
 import ProductGrid from '@/components/ProductGrid';
 import RichText from '@/components/RichText';
@@ -13,7 +14,9 @@ import Stars from '@/components/Stars';
 import ProductReviews from '@/components/reviews/ProductReviews';
 import { getProductReviews, getProductReviewSummary } from '@/lib/data/reviews';
 import { getProductBySlug, getRelatedProducts, getShopSummary } from '@/lib/data/products';
-import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL, tagHref } from '@/lib/utils';
+import { getCategories } from '@/lib/data/categories';
+import { countryOf } from '@/lib/seller-onboarding';
+import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, tagHref } from '@/lib/utils';
 import { LICENSES, labelOf } from '@/lib/listing';
 import { stripRichText } from '@/lib/rich-text';
 import { siteConfig } from '@/lib/site';
@@ -64,31 +67,58 @@ function productJsonLd(product, reviews) {
     },
     // Star rating in search results, once there are reviews.
     ...(reviews.count > 0 && {
-      aggregateRating: { '@type': 'AggregateRating', ratingValue: reviews.average.toFixed(1), reviewCount: reviews.count, bestRating: 5, worstRating: 1 },
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: reviews.average.toFixed(1),
+        reviewCount: reviews.count,
+        bestRating: 5,
+        worstRating: 1,
+      },
     }),
   };
 }
 
-const TRUST = [
-  { label: 'Instant download', d: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z' },
-  { label: 'Secure checkout', d: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3' },
-  { label: 'Lifetime access', d: 'M12 3v12m0 0-4-4m4 4 4-4M5 19h14' },
-];
+/** "3 months" / "2 years" on Sellpify. */
+function timeOn(since) {
+  const months = since ? Math.max(1, Math.round((Date.now() - new Date(since)) / (30.44 * 86_400_000))) : 0;
+  if (!months) return null;
+  return months < 12 ? `${months} month${months === 1 ? '' : 's'}` : `${Math.floor(months / 12)} year${months >= 24 ? 's' : ''}`;
+}
 
+const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+/** One row of the right column's "Highlights" / "Delivery" lists: an icon and text. */
+function Fact({ icon: Icon, children }) {
+  return (
+    <li className="flex gap-3">
+      <Icon size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-ink" />
+      <span className="min-w-0 text-[15px] leading-relaxed text-stone-700">{children}</span>
+    </li>
+  );
+}
+
+/**
+ * Product page, marketplace layout: breadcrumbs on top; photos (thumbnails on the left) beside the buy box; under the
+ * photos the reviews and the seller; under the buy box the highlights, description and delivery; related items last.
+ */
 export default async function ProductPage({ params }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [related, shop, reviewSummary, firstReviews] = await Promise.all([
-    getRelatedProducts(product, 3),
+  const [related, shop, reviewSummary, firstReviews, categories] = await Promise.all([
+    getRelatedProducts(product, 4),
     getShopSummary(product.sellerId),
     getProductReviewSummary(product._id),
     getProductReviews(product._id),
+    getCategories(),
   ]);
+  const byId = new Map(categories.map((c) => [String(c._id), c]));
+  const leaf = product.category && byId.get(String(product.category._id));
+  const trail = leaf ? [...leaf.ancestors.map((id) => byId.get(String(id))).filter(Boolean), leaf] : [];
   const fileSize = formatFileSize(product.fileSize);
-  const discount =
-    product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
+  const discount = product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
+  const accessLink = isAccessLink(product);
   const cartProduct = {
     _id: product._id,
     slug: product.slug,
@@ -96,178 +126,265 @@ export default async function ProductPage({ params }) {
     price: product.price,
     currency: product.currency,
     coverImage: product.coverImage,
-    accessLink: isAccessLink(product),
+    accessLink,
   };
+  const photos = product.images?.length ? product.images : [product.coverImage].filter(Boolean);
+  const country = shop?.country && countryOf(shop.country)?.name;
+  const shopAge = timeOn(shop?.since);
 
   return (
-    <div className="container-page py-8 sm:py-12">
+    <div className="container-page py-6 sm:py-10">
       <script
         type="application/ld+json"
         // Escape "<" so product text can never close the script tag.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, reviewSummary)).replace(/</g, '\\u003c') }}
       />
 
-      <div className="flex items-center gap-3">
-        <BackLink fallback={product.category ? categoryHref(product.category) : '/products'} />
-        <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
-          <ol className="flex flex-wrap items-center gap-1.5">
+      {/* ---------- Top navigation: Back + breadcrumbs (centred on large screens) ---------- */}
+      <div className="relative flex items-center gap-3 lg:justify-center">
+        <BackLink fallback={leaf ? categoryHref(leaf) : '/products'} className="lg:absolute lg:left-0" />
+        <nav aria-label="Breadcrumb" className="min-w-0">
+          <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
             <li>
-              <Link href="/products" className="hover:text-ink">
-                Products
+              <Link href="/" className="font-medium text-ink underline-offset-4 hover:underline">
+                Home
               </Link>
             </li>
-            {product.category && (
-              <>
-                <li aria-hidden="true">/</li>
-                <li>
-                  <Link href={categoryHref(product.category)} className="hover:text-ink">
-                    {product.category.name}
-                  </Link>
-                </li>
-              </>
-            )}
+            {(trail.length ? trail : [{ _id: 'all', name: 'All products', href: '/products' }]).map((c) => (
+              <li key={c._id} className="flex items-center gap-1.5">
+                <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
+                <Link href={c.href ?? categoryHref(c)} className="font-medium text-ink underline-offset-4 hover:underline">
+                  {c.name}
+                </Link>
+              </li>
+            ))}
           </ol>
         </nav>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
-        {/* ---------- Cover (or a gallery when the listing has several photos) ---------- */}
-        {product.images?.length > 1 || product.videos?.length > 0 ? (
-          <ProductGallery images={product.images?.length ? product.images : [product.coverImage].filter(Boolean)} videos={product.videos ?? []} title={product.title} coverBlurDataURL={product.coverBlurDataURL} />
-        ) : (
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
-            {product.coverImage ? (
-              <Image
-                src={product.coverImage}
-                alt={product.title}
-                fill
-                preload // LCP element
-                placeholder="blur"
-                blurDataURL={product.coverBlurDataURL || NEUTRAL_BLUR_DATA_URL}
-                sizes="(min-width: 1280px) 720px, (min-width: 1024px) 58vw, 100vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center bg-stone-100 text-7xl font-medium text-stone-400">
-                {product.title.charAt(0)}
-              </div>
-            )}
-          </div>
-        )}
+      <div className="mt-6 grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] xl:gap-x-16">
+        {/* ---------- Photos ---------- */}
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+          <ProductGallery images={photos} videos={product.videos ?? []} title={product.title} coverBlurDataURL={product.coverBlurDataURL} />
+        </div>
 
-        {/* ---------- Buy box ---------- */}
-        <div className="lg:sticky lg:top-24 lg:self-start">
-          {product.category && (
-            <Link
-              href={categoryHref(product.category)}
-              className="inline-flex rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
-            >
-              {product.category.name}
-            </Link>
-          )}
-          <h1 className="headline mt-4 text-4xl leading-[1.1] text-balance sm:text-5xl">{product.title}</h1>
-          {reviewSummary.count > 0 && (
-            <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-stone-600 hover:text-ink">
-              <Stars rating={reviewSummary.average} size={15} />
-              <span className="font-medium text-ink">{reviewSummary.average.toFixed(1)}</span>
-              <span className="underline underline-offset-2">
-                {reviewSummary.count} review{reviewSummary.count === 1 ? '' : 's'}
-              </span>
-            </a>
-          )}
-          {product.shortDescription && <p className="mt-3 text-lg text-stone-600 text-pretty">{product.shortDescription}</p>}
+        {/* ---------- Right column: buy box, highlights, description, delivery ---------- */}
+        <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <h1 className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.015em] text-ink text-balance sm:text-[2rem]">{product.title}</h1>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="headline text-4xl tabular-nums">
-              {product.price === 0 ? 'Free' : formatPrice(product.price, product.currency)}
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="text-[1.75rem] font-semibold tracking-[-0.02em] text-ink tabular-nums">
+              {product.price === 0
+                ? 'Free'
+                : discount > 0
+                  ? `Now ${formatPrice(product.price, product.currency)}`
+                  : formatPrice(product.price, product.currency)}
             </span>
             {discount > 0 && (
               <>
-                <span className="text-stone-500 line-through">{formatPrice(product.compareAtPrice, product.currency)}</span>
-                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-medium text-emerald-700">
-                  Save {discount}%
-                </span>
+                <span className="text-lg text-stone-500 line-through tabular-nums">{formatPrice(product.compareAtPrice, product.currency)}</span>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-semibold text-emerald-800">{discount}% off</span>
               </>
             )}
           </div>
+          {product.price > 0 && <p className="mt-1 text-sm text-stone-500">Taxes, if any, are shown at checkout.</p>}
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+          {/* Shop and rating */}
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+            <span className="flex items-center gap-1 font-semibold text-ink">
+              {shop ? shop.name : siteConfig.name}
+              {shop?.verified && <VerifiedBadge size={15} />}
+            </span>
+            {reviewSummary.count > 0 ? (
+              <a href="#reviews" className="inline-flex items-center gap-1.5 text-stone-600 hover:text-ink">
+                <Stars rating={reviewSummary.average} size={14} />
+                <span className="underline underline-offset-2">({reviewSummary.count})</span>
+              </a>
+            ) : (
+              shop?.rating.count > 0 && <Stars rating={shop.rating.average} size={14} />
+            )}
+          </p>
+
+          <ul className="mt-4 space-y-2 text-[15px] text-stone-700">
+            <li className="flex items-center gap-2.5">
+              <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
+              {accessLink ? 'Instant access: your link is ready the moment you pay' : 'Instant download: your files are ready the moment you pay'}
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
+              Yours to keep: download again any time from Purchases
+            </li>
+            <li className="flex items-center gap-2.5">
+              <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
+              Secure checkout
+            </li>
+          </ul>
+
+          <div className="mt-6 space-y-3">
             <BuyNowButton product={cartProduct} />
             <AddToCartButton product={cartProduct} />
           </div>
 
-          <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-stone-600">
-            {TRUST.map((t) => (
-              <li key={t.label} className="flex items-center gap-1.5">
-                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 text-black" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={t.d} />
-                </svg>
-                {t.label}
-              </li>
-            ))}
-          </ul>
+          {/* ---------- Highlights ---------- */}
+          <section className="mt-10" aria-labelledby="highlights-heading">
+            <h2 id="highlights-heading" className="text-lg font-semibold text-ink">
+              Highlights
+            </h2>
+            <ul className="mt-4 space-y-3.5">
+              <Fact icon={Download}>{deliveryLabel(product)}</Fact>
+              {product.fileFormat && <Fact icon={FileText}>Format: {product.fileFormat}</Fact>}
+              {fileSize && <Fact icon={Layers}>Size: {fileSize}</Fact>}
+              {product.license && <Fact icon={Scale}>Licence: {labelOf(LICENSES, product.license)}</Fact>}
+              {product.salesCount > 0 && (
+                <Fact icon={ShoppingBag}>
+                  {product.salesCount.toLocaleString('en-US')} {product.price === 0 ? 'downloads' : 'sold'}
+                </Fact>
+              )}
+              {leaf && (
+                <Fact icon={Tag}>
+                  Category:{' '}
+                  <Link href={categoryHref(leaf)} className="underline underline-offset-2 hover:text-ink">
+                    {leaf.path ?? leaf.name}
+                  </Link>
+                </Fact>
+              )}
+            </ul>
+          </section>
 
-          <dl className="mt-8 divide-y divide-stone-200 rounded-2xl border border-stone-200 bg-white text-sm">
-            <div className="flex justify-between gap-4 px-4 py-3">
-              <dt className="text-stone-500">Delivery</dt>
-              <dd className="font-medium">{deliveryLabel(product)}</dd>
+          {/* ---------- Description ---------- */}
+          <section className="mt-10 border-t border-stone-200 pt-8" aria-labelledby="about-heading">
+            <h2 id="about-heading" className="text-lg font-semibold text-ink">
+              About this item
+            </h2>
+            {product.shortDescription && <p className="mt-3 text-[15px] font-medium leading-relaxed text-stone-800">{product.shortDescription}</p>}
+            <div className="mt-3">
+              <ExpandableText>
+                <RichText text={product.description} className="text-[15px] leading-relaxed text-stone-700" />
+                {product.tags?.length > 0 && (
+                  <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tags">
+                    {product.tags.map((tag) => (
+                      <li key={tag}>
+                        <Link
+                          href={tagHref(tag)}
+                          className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200"
+                        >
+                          #{tag}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </ExpandableText>
             </div>
-            {product.fileFormat && (
-              <div className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-stone-500">Format</dt>
-                <dd className="text-right font-medium">{product.fileFormat}</dd>
-              </div>
-            )}
-            {product.license && (
-              <div className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-stone-500">Licence</dt>
-                <dd className="text-right font-medium">{labelOf(LICENSES, product.license)}</dd>
-              </div>
-            )}
-            {fileSize && (
-              <div className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-stone-500">Size</dt>
-                <dd className="font-medium">{fileSize}</dd>
-              </div>
-            )}
-            {product.salesCount > 0 && (
-              <div className="flex justify-between gap-4 px-4 py-3">
-                <dt className="text-stone-500">{product.price === 0 ? 'Downloads' : 'Sales'}</dt>
-                <dd className="font-medium">{product.salesCount.toLocaleString('en-US')}</dd>
-              </div>
-            )}
-          </dl>
+          </section>
 
-          {/* ---------- Shop + Message seller ---------- */}
+          {/* ---------- Delivery ---------- */}
+          <section className="mt-10 border-t border-stone-200 pt-8" aria-labelledby="delivery-heading">
+            <h2 id="delivery-heading" className="text-lg font-semibold text-ink">
+              Delivery
+            </h2>
+            <ul className="mt-4 space-y-3.5">
+              <Fact icon={Download}>
+                {accessLink ? 'Access link delivered instantly after payment' : 'Digital files delivered instantly after payment'}
+              </Fact>
+              <Fact icon={RefreshCw}>Lifetime access from your Purchases page</Fact>
+              <Fact icon={Lock}>Secure checkout: cards, JazzCash, Easypaisa and bank transfer</Fact>
+              {country && <Fact icon={MapPin}>Made by a creator in {country}</Fact>}
+            </ul>
+          </section>
+        </div>
+
+        {/* ---------- Under the photos: reviews, then the seller ---------- */}
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+          <ProductReviews productId={product._id} productTitle={product.title} summary={reviewSummary} initial={firstReviews} />
+
           {shop ? (
-            <div className="mt-6 rounded-2xl border border-stone-200 bg-white p-4">
-              <div className="flex items-center gap-3">
+            <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-5 sm:p-7" aria-labelledby="seller-heading">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
                 {shop.logo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={shop.logo} alt="" className="size-11 shrink-0 rounded-full object-cover" />
+                  <img src={shop.logo} alt="" className="size-20 shrink-0 rounded-2xl object-cover" />
                 ) : (
-                  <span aria-hidden="true" className="grid size-11 shrink-0 place-items-center rounded-full bg-stone-100 text-base font-semibold uppercase text-stone-700">
+                  <span
+                    aria-hidden="true"
+                    className="grid size-20 shrink-0 place-items-center rounded-2xl bg-brand-100 font-serif text-3xl text-brand-800"
+                  >
                     {shop.name.charAt(0)}
                   </span>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-stone-500">Sold by</p>
-                  <p className="flex min-w-0 items-center gap-1 font-medium">
+                  <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Meet the seller</p>
+                  <h2 id="seller-heading" className="mt-0.5 flex items-center gap-1.5 font-serif text-2xl text-ink">
                     <span className="truncate">{shop.name}</span>
-                    {shop.verified && <VerifiedBadge />}
+                    {shop.verified && <VerifiedBadge size={20} />}
+                    {country && <span className="font-sans text-sm font-normal text-stone-500">· {country}</span>}
+                  </h2>
+                  <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-stone-700">
+                    {shop.rating.count > 0 && (
+                      <span className="inline-flex items-center gap-1 font-medium">
+                        <Star size={14} aria-hidden="true" className="fill-ink text-ink" />
+                        {shop.rating.average.toFixed(1)} ({shop.rating.count})
+                      </span>
+                    )}
+                    {shop.rating.count > 0 && <span aria-hidden="true">·</span>}
+                    <span className="font-medium">
+                      {shop.sales.toLocaleString('en-US')} sale{shop.sales === 1 ? '' : 's'}
+                    </span>
+                    <span aria-hidden="true">·</span>
+                    <span>
+                      {shop.listings} listing{shop.listings === 1 ? '' : 's'}
+                    </span>
+                    {shopAge && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <span>
+                          {shopAge} on {siteConfig.name}
+                        </span>
+                      </>
+                    )}
                   </p>
+                  {shop.verified && (
+                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-sky-800">
+                      <BadgeCheck size={15} strokeWidth={2} aria-hidden="true" />
+                      Identity verified by {siteConfig.name}
+                    </p>
+                  )}
+                  {shop.description && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-600">{shop.description}</p>}
                 </div>
-                <span className="shrink-0 text-xs text-stone-500">
-                  {shop.listings} {shop.listings === 1 ? 'listing' : 'listings'}
-                </span>
+                <div className="shrink-0 sm:w-44">
+                  <MessageSellerButton
+                    product={{ id: product._id, slug: product.slug, title: product.title, coverImage: product.coverImage }}
+                    shop={{ id: shop.id, name: shop.name, verified: shop.verified }}
+                  />
+                </div>
               </div>
-              {shop.description && <p className="mt-3 line-clamp-2 text-sm text-stone-600">{shop.description}</p>}
-              <div className="mt-4">
-                <MessageSellerButton product={{ id: product._id, slug: product.slug, title: product.title, coverImage: product.coverImage }} shop={{ id: shop.id, name: shop.name, verified: shop.verified }} />
-              </div>
-            </div>
+
+              {/* Nothing on this item yet: what buyers said about the shop's other items. */}
+              {reviewSummary.count === 0 && shop.recentReviews.length > 0 && (
+                <div className="mt-7 border-t border-stone-200 pt-6">
+                  <h3 className="text-lg font-semibold text-ink">Reviews from this shop ({shop.rating.count})</h3>
+                  <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+                    {shop.recentReviews.map((r) => (
+                      <li key={r._id} className="flex flex-col rounded-xl border border-stone-200 p-4">
+                        <Stars rating={r.rating} size={15} />
+                        <p className="mt-2 line-clamp-4 flex-1 text-sm leading-relaxed text-stone-700">{r.body}</p>
+                        <p className="mt-3 text-xs text-stone-500">
+                          <span className="font-medium text-stone-700">{r.authorName}</span> · {fmtDate(r.createdAt)}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-stone-500">
+                          Purchased:{' '}
+                          <Link href={`/products/${r.productSlug}`} className="underline underline-offset-2 hover:text-ink">
+                            {r.productTitle}
+                          </Link>
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </section>
           ) : (
-            <p className="mt-6 text-sm text-stone-500">
+            <p className="mt-10 rounded-2xl border border-stone-200 bg-white p-5 text-sm text-stone-600">
               Sold by {siteConfig.name}. Questions?{' '}
               <Link href="/contact" className="font-medium text-ink underline underline-offset-2">
                 Contact us
@@ -277,40 +394,14 @@ export default async function ProductPage({ params }) {
         </div>
       </div>
 
-      {/* ---------- Description + tags ---------- */}
-      <section className="mt-20 max-w-3xl" aria-labelledby="about-heading">
-        <h2 id="about-heading" className="headline text-3xl">
-          About this product
-        </h2>
-        <RichText text={product.description} className="mt-4 leading-relaxed text-stone-700" />
-
-        {product.tags?.length > 0 && (
-          <ul className="mt-6 flex flex-wrap gap-2" aria-label="Tags">
-            {product.tags.map((tag) => (
-              <li key={tag}>
-                <Link
-                  href={tagHref(tag)}
-                  className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600 hover:bg-stone-200"
-                >
-                  #{tag}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ---------- Reviews ---------- */}
-      <ProductReviews productId={product._id} productTitle={product.title} summary={reviewSummary} initial={firstReviews} />
-
       {/* ---------- Related ---------- */}
       {related.length > 0 && (
-        <section className="mt-24" aria-labelledby="related-heading">
+        <section className="mt-20" aria-labelledby="related-heading">
           <div className="flex items-end justify-between gap-4">
             <h2 id="related-heading" className="headline text-3xl">
               You might also like
             </h2>
-            <Link href={product.category ? categoryHref(product.category) : '/products'} className="btn btn-md btn-outline">
+            <Link href={leaf ? categoryHref(leaf) : '/products'} className="btn btn-md btn-outline">
               View all
             </Link>
           </div>

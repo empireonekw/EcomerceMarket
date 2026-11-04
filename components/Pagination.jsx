@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import LinkPending from '@/components/LinkPending';
 
 function buildHref(basePath, params, page) {

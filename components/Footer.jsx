@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { BadgeCheck, Clock, Download, Infinity as InfinityIcon, Lock, Mail, MapPin, MessageSquare } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { categoryHref } from '@/lib/category-tree';

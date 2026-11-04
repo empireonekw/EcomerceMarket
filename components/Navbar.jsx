@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import DesktopNav from '@/components/nav/DesktopNav';
 import MobileMenu from '@/components/nav/MobileMenu';
 import NavSearch from '@/components/nav/NavSearch';

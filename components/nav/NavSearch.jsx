@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Form from 'next/form';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { usePathname, useRouter } from 'next/navigation';
 import { Search, SearchX } from 'lucide-react';
 import { escapeRegex, formatPrice, searchTokens, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
@@ -118,6 +118,11 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
   }, [open]);
 
   const options = result.items;
+  // The suggestion picked with the arrow keys opens with Enter (router.push): load it ahead so that's instant.
+  const activeSlug = options[active]?.slug;
+  useEffect(() => {
+    if (activeSlug) router.prefetch(`/products/${activeSlug}`);
+  }, [activeSlug, router]);
   const showPanel = open && Boolean(term);
   const optionId = (i) => `${listboxId}-opt-${i}`;
 

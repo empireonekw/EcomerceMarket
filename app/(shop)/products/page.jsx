@@ -1,12 +1,12 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { permanentRedirect } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 import BackLink from '@/components/BackLink';
-import ChipScroller from '@/components/ChipScroller';
-import FilterChip from '@/components/FilterChip';
+import { CategoryColumn, CategoryDrawerButton } from '@/components/CategorySidebar';
+import SortMenu from '@/components/SortMenu';
 import ProductGrid from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
-import { categoryHref } from '@/lib/category-tree';
+import { categoryHref, categoryNav } from '@/lib/category-tree';
 import { findCategory, getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 import { parseProductQuery, PRODUCT_SORTS, tagHref } from '@/lib/utils';
@@ -46,11 +46,11 @@ export default async function ProductsPage({ searchParams }) {
     return s ? `/products?${s}` : '/products';
   };
 
-  const mainCategories = categories.filter((c) => !c.parent);
+  const nav = categoryNav(categories);
   const heading = query.q ? `Results for “${query.q}”` : 'All products';
 
   return (
-    <div className="container-page py-12 sm:py-16">
+    <div className="container-wide py-6 sm:py-10">
       <div className="flex items-center gap-3">
         <BackLink fallback="/" />
         <nav aria-label="Breadcrumb">
@@ -76,52 +76,46 @@ export default async function ProductsPage({ searchParams }) {
         </nav>
       </div>
 
-      <header className="mt-5">
-        <h1 className="headline text-4xl sm:text-5xl">{heading}</h1>
-        <p className="mt-3 text-stone-500">
-          {pagination.total} {pagination.total === 1 ? 'product' : 'products'}
-          {query.tag && (
-            <>
-              {' '}
-              tagged <span className="font-medium text-ink">#{query.tag}</span> ·{' '}
-              <Link href={href({ tag: undefined })} className="underline">
-                clear
-              </Link>
-            </>
-          )}
-        </p>
-      </header>
+      <div className="mt-6 grid grid-cols-1 gap-x-8 lg:grid-cols-[13rem_minmax(0,1fr)] xl:grid-cols-[14rem_minmax(0,1fr)]">
+        <CategoryColumn nav={nav} />
 
-      <div className="mt-8 space-y-3">
-        <ChipScroller label="Categories">
-          <FilterChip href="/products" active>
-            All
-          </FilterChip>
-          {mainCategories.map((c) => (
-            <FilterChip key={c._id} href={categoryHref(c)}>
-              {c.name}
-            </FilterChip>
-          ))}
-        </ChipScroller>
+        <div className="min-w-0">
+          <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div className="min-w-0">
+              <h1 className="font-serif text-3xl leading-tight tracking-[-0.02em] break-words text-ink sm:text-4xl">{heading}</h1>
+              <p className="mt-1 text-sm text-stone-500">
+                {pagination.total.toLocaleString('en-US')} {pagination.total === 1 ? 'item' : 'items'}
+                {query.tag && (
+                  <>
+                    {' '}
+                    tagged <span className="font-medium text-ink">#{query.tag}</span> ·{' '}
+                    <Link href={href({ tag: undefined })} className="underline">
+                      clear
+                    </Link>
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <CategoryDrawerButton nav={nav} />
+              <SortMenu
+                current={query.sort}
+                options={Object.entries(PRODUCT_SORTS).map(([key, { label }]) => ({
+                  key,
+                  label,
+                  href: href({ sort: key === 'newest' ? undefined : key }),
+                }))}
+              />
+            </div>
+          </header>
 
-        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
-          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
+          <div className="mt-6">
+            <ProductGrid wide products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
+          </div>
 
-          <ChipScroller label="Sort" bleed={false}>
-            {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
-              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-                {label}
-              </FilterChip>
-            ))}
-          </ChipScroller>
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} params={base} />
         </div>
       </div>
-
-      <div className="mt-8">
-        <ProductGrid products={items} preloadCount={pagination.page === 1 ? 3 : 0} />
-      </div>
-
-      <Pagination page={pagination.page} totalPages={pagination.totalPages} params={base} />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import ProductGrid from '@/components/ProductGrid';
 import HeroShowcase from '@/components/home/HeroShowcase';
 import FormatStrip from '@/components/home/FormatStrip';

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ArrowUpRight } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 import { Eyebrow, Marker, Glow, Sparkle } from '@/components/home/Editorial';

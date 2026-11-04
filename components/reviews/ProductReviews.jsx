@@ -40,7 +40,7 @@ export function ReviewCard({ review, mine = false }) {
 }
 
 /**
- * Product page → Reviews. The summary and first page come from the server (the page stays cached); more pages,
+ * Product page → Reviews (laid out by its own width: it sits beside the buy box on large screens). The summary and first page come from the server (the page stays cached); more pages,
  * the star filter and "your review" (write / edit, 3 edits) load in the browser.
  */
 export default function ProductReviews({ productId, productTitle, summary, initial }) {
@@ -99,14 +99,14 @@ export default function ProductReviews({ productId, productTitle, summary, initi
   };
 
   return (
-    <section id="reviews" className="mt-20 scroll-mt-24" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading" className="headline text-3xl">
+    <section id="reviews" className="@container scroll-mt-24" aria-labelledby="reviews-heading">
+      <h2 id="reviews-heading" className="text-2xl font-semibold tracking-[-0.01em] text-ink">
         Reviews
       </h2>
 
-      <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-12">
+      <div className="mt-6 grid grid-cols-1 gap-8 @2xl:grid-cols-[15rem_minmax(0,1fr)] @2xl:gap-10">
         {/* ---------- Summary ---------- */}
-        <div className="lg:sticky lg:top-28 lg:self-start">
+        <div className="@2xl:sticky @2xl:top-28 @2xl:self-start">
           {summary.count > 0 ? (
             <>
               <p className="flex items-end gap-3">

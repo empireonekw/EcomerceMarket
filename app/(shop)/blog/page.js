@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import PageIntro from '@/components/PageIntro';
 import { siteConfig } from '@/lib/site';
 

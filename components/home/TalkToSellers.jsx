@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ArrowRight, MessageSquare, SendHorizontal } from 'lucide-react';
 import Reveal from '@/components/Reveal';
 import { Eyebrow, Glow, Sparkle } from '@/components/home/Editorial';

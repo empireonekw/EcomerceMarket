@@ -1,9 +1,10 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import BackLink from '@/components/BackLink';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 import ChipScroller from '@/components/ChipScroller';
 import FilterChip from '@/components/FilterChip';
+import SortMenu from '@/components/SortMenu';
 import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
 import { getPopularTags, getProducts } from '@/lib/data/products';
@@ -127,9 +128,9 @@ export default async function TagPage({ params, searchParams }) {
         </p>
       </header>
 
-      <div className="mt-8 space-y-3">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
         {related.length > 0 && (
-          <ChipScroller label="Related tags">
+          <ChipScroller label="Related tags" className="sm:flex-1">
             {related.map((t) => (
               <FilterChip key={t.tag} href={tagHref(t.tag)}>
                 {label(t.tag)}
@@ -137,16 +138,10 @@ export default async function TagPage({ params, searchParams }) {
             ))}
           </ChipScroller>
         )}
-        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
-          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
-          <ChipScroller label="Sort" bleed={false}>
-            {Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => (
-              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-                {sortLabel}
-              </FilterChip>
-            ))}
-          </ChipScroller>
-        </div>
+        <SortMenu
+          current={query.sort}
+          options={Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => ({ key, label: sortLabel, href: href({ sort: key === 'newest' ? undefined : key }) }))}
+        />
       </div>
 
       <div className="mt-8">

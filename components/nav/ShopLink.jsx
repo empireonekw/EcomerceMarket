@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { Store } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { ONBOARDING_PATH } from '@/lib/seller-onboarding';

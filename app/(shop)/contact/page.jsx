@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { Clock, Mail, Receipt, Store } from 'lucide-react';
 import ContactForm from '@/components/ContactForm';
 import PageIntro from '@/components/PageIntro';

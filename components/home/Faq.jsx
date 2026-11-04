@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { Plus } from 'lucide-react';
 import { Eyebrow, Glow, Sparkle } from '@/components/home/Editorial';
 import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';

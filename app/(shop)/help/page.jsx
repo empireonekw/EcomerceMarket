@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ChevronDown } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
 import { NO_PLATFORM_FEE } from '@/lib/commission';

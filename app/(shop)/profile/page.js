@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { Download, LayoutGrid, MessageSquare, ShoppingBag, Star, UserRound } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { getUserPurchases } from '@/lib/data/orders';

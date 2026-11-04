@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 
 /** Pill link used for category and sort filters on product listings. */
 export default function FilterChip({ href, active, children }) {

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ChevronRight } from 'lucide-react';
 import CategoryBrowser from '@/components/CategoryBrowser';
 import { ALL_CATEGORIES_HREF, browsableCategories } from '@/lib/category-tree';

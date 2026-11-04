@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { Camera, Check, CreditCard, FileText, Loader2, RefreshCw, ShieldCheck, Upload, UserRound } from 'lucide-react';
 import { uploadFile } from '@/lib/upload-client';
 import { formatBytes, UPLOAD_RULES, uploadProblem } from '@/lib/listing';
@@ -239,9 +240,9 @@ export default function IdentityVerification({ uploads, rejectedNote }) {
         </span>
         <h2 className="mt-4 font-serif text-2xl text-ink">Thanks, we’ve got it</h2>
         <p className="mt-2 text-sm text-stone-600">We usually check it within a day or two and message you in your inbox. Payouts open once it’s verified.</p>
-        <a href="/seller/dashboard" className="btn btn-md btn-dark mt-6">
+        <Link href="/seller/dashboard" prefetch className="btn btn-md btn-dark mt-6">
           Back to dashboard
-        </a>
+        </Link>
       </div>
     );
   }

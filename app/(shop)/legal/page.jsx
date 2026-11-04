@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { ArrowRight } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
 import { POLICIES } from '@/lib/policies';

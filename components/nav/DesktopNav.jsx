@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/PrefetchLink';
 import { usePathname } from 'next/navigation';
 import { LayoutGrid } from 'lucide-react';
 import CategoryIcon from '@/components/CategoryIcon';
