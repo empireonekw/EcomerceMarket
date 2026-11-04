@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import BackLink from '@/components/BackLink';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
+import ChipScroller from '@/components/ChipScroller';
 import FilterChip from '@/components/FilterChip';
 import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
@@ -91,27 +93,30 @@ export default async function TagPage({ params, searchParams }) {
     <div className="container-page py-12 sm:py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
 
-      <nav aria-label="Breadcrumb">
-        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
-          <li>
-            <Link href="/" className="hover:text-ink">
-              Home
-            </Link>
-          </li>
-          <li className="flex items-center gap-1.5">
-            <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
-            <Link href="/products" className="hover:text-ink">
-              Products
-            </Link>
-          </li>
-          <li className="flex items-center gap-1.5">
-            <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
-            <span aria-current="page" className="text-ink">
-              {name}
-            </span>
-          </li>
-        </ol>
-      </nav>
+      <div className="flex items-center gap-3">
+        <BackLink fallback={'/products'} />
+        <nav aria-label="Breadcrumb">
+          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+            <li>
+              <Link href="/" className="hover:text-ink">
+                Home
+              </Link>
+            </li>
+            <li className="flex items-center gap-1.5">
+              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
+              <Link href="/products" className="hover:text-ink">
+                Products
+              </Link>
+            </li>
+            <li className="flex items-center gap-1.5">
+              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
+              <span aria-current="page" className="text-ink">
+                {name}
+              </span>
+            </li>
+          </ol>
+        </nav>
+      </div>
 
       <header className="mt-5 max-w-3xl">
         <h1 className="headline text-4xl sm:text-5xl">{name}</h1>
@@ -122,23 +127,26 @@ export default async function TagPage({ params, searchParams }) {
         </p>
       </header>
 
-      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mt-8 space-y-3">
         {related.length > 0 && (
-          <nav aria-label="Related tags" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+          <ChipScroller label="Related tags">
             {related.map((t) => (
               <FilterChip key={t.tag} href={tagHref(t.tag)}>
                 {label(t.tag)}
               </FilterChip>
             ))}
-          </nav>
+          </ChipScroller>
         )}
-        <nav aria-label="Sort" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          {Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => (
-            <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-              {sortLabel}
-            </FilterChip>
-          ))}
-        </nav>
+        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
+          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
+          <ChipScroller label="Sort" bleed={false}>
+            {Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => (
+              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
+                {sortLabel}
+              </FilterChip>
+            ))}
+          </ChipScroller>
+        </div>
       </div>
 
       <div className="mt-8">

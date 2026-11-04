@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShoppingBag } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck, ShoppingBag } from 'lucide-react';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
@@ -41,26 +41,38 @@ export default async function SellerDashboardPage() {
         </div>
       )}
 
+      {/* Identity: asked for after the first sale (lib/data/seller-verification.js); payouts wait for it. */}
+      {!data.verification && (data.verificationRequested || data.sales.count > 0) && (
+        <div role="status" className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-brand-200 bg-brand-50 px-5 py-4">
+          <ShieldCheck size={22} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-brand-700" />
+          <div className="min-w-0 flex-1 text-sm text-stone-700">
+            <p className="font-medium text-ink">You made your first sale! Verify your identity to get paid.</p>
+            <p className="mt-0.5">A photo of both sides of your ID card (CNIC) and a quick selfie with your camera. About two minutes.</p>
+          </div>
+          <Link href="/seller/verify" className="btn btn-md btn-dark shrink-0">
+            Verify identity
+          </Link>
+        </div>
+      )}
       {data.verification?.status === 'pending' && (
         <p role="status" className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <Clock size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
           <span>
-            <span className="font-medium">We’re checking your ID.</span> It usually takes a day or two. Once it’s verified, a blue tick appears next to
-            your shop’s name for buyers. You can add listings meanwhile.
+            <span className="font-medium">We’re checking your identity.</span> It usually takes a day or two. Once it’s verified you can request
+            payouts, and a blue tick appears next to your shop’s name.
           </span>
         </p>
       )}
       {data.verification?.status === 'rejected' && (
-        <p role="alert" className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <AlertTriangle size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0" />
-          <span>
-            <span className="font-medium">We couldn’t verify your ID.</span> {data.verification.note}{' '}
-            <Link href="/contact" className="font-medium underline underline-offset-2">
-              Contact us
-            </Link>{' '}
-            to send a new one.
-          </span>
-        </p>
+        <div role="alert" className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
+          <AlertTriangle size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
+          <p className="min-w-0 flex-1">
+            <span className="font-medium">We couldn’t verify your identity.</span> {data.verification.note}
+          </p>
+          <Link href="/seller/verify" className="btn btn-md btn-dark shrink-0">
+            Verify again
+          </Link>
+        </div>
       )}
 
       <PageHeader

@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { permanentRedirect } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
+import BackLink from '@/components/BackLink';
+import ChipScroller from '@/components/ChipScroller';
 import FilterChip from '@/components/FilterChip';
 import ProductGrid from '@/components/ProductGrid';
 import Pagination from '@/components/Pagination';
@@ -48,7 +51,32 @@ export default async function ProductsPage({ searchParams }) {
 
   return (
     <div className="container-page py-12 sm:py-16">
-      <header>
+      <div className="flex items-center gap-3">
+        <BackLink fallback="/" />
+        <nav aria-label="Breadcrumb">
+          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+            <li>
+              <Link href="/" className="hover:text-ink">
+                Home
+              </Link>
+            </li>
+            <li className="flex items-center gap-1.5">
+              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
+              {query.q ? (
+                <Link href="/products" className="hover:text-ink">
+                  All products
+                </Link>
+              ) : (
+                <span aria-current="page" className="text-ink">
+                  All products
+                </span>
+              )}
+            </li>
+          </ol>
+        </nav>
+      </div>
+
+      <header className="mt-5">
         <h1 className="headline text-4xl sm:text-5xl">{heading}</h1>
         <p className="mt-3 text-stone-500">
           {pagination.total} {pagination.total === 1 ? 'product' : 'products'}
@@ -64,8 +92,8 @@ export default async function ProductsPage({ searchParams }) {
         </p>
       </header>
 
-      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <nav aria-label="Categories" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
+      <div className="mt-8 space-y-3">
+        <ChipScroller label="Categories">
           <FilterChip href="/products" active>
             All
           </FilterChip>
@@ -74,15 +102,19 @@ export default async function ProductsPage({ searchParams }) {
               {c.name}
             </FilterChip>
           ))}
-        </nav>
+        </ChipScroller>
 
-        <nav aria-label="Sort" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
-            <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-              {label}
-            </FilterChip>
-          ))}
-        </nav>
+        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
+          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
+
+          <ChipScroller label="Sort" bleed={false}>
+            {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
+              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
+                {label}
+              </FilterChip>
+            ))}
+          </ChipScroller>
+        </div>
       </div>
 
       <div className="mt-8">

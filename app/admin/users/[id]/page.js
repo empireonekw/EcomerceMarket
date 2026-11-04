@@ -21,9 +21,9 @@ function Details({ rows }) {
   return (
     <dl className="divide-y divide-stone-100 text-sm">
       {rows.map(([k, v]) => (
-        <div key={k} className="flex justify-between gap-4 px-5 py-3">
-          <dt className="text-stone-500">{k}</dt>
-          <dd className="text-right font-medium">{v}</dd>
+        <div key={k} className="flex items-baseline justify-between gap-4 px-5 py-3">
+          <dt className="shrink-0 text-stone-500">{k}</dt>
+          <dd className="min-w-0 text-right font-medium break-words [overflow-wrap:anywhere]">{v}</dd>
         </div>
       ))}
     </dl>
@@ -47,18 +47,18 @@ export default async function AdminUserPage({ params }) {
       </Link>
 
       {/* ---------- Header ---------- */}
-      <header className="mb-8 mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+      <header className="mt-4 mb-8 flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center">
         <span aria-hidden="true" className="grid size-14 shrink-0 place-items-center rounded-full bg-brand-500 text-xl font-medium text-ink">
           {u.name.charAt(0).toUpperCase()}
         </span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="headline truncate text-3xl sm:text-4xl">{u.name}</h1>
             {u.shop?.verification?.status === 'verified' && <VerifiedBadge size={24} />}
             <RoleBadge role={u.role} />
             <StatusBadge status={u.status.tone} label={u.status.label} />
           </div>
-          <p className="mt-1 truncate text-sm text-stone-500">
+          <p className="mt-1 text-sm break-words text-stone-500">
             {u.email} · Joined {date(u.createdAt)} · Last active {u.lastLoginAt ? date(u.lastLoginAt) : 'never'}
           </p>
         </div>
@@ -96,16 +96,16 @@ export default async function AdminUserPage({ params }) {
       {s && (
         <div className="mt-8 space-y-6">
           <EarningsPanel months={monthly} title="Seller earnings by month" />
-          <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr] xl:items-start">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:items-start">
             <ProductMonthlyPanel data={byProduct} />
             <ActivityLog events={activity} />
           </div>
         </div>
       )}
 
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1fr_1.4fr] xl:items-start">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] xl:items-start">
         {/* ---------- Account + shop ---------- */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Panel title="Account">
             <Details
               rows={[
@@ -132,9 +132,11 @@ export default async function AdminUserPage({ params }) {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={u.shop.logo} alt="" className="size-12 shrink-0 rounded-full object-cover" />
                     )}
-                    <div className="min-w-0">
-                      <p className="font-medium">{u.shop.storeName}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-stone-600">{u.shop.storeDescription || 'No description.'}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium break-words">{u.shop.storeName}</p>
+                      <p className="mt-1 line-clamp-4 text-sm leading-relaxed text-stone-600" title={u.shop.storeDescription || undefined}>
+                        {u.shop.storeDescription || 'No description.'}
+                      </p>
                     </div>
                   </div>
                   <Details
@@ -158,7 +160,7 @@ export default async function AdminUserPage({ params }) {
         </div>
 
         {/* ---------- Activity ---------- */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {s && (
             <Panel title="Products">
               {u.products.length === 0 ? (
@@ -166,16 +168,18 @@ export default async function AdminUserPage({ params }) {
               ) : (
                 <PagedList pageSize={8} label="Products" className="divide-y divide-stone-100">
                   {u.products.map((p) => (
-                    <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+                    <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
                       <div className="min-w-0">
-                        <Link href={`/admin/products/${p._id}/edit`} className="block truncate font-medium hover:underline">
+                        <Link href={`/admin/products/${p._id}/edit`} className="line-clamp-2 font-medium leading-snug hover:underline" title={p.title}>
                           {p.title}
                         </Link>
-                        <p className="text-xs text-stone-500">
+                        <p className="mt-1 text-xs text-stone-500">
                           {usd(p.price)} · {p.salesCount} sale{p.salesCount === 1 ? '' : 's'} · Added {date(p.createdAt)}
                         </p>
                       </div>
-                      <StatusBadge status={listingStatus(p).tone} label={listingStatus(p).label} />
+                      <span className="shrink-0">
+                        <StatusBadge status={listingStatus(p).tone} label={listingStatus(p).label} />
+                      </span>
                     </li>
                   ))}
                 </PagedList>
@@ -184,7 +188,7 @@ export default async function AdminUserPage({ params }) {
           )}
 
           {s && (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
               <Panel title="Recent sales">
                 {u.recentSales.length === 0 ? (
                   <p className="px-5 py-6 text-center text-sm text-stone-500">No sales yet.</p>
@@ -244,7 +248,7 @@ export default async function AdminUserPage({ params }) {
                   {u.recentOrders.map((o) => (
                     <li key={o._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{o.items.map((i) => i.title).join(', ')}</p>
+                        <p className="line-clamp-2 font-medium leading-snug">{o.items.map((i) => i.title).join(', ')}</p>
                         <p className="text-xs text-stone-500">
                           #{o._id.slice(-8).toUpperCase()} · {date(o.createdAt)}
                         </p>

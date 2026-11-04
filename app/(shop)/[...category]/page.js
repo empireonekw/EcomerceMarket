@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import BackLink from '@/components/BackLink';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
+import ChipScroller from '@/components/ChipScroller';
 import FilterChip from '@/components/FilterChip';
 import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
@@ -77,29 +79,32 @@ export default async function CategoryPage({ params, searchParams }) {
     <div className="container-page py-12 sm:py-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\u003c') }} />
 
-      <nav aria-label="Breadcrumb">
-        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
-          <li>
-            <Link href="/" className="hover:text-ink">
-              Home
-            </Link>
-          </li>
-          {trail.map((c, i) => (
-            <li key={c._id} className="flex items-center gap-1.5">
-              <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
-              {i === trail.length - 1 ? (
-                <span aria-current="page" className="text-ink">
-                  {c.name}
-                </span>
-              ) : (
-                <Link href={categoryHref(c)} className="hover:text-ink">
-                  {c.name}
-                </Link>
-              )}
+      <div className="flex items-center gap-3">
+        <BackLink fallback={parent ? categoryHref(parent) : '/categories'} />
+        <nav aria-label="Breadcrumb">
+          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+            <li>
+              <Link href="/" className="hover:text-ink">
+                Home
+              </Link>
             </li>
-          ))}
-        </ol>
-      </nav>
+            {trail.map((c, i) => (
+              <li key={c._id} className="flex items-center gap-1.5">
+                <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
+                {i === trail.length - 1 ? (
+                  <span aria-current="page" className="text-ink">
+                    {c.name}
+                  </span>
+                ) : (
+                  <Link href={categoryHref(c)} className="hover:text-ink">
+                    {c.name}
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </div>
 
       <header className="mt-5 max-w-3xl">
         <h1 className="headline text-4xl sm:text-5xl">{category.name}</h1>
@@ -118,11 +123,8 @@ export default async function CategoryPage({ params, searchParams }) {
         </p>
       </header>
 
-      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <nav
-          aria-label={children.length ? 'Sub-categories' : 'Related categories'}
-          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0"
-        >
+      <div className="mt-8 space-y-3">
+        <ChipScroller label={children.length ? 'Sub-categories' : 'Related categories'}>
           {children.length > 0 ? (
             <FilterChip href={categoryHref(category)} active>
               All {category.name}
@@ -135,15 +137,19 @@ export default async function CategoryPage({ params, searchParams }) {
               {c.name}
             </FilterChip>
           ))}
-        </nav>
+        </ChipScroller>
 
-        <nav aria-label="Sort" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
-          {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
-            <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
-              {label}
-            </FilterChip>
-          ))}
-        </nav>
+        <div className="flex items-center gap-3 border-t border-stone-100 pt-3">
+          <span className="shrink-0 text-sm text-stone-500">Sort by</span>
+
+          <ChipScroller label="Sort" bleed={false}>
+            {Object.entries(PRODUCT_SORTS).map(([key, { label }]) => (
+              <FilterChip key={key} href={href({ sort: key === 'newest' ? undefined : key })} active={query.sort === key}>
+                {label}
+              </FilterChip>
+            ))}
+          </ChipScroller>
+        </div>
       </div>
 
       <div className="mt-8">

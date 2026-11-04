@@ -1,4 +1,5 @@
-import { AlertTriangle, CheckCircle2, Clock, DollarSign } from 'lucide-react';
+import Link from 'next/link';
+import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck } from 'lucide-react';
 import PayoutDetailsForm from '@/components/seller/PayoutDetailsForm';
 import RequestPayoutButton from '@/components/seller/RequestPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, formatDateTime } from '@/components/dashboard/ui';
@@ -14,6 +15,8 @@ const usd = (cents) => formatPrice(cents, 'USD');
 function payoutBlocker(data) {
   if (data.openRequest) return `Request for ${usd(data.openRequest.amount)} sent ${formatDateTime(data.openRequest.createdAt).date}, awaiting payment.`;
   if (data.balances.pendingPayout <= 0) return 'Your pending balance is empty.';
+  if (data.verification === 'pending') return 'We’re checking your identity. Payouts open once it’s verified.';
+  if (data.verification !== 'verified') return 'Verify your identity first.';
   if (!data.hasPayoutMethod) return 'Add bank or wallet details below first.';
   return null;
 }
@@ -30,6 +33,25 @@ export default async function SellerPayoutsPage() {
         title="Payouts & Bank Details"
         description={`${NO_PLATFORM_FEE ? 'No platform fees. You keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance. Our team sends it to the details below.`}
       />
+
+      {data.verification !== 'verified' && (
+        <div role="status" className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5">
+          <ShieldCheck size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-sky-700" />
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-sky-950">{data.verification === 'pending' ? 'We’re checking your identity' : 'Verify your identity to get paid'}</p>
+            <p className="mt-0.5 text-sm text-sky-900">
+              {data.verification === 'pending'
+                ? 'It usually takes a day or two. You can request a payout once it’s verified.'
+                : 'A photo of both sides of your ID card and a quick selfie. It takes about two minutes.'}
+            </p>
+          </div>
+          {data.verification !== 'pending' && (
+            <Link href="/seller/verify" className="btn btn-md btn-dark shrink-0">
+              Verify identity
+            </Link>
+          )}
+        </div>
+      )}
 
       {!data.hasPayoutMethod && (
         <div role="status" className="mb-8 flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">

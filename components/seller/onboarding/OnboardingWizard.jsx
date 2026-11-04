@@ -7,6 +7,16 @@ import ImageUpload from '@/components/seller/onboarding/ImageUpload';
 import { walletIdLabel, WALLET_OPTIONS } from '@/lib/validation';
 import { checkStep, COUNTRIES, countryOf, CURRENCIES, DIAL_CODES, ONBOARDING_STEPS } from '@/lib/seller-onboarding';
 
+// Wallet provider tiles: a colored initial in each service's own color family.
+const WALLET_TILE = {
+  jazzcash: 'bg-red-50 text-red-700',
+  easypaisa: 'bg-emerald-50 text-emerald-700',
+  nayapay: 'bg-orange-50 text-orange-700',
+  sadapay: 'bg-teal-50 text-teal-700',
+  payoneer: 'bg-amber-50 text-amber-700',
+  paypal: 'bg-sky-50 text-sky-700',
+};
+
 const inputCls = (err) =>
   `mt-1.5 h-11 w-full rounded-xl border bg-white px-3.5 text-[15px] placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
@@ -233,7 +243,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
         </span>
         <h1 className="mt-6 font-serif text-4xl tracking-[-0.02em] text-ink">{done.storeName} is open!</h1>
         <p className="mt-3 text-stone-600">
-          Your ID is with our team for a quick check. Meanwhile you can add your first listing: every listing is reviewed before it goes live.
+          Add your first listing now. After your first sale we’ll ask you to verify your identity so we can pay you.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {/* Full page loads: the header and menus pick up the new seller account. */}
@@ -382,42 +392,14 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
           </>
         )}
 
-        {/* ---------- 3. Billing & ID ---------- */}
+        {/* ---------- 3. Billing info ---------- */}
         {step === 'billing' && (
           <>
             <SectionTitle
               title="Share your billing info"
-              subtitle="We verify every seller to keep Sellpify safe for buyers. Your ID and address are private: only our verification team sees them."
+              subtitle="Your address and phone stay private. After your first sale we’ll also ask you to verify your identity (ID card and a quick selfie)."
             />
             <div className="mx-auto mt-8 max-w-3xl space-y-6">
-              <section className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6" aria-labelledby="id-heading">
-                <h2 id="id-heading" className="font-medium text-ink">
-                  Government ID
-                </h2>
-                <p className="mt-0.5 text-sm text-stone-500">
-                  Your CNIC, passport or national ID card. Make sure every corner and all the text are clearly visible.
-                </p>
-                <div className="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  {[
-                    ['idFront', 'front', 'Front'],
-                    ['idBack', 'back', 'Back'],
-                  ].map(([key, side, label]) => (
-                    <ImageUpload
-                      key={key}
-                      id={key}
-                      label={`ID (${label})`}
-                      kind="idDocument"
-                      shape="id"
-                      value={b[key]}
-                      onChange={(v) => set('billing', { [key]: v })}
-                      driver={uploads}
-                      error={errors[key]}
-                      serverPreview={b[key] ? `/api/seller/onboarding/id-document/${side}?v=${encodeURIComponent(b[key].slice(-12))}` : null}
-                    />
-                  ))}
-                </div>
-              </section>
-
               <section className="rounded-2xl border border-stone-200 bg-white p-5 sm:p-6" aria-labelledby="address-heading">
                 <h2 id="address-heading" className="font-medium text-ink">
                   Address &amp; contact
@@ -555,62 +537,62 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
               title="How you’ll get paid"
               subtitle="Where we send your earnings. Stored encrypted, and you can change it any time from Payouts."
             />
-            <div className="mx-auto mt-8 max-w-2xl space-y-5">
+            <div className="mx-auto mt-8 max-w-3xl space-y-5">
               <fieldset>
                 <legend className="sr-only">Payout method</legend>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {[
-                    { value: 'bank', label: 'Bank account', text: 'Any bank, by IBAN or account number.', icon: Building2 },
-                    {
-                      value: 'wallet',
-                      label: 'Wallet or payment service',
-                      text: 'JazzCash, EasyPaisa, NayaPay, SadaPay, Payoneer, PayPal.',
-                      icon: Smartphone,
-                    },
-                  ].map(({ value, label, text, icon: Icon }) => (
-                    <label
-                      key={value}
-                      className={`flex cursor-pointer gap-3 rounded-2xl border bg-white p-4 transition-colors ${
-                        pay.method === value
-                          ? 'border-ink ring-1 ring-ink'
-                          : errors.method
-                            ? 'border-red-300'
-                            : 'border-stone-200 hover:border-stone-400'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="method"
-                        value={value}
-                        checked={pay.method === value}
-                        onChange={() => set('payout', { method: value })}
-                        className="mt-1 accent-ink"
-                      />
-                      <span>
-                        <span className="flex items-center gap-2 font-medium text-ink">
-                          <Icon size={17} strokeWidth={1.75} aria-hidden="true" />
-                          {label}
+                    { value: 'bank', label: 'Bank account', text: 'Straight to any bank in Pakistan, by IBAN or account number.', tags: ['IBAN', 'Account no.'], icon: Building2 },
+                    { value: 'wallet', label: 'Mobile wallet or online service', text: 'Paid to the wallet or service you already use.', tags: WALLET_OPTIONS.map((w) => w.label), icon: Smartphone },
+                  ].map(({ value, label, text, tags, icon: Icon }) => {
+                    const on = pay.method === value;
+                    return (
+                      <label
+                        key={value}
+                        className={`relative flex min-h-44 cursor-pointer flex-col rounded-2xl border-2 bg-white p-5 transition-all has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/40 sm:p-6 ${
+                          on ? 'border-ink shadow-[0_10px_30px_-16px_rgba(20,20,20,0.45)]' : errors.method ? 'border-red-300' : 'border-stone-200 hover:-translate-y-0.5 hover:border-stone-400 hover:shadow-md'
+                        }`}
+                      >
+                        <input type="radio" name="method" value={value} checked={on} onChange={() => set('payout', { method: value })} className="sr-only" />
+                        <span className="flex items-start justify-between">
+                          <span className={`grid size-12 place-items-center rounded-xl transition-colors ${on ? 'bg-ink text-white' : 'bg-brand-50 text-brand-700'}`}>
+                            <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+                          </span>
+                          <span aria-hidden="true" className={`grid size-6 place-items-center rounded-full border-2 transition-colors ${on ? 'border-ink bg-ink text-white' : 'border-stone-300'}`}>
+                            {on && <Check size={14} strokeWidth={3} />}
+                          </span>
                         </span>
-                        <span className="mt-0.5 block text-sm text-stone-500">{text}</span>
-                      </span>
-                    </label>
-                  ))}
+                        <span className="mt-4 text-lg font-medium text-ink">{label}</span>
+                        <span className="mt-1 text-sm text-stone-500">{text}</span>
+                        <span className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                          {tags.map((t) => (
+                            <span key={t} className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600">
+                              {t}
+                            </span>
+                          ))}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
                 {errors.method && <p className="mt-2 text-sm font-medium text-red-600">{errors.method}</p>}
               </fieldset>
 
               {pay.method === 'bank' && (
-                <div className="grid grid-cols-1 gap-4 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
-                  <Field id="accountTitle" label="Account holder name" error={errors.accountTitle}>
-                    <input
-                      {...aria('accountTitle', errors.accountTitle)}
-                      autoComplete="name"
-                      maxLength={80}
-                      value={pay.accountTitle}
-                      onChange={(e) => set('payout', { accountTitle: e.target.value })}
-                      className={inputCls(errors.accountTitle)}
-                    />
-                  </Field>
+                <div className="grid grid-cols-1 gap-4 rounded-2xl border border-stone-200 bg-white p-5 sm:grid-cols-2 sm:p-6">
+                  <h3 className="font-medium text-ink sm:col-span-2">Bank details</h3>
+                  <div className="sm:col-span-2">
+                    <Field id="accountTitle" label="Account holder name" error={errors.accountTitle} hint="Exactly as it appears on your bank account.">
+                      <input
+                        {...aria('accountTitle', errors.accountTitle)}
+                        autoComplete="name"
+                        maxLength={80}
+                        value={pay.accountTitle}
+                        onChange={(e) => set('payout', { accountTitle: e.target.value })}
+                        className={inputCls(errors.accountTitle)}
+                      />
+                    </Field>
+                  </div>
                   <Field id="bankName" label="Bank name" error={errors.bankName}>
                     <input
                       {...aria('bankName', errors.bankName)}
@@ -635,35 +617,63 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
               )}
 
               {pay.method === 'wallet' && (
-                <div className="grid grid-cols-1 gap-4 rounded-2xl border border-stone-200 bg-white p-5 sm:grid-cols-2 sm:p-6">
-                  <Field id="walletProvider" label="Provider" error={errors.walletProvider}>
-                    <select
-                      {...aria('walletProvider', errors.walletProvider)}
-                      value={pay.walletProvider}
-                      onChange={(e) => set('payout', { walletProvider: e.target.value, walletNumber: '' })}
-                      className={inputCls(errors.walletProvider)}
-                    >
-                      <option value="">Choose…</option>
-                      {WALLET_OPTIONS.map((w) => (
-                        <option key={w.value} value={w.value}>
-                          {w.label}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field id="walletNumber" label={walletIdLabel(pay.walletProvider)} error={errors.walletNumber}>
-                    <input
-                      {...aria('walletNumber', errors.walletNumber)}
-                      disabled={!wallet}
-                      type={wallet?.id === 'email' ? 'email' : 'tel'}
-                      inputMode={wallet?.id === 'email' ? 'email' : 'tel'}
-                      maxLength={wallet?.id === 'email' ? 254 : 15}
-                      placeholder={!wallet ? 'Choose a provider first' : wallet.id === 'email' ? 'you@example.com' : '03001234567'}
-                      value={pay.walletNumber}
-                      onChange={(e) => set('payout', { walletNumber: e.target.value })}
-                      className={inputCls(errors.walletNumber)}
-                    />
-                  </Field>
+                <div className="space-y-5 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
+                  <fieldset id="walletProvider" aria-invalid={Boolean(errors.walletProvider) || undefined} aria-describedby={errors.walletProvider ? 'walletProvider-error' : undefined} tabIndex={-1} className="focus:outline-none">
+                    <legend className="font-medium text-ink">Choose your provider</legend>
+                    <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                      {WALLET_OPTIONS.map((w) => {
+                        const on = pay.walletProvider === w.value;
+                        return (
+                          <label
+                            key={w.value}
+                            className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 px-3 py-3 transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand-500/40 ${
+                              on ? 'border-ink bg-stone-50 shadow-sm' : errors.walletProvider ? 'border-red-300' : 'border-stone-200 hover:border-stone-400'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="walletProvider"
+                              value={w.value}
+                              checked={on}
+                              onChange={() => set('payout', { walletProvider: w.value, walletNumber: pay.walletProvider && wallet?.id === w.id ? pay.walletNumber : '' })}
+                              className="sr-only"
+                            />
+                            <span aria-hidden="true" className={`grid size-9 shrink-0 place-items-center rounded-lg text-sm font-semibold ${WALLET_TILE[w.value] ?? 'bg-stone-100 text-stone-700'}`}>
+                              {w.label.charAt(0)}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-medium text-ink">{w.label}</span>
+                              <span className="block text-xs text-stone-500">{w.id === 'email' ? 'By email' : 'By mobile no.'}</span>
+                            </span>
+                            {on && (
+                              <span aria-hidden="true" className="grid size-5 shrink-0 place-items-center rounded-full bg-ink text-white">
+                                <Check size={12} strokeWidth={3} />
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {errors.walletProvider && (
+                      <p id="walletProvider-error" className="mt-2 text-sm font-medium text-red-600">
+                        {errors.walletProvider}
+                      </p>
+                    )}
+                  </fieldset>
+                  {wallet && (
+                    <Field id="walletNumber" label={`${wallet.label} ${walletIdLabel(pay.walletProvider).toLowerCase()}`} error={errors.walletNumber}>
+                      <input
+                        {...aria('walletNumber', errors.walletNumber)}
+                        type={wallet.id === 'email' ? 'email' : 'tel'}
+                        inputMode={wallet.id === 'email' ? 'email' : 'tel'}
+                        maxLength={wallet.id === 'email' ? 254 : 15}
+                        placeholder={wallet.id === 'email' ? 'you@example.com' : '03001234567'}
+                        value={pay.walletNumber}
+                        onChange={(e) => set('payout', { walletNumber: e.target.value })}
+                        className={`${inputCls(errors.walletNumber)} block sm:max-w-sm`}
+                      />
+                    </Field>
+                  )}
                 </div>
               )}
             </div>
@@ -681,11 +691,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
               {[
                 ['Shop preferences', 0, [countryOf(p.country)?.name, p.currency].join(' · ')],
                 ['Shop', 1, `${id.storeName}${id.logo ? ' · profile picture' : ''}${id.banner ? ' · banner' : ''}`],
-                [
-                  'Billing & ID',
-                  2,
-                  `ID front and back · ${[b.address.city, countryOf(p.country)?.name].filter(Boolean).join(', ')} · ${b.phone.dial} ${b.phone.number}`,
-                ],
+                ['Billing info', 2, `${[b.address.city, countryOf(p.country)?.name].filter(Boolean).join(', ')} · ${b.phone.dial} ${b.phone.number}`],
                 [
                   'Payouts',
                   3,

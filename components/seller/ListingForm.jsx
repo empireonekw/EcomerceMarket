@@ -241,7 +241,7 @@ function UploadingTile({ upload, video = false }) {
  * @param {{ categories: Array<{ _id, name, slug }>, listing?: object, uploads: 'blob' | 'local' | null }} props
  *   `listing` = edit mode; `uploads` = where files go (lib/uploads.js → uploadDriver()), null when uploads are off
  */
-export default function ListingForm({ categories, listing, uploads }) {
+export default function ListingForm({ categories, listing, uploads, autoApprove = false }) {
   const router = useRouter();
   const toast = useToast();
   const previewRef = useRef(null);
@@ -431,11 +431,19 @@ export default function ListingForm({ categories, listing, uploads }) {
         return;
       }
       setDirty(false);
+      // Auto-approve on (Admin → Products): it's live now (or inactive, if the seller chose to activate it themselves).
+      const live = mode !== 'draft' && autoApprove;
       toast.success(
-        mode === 'draft' ? 'Draft saved' : isEdit ? 'Changes submitted for review' : 'Listing submitted for review',
-        mode === 'draft' ? `“${data.title ?? data.product?.title}” is saved in your drafts.` : 'It goes live as soon as our team approves it.',
+        mode === 'draft' ? 'Draft saved' : live ? (isEdit ? 'Changes published' : 'Listing published') : isEdit ? 'Changes submitted for review' : 'Listing submitted for review',
+        mode === 'draft'
+          ? `“${data.title ?? data.product?.title}” is saved in your drafts.`
+          : live
+            ? values.isPublished
+              ? 'It’s live in the store now.'
+              : 'It’s ready. Activate it from Listings whenever you like.'
+            : 'It goes live as soon as our team approves it.',
       );
-      router.push(`/seller/listings?status=${mode === 'draft' ? 'draft' : 'review'}`);
+      router.push(`/seller/listings?status=${mode === 'draft' ? 'draft' : live ? (values.isPublished ? 'active' : 'inactive') : 'review'}`);
       router.refresh();
     } catch {
       toast.error('Network error', 'Check your connection and try again.');
@@ -468,7 +476,7 @@ export default function ListingForm({ categories, listing, uploads }) {
           <h1 className="headline text-3xl sm:text-4xl">{isEdit ? 'Edit listing' : 'New listing'}</h1>
           {status && <StatusBadge status={status.tone} label={status.label} />}
         </div>
-        {isEdit && listing.status !== 'draft' && (
+        {isEdit && listing.status !== 'draft' && !autoApprove && (
           <p className="mt-3 flex items-start gap-2 text-sm text-stone-600">
             <Info size={16} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-brand-700" />
             {listing.status === 'rejected'
@@ -1118,16 +1126,24 @@ export default function ListingForm({ categories, listing, uploads }) {
             </div>
             <div>
               <Label as="p" required>
-                When it’s approved
+                {autoApprove ? 'When you publish' : 'When it’s approved'}
               </Label>
-              <Help>Every listing is reviewed by our team before it can go live.</Help>
+              {!autoApprove && <Help>Every listing is reviewed by our team before it can go live.</Help>}
               <RadioList
                 name="isPublished"
                 value={values.isPublished ? 'auto' : 'manual'}
                 onChange={(v) => update('isPublished', v === 'auto')}
                 options={[
-                  { value: 'auto', label: 'Automatic', text: 'Goes live in the store as soon as it’s approved (recommended).' },
-                  { value: 'manual', label: 'Manual', text: 'Stays inactive after approval, I’ll activate it from Listings myself.' },
+                  {
+                    value: 'auto',
+                    label: 'Automatic',
+                    text: autoApprove ? 'Goes live in the store as soon as you publish (recommended).' : 'Goes live in the store as soon as it’s approved (recommended).',
+                  },
+                  {
+                    value: 'manual',
+                    label: 'Manual',
+                    text: autoApprove ? 'Stays inactive, I’ll activate it from Listings myself.' : 'Stays inactive after approval, I’ll activate it from Listings myself.',
+                  },
                 ]}
               />
             </div>
@@ -1135,8 +1151,8 @@ export default function ListingForm({ categories, listing, uploads }) {
         </section>
       </form>
 
-      {/* ---------- Sticky actions ---------- */}
-      <div className="sticky bottom-0 z-20 -mx-4 border-t border-stone-200 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
+      {/* ---------- Sticky actions: a floating bar inside the content, not an edge-to-edge strip ---------- */}
+      <div className="sticky bottom-3 z-20 mt-8 rounded-2xl border border-stone-200 bg-white/95 px-3 py-2.5 shadow-[0_12px_32px_-14px_rgba(20,20,20,0.3)] backdrop-blur sm:bottom-4 sm:px-4">
         <div className="flex items-center gap-2">
           <Link href="/seller/listings" className="btn btn-md px-3 text-stone-700 hover:bg-stone-100 sm:px-5">
             Cancel

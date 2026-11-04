@@ -4,6 +4,8 @@ import CartDrawer from '@/components/CartDrawer';
 import { AuthProvider } from '@/context/AuthContext';
 import { CartProvider } from '@/context/CartContext';
 import ShopMessaging from '@/components/messages/ShopMessaging';
+import BackToTop from '@/components/BackToTop';
+import { NavigationTracker } from '@/components/BackLink';
 
 /** Storefront chrome. The (shop) route group doesn't affect URLs. */
 export default function ShopLayout({ children }) {
@@ -18,6 +20,8 @@ export default function ShopLayout({ children }) {
           </main>
           <Footer />
           <CartDrawer />
+          <BackToTop />
+          <NavigationTracker />
         </CartProvider>
       </ShopMessaging>
     </AuthProvider>

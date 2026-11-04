@@ -214,7 +214,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
           onClick={() => askDelete([p._id])}
           disabled={Boolean(busy)}
           aria-label={`Delete ${p.title}`}
-          className="ml-auto grid size-8 place-items-center rounded-full text-stone-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+          className="ml-auto grid size-8 shrink-0 place-items-center rounded-full text-stone-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
         >
           <Trash2 size={15} strokeWidth={1.75} aria-hidden="true" />
         </button>
@@ -333,7 +333,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
                 )}
               </div>
             ) : grid ? (
-              <ul className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="grid gap-5 sm:grid-cols-2 min-[1400px]:grid-cols-3">
                 {items.map((p) => {
                   const s = listingStatus(p);
                   const isSelected = selected.has(p._id);
@@ -470,7 +470,8 @@ export default function ListingsManager({ items, counts, total, pagination, para
         </div>
 
         {/* ---------- Sidebar ---------- */}
-        <aside aria-label="Listing filters" className="order-first space-y-6 border-b border-stone-200 pb-6 lg:order-2 lg:border-0 lg:pb-0">
+        {/* A line on its left (large screens) sets the filters apart from the listings. */}
+        <aside aria-label="Listing filters" className="order-first space-y-6 border-b border-stone-200 pb-6 lg:order-2 lg:border-b-0 lg:border-l lg:pb-0 lg:pl-6">
           <div className="flex items-center justify-between gap-4 lg:justify-start">
             <span className="text-sm font-medium">Stats</span>
             <Switch checked={showStats} onChange={(on) => go({ stats: on ? '1' : '0', page: params.page })} label="Show sales stats" />

@@ -26,7 +26,7 @@ export default function ProductCard({ product, preload = false }) {
   return (
     <article className="group relative flex h-full flex-col">
       {/* ---------- Cover ---------- */}
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[1.4rem] bg-stone-100 shadow-[0_1px_2px_rgba(20,20,20,0.05)] ring-1 ring-black/5 transition-shadow duration-500 group-hover:shadow-[0_24px_50px_-24px_rgba(20,20,20,0.45)]">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-[1.4rem] bg-stone-100 shadow-[0_1px_2px_rgba(20,20,20,0.05)] ring-1 ring-black/5 transition-shadow duration-500 group-hover:shadow-[0_24px_50px_-24px_rgba(20,20,20,0.45)]">
         {coverImage ? (
           <Image
             src={coverImage}
@@ -93,8 +93,8 @@ export default function ProductCard({ product, preload = false }) {
           )}
         </p>
 
-        {/* Title and description always take two lines each, so prices and buttons line up across a row. */}
-        <h3 className="mt-2 line-clamp-2 min-h-[2lh] font-serif text-[1.25rem] leading-[1.2] tracking-[-0.015em] text-ink">
+        {/* No reserved blank lines: the price row is pushed to the card’s bottom (spacer below), so a row still lines up. */}
+        <h3 className="mt-2 line-clamp-2 font-serif text-[1.25rem] leading-[1.2] tracking-[-0.015em] text-ink">
           <Link
             href={href}
             className="after:absolute after:inset-0 after:rounded-[1.4rem] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-brand-700"
@@ -102,10 +102,11 @@ export default function ProductCard({ product, preload = false }) {
             {title}
           </Link>
         </h3>
-        <p className="mt-1.5 line-clamp-2 min-h-[2lh] text-sm leading-relaxed text-stone-500">{shortDescription}</p>
+        {shortDescription && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-stone-500">{shortDescription}</p>}
 
         {/* ---------- Price + add ---------- */}
-        <div className="mt-3.5 flex h-14 items-center justify-between gap-3 border-t border-dashed border-stone-200 pt-3">
+        <span aria-hidden="true" className="block min-h-3.5 flex-1" />
+        <div className="flex h-14 items-center justify-between gap-3 border-t border-dashed border-stone-200 pt-3">
           <p className="flex items-baseline gap-2">
             <span className="font-serif text-[1.45rem] leading-none tracking-[-0.02em] text-ink tabular-nums">{price === 0 ? 'Free' : formatPrice(price, currency)}</span>
             {discount > 0 && <span className="text-sm text-stone-400 line-through tabular-nums">{formatPrice(compareAtPrice, currency)}</span>}

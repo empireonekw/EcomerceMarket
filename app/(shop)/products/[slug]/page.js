@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import BackLink from '@/components/BackLink';
 import { notFound } from 'next/navigation';
 import ProductGallery from '@/components/ProductGallery';
 import ProductGrid from '@/components/ProductGrid';
@@ -106,25 +107,28 @@ export default async function ProductPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, reviewSummary)).replace(/</g, '\\u003c') }}
       />
 
-      <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
-        <ol className="flex flex-wrap items-center gap-1.5">
-          <li>
-            <Link href="/products" className="hover:text-ink">
-              Products
-            </Link>
-          </li>
-          {product.category && (
-            <>
-              <li aria-hidden="true">/</li>
-              <li>
-                <Link href={categoryHref(product.category)} className="hover:text-ink">
-                  {product.category.name}
-                </Link>
-              </li>
-            </>
-          )}
-        </ol>
-      </nav>
+      <div className="flex items-center gap-3">
+        <BackLink fallback={product.category ? categoryHref(product.category) : '/products'} />
+        <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li>
+              <Link href="/products" className="hover:text-ink">
+                Products
+              </Link>
+            </li>
+            {product.category && (
+              <>
+                <li aria-hidden="true">/</li>
+                <li>
+                  <Link href={categoryHref(product.category)} className="hover:text-ink">
+                    {product.category.name}
+                  </Link>
+                </li>
+              </>
+            )}
+          </ol>
+        </nav>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
         {/* ---------- Cover (or a gallery when the listing has several photos) ---------- */}

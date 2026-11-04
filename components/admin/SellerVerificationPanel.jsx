@@ -15,7 +15,8 @@ const day = (d) => (d ? new Date(d).toLocaleDateString('en-US', { dateStyle: 'me
 
 /**
  * Admin → user → "Verification": what a seller entered when opening their shop (preferences, address, phone) and the
- * ID they uploaded (front and back, from the admin-only route), with Verify / Reject. Rejecting needs a reason.
+ * identity check they sent after their first sale (ID front and back, live selfie; from the admin-only route), with
+ * Verify / Reject. Rejecting needs a reason, which the seller is messaged.
  */
 export default function SellerVerificationPanel({ userId, shop }) {
   const router = useRouter();
@@ -76,40 +77,35 @@ export default function SellerVerificationPanel({ userId, shop }) {
         ))}
       </dl>
 
-      <div className="grid grid-cols-1 gap-3 border-t border-stone-100 p-5 sm:grid-cols-2">
-        {['front', 'back'].map((side) => {
+      <div className="grid grid-cols-2 gap-3 border-t border-stone-100 p-5 sm:grid-cols-3">
+        {[
+          ['front', 'ID front'],
+          ['back', 'ID back'],
+          ['selfie', 'Live selfie'],
+        ].map(([side, label]) => {
           const doc = v?.[side];
           const href = `/api/admin/users/${userId}/id-document/${side}`;
           return (
-            <div key={side}>
-              <p className="text-xs font-medium uppercase tracking-wide text-stone-500">ID {side}</p>
+            <div key={side} className={side === 'selfie' ? 'col-span-2 sm:col-span-1' : ''}>
+              <p className="text-xs font-medium uppercase tracking-wide text-stone-500">{label}</p>
               {!doc ? (
-                <p className="mt-2 text-sm text-stone-400">Not uploaded</p>
+                <p className="mt-2 text-sm text-stone-400">{side === 'selfie' && v ? 'None (sent before selfies were asked)' : 'Not sent yet'}</p>
               ) : doc.pdf ? (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 flex items-center gap-2 rounded-xl border border-stone-200 p-3 text-sm hover:border-ink"
-                >
+                <a href={href} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-2 rounded-xl border border-stone-200 p-3 text-sm hover:border-ink">
                   <FileText size={18} strokeWidth={1.75} aria-hidden="true" />
                   Open PDF
                 </a>
               ) : (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2 block overflow-hidden rounded-xl border border-stone-200 hover:border-ink"
-                >
+                <a href={href} target="_blank" rel="noreferrer" className="mt-2 block overflow-hidden rounded-xl border border-stone-200 hover:border-ink">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={href} alt={`ID ${side}`} className="aspect-[16/10] w-full bg-stone-50 object-contain" />
+                  <img src={href} alt={label} className="aspect-[4/3] w-full bg-stone-50 object-contain" />
                 </a>
               )}
             </div>
           );
         })}
       </div>
+      {v && <p className="px-5 pb-4 text-xs text-stone-500">Check the selfie matches the photo on the ID card, and the name matches the shop’s billing details.</p>}
 
       {v && (
         <div className="border-t border-stone-100 p-5">

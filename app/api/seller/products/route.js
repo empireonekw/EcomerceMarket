@@ -1,11 +1,12 @@
 import { getRequestUser } from '@/lib/auth';
 import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
 import { createSellerProduct } from '@/lib/data/seller';
+import { refreshStorefront } from '@/lib/revalidate';
 
 /**
  * POST /api/seller/products — a new listing from the seller listing form (lib/listing.js has the fields).
- * `draft: true` saves a private draft (only a title is required); otherwise it's submitted for review ('pending').
- * Always owned by the signed-in seller; an admin approves it before it goes live.
+ * `draft: true` saves a private draft (only a title is required); otherwise it's submitted: live at once with
+ * auto-approve on (Admin → Products), else waiting for an admin's approval ('pending'). Always the seller's own.
  */
 export async function POST(request) {
   const user = await getRequestUser(request);
@@ -16,6 +17,7 @@ export async function POST(request) {
   try {
     const body = await readJson(request, 64 * 1024);
     const product = await createSellerProduct(user.id, body, { draft: body.draft === true });
+    if (product.status === 'approved') refreshStorefront(product.slug);
     return json(product, 201);
   } catch (err) {
     return errorResponse(err, 'POST /api/seller/products');

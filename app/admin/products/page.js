@@ -9,8 +9,11 @@ import Thumb from '@/components/dashboard/Thumb';
 import { PageHeader, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { getAdminProducts } from '@/lib/data/admin';
 import { getCategories } from '@/lib/data/categories';
+import { getMarketplaceSettings } from '@/lib/data/settings';
+import ApprovalModeSwitch from '@/components/admin/ApprovalModeSwitch';
 import { formatPrice } from '@/lib/utils';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import { ApproveAllButton, BulkBar, BulkSelectionProvider, SelectAllProducts, SelectAllRow, SelectProduct } from '@/components/admin/BulkModeration';
 
 export const metadata = { title: 'Products' };
 
@@ -25,20 +28,25 @@ function ProductStatusCell({ product }) {
   );
 }
 
+const decidable = (p) => p.status === 'pending' || p.status === 'rejected';
+
 const field = 'h-10 rounded-xl border border-stone-200 bg-stone-50 px-3.5 text-sm transition-colors hover:border-stone-300 focus:border-ink focus:bg-white focus:outline-none';
 
 export default async function AdminProductsPage({ searchParams }) {
   const sp = await searchParams;
   const params = { q: sp.q ?? '', category: sp.category ?? '', status: sp.status ?? '', page: sp.page };
-  const [{ items, pagination }, categories] = await Promise.all([getAdminProducts(params), getCategories()]);
+  const [{ items, pagination, awaitingReview }, categories, settings] = await Promise.all([getAdminProducts(params), getCategories(), getMarketplaceSettings()]);
   const filtered = Boolean(params.q || params.category || params.status);
 
   return (
     <>
       <PageHeader
         title="Products Management"
-        description={`${pagination.total} product${pagination.total === 1 ? '' : 's'}${filtered ? ' match your filters' : ' in the catalog'}`}
+        description={`${pagination.total} product${pagination.total === 1 ? '' : 's'}${filtered ? ' match your filters' : ' in the catalog'}${awaitingReview ? ` · ${awaitingReview} awaiting review` : ''}`}
+        actions={<ApproveAllButton count={awaitingReview} />}
       />
+
+      <ApprovalModeSwitch autoApprove={settings.autoApproveListings} awaiting={awaitingReview} />
 
       {/* Filters: plain GET form → URL state, shareable and back-button friendly. */}
       <Form action="/admin/products" className="mb-5 flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-2.5 sm:flex-row sm:flex-wrap sm:items-center">
@@ -89,12 +97,18 @@ export default async function AdminProductsPage({ searchParams }) {
           </Link>
         </EmptyState>
       ) : (
-        <>
+        <BulkSelectionProvider selectable={items.filter(decidable).map((p) => p._id)}>
+        <SelectAllRow />
         {/* Phones: card list, so price, status and actions are visible without horizontal scrolling. */}
         <ul className="space-y-3 md:hidden">
           {items.map((p) => (
             <li key={p._id} className="rounded-2xl border border-stone-200 bg-white p-3">
-              <div className="flex gap-3">
+              <div className="flex items-start gap-3">
+                {decidable(p) && (
+                  <span className="pt-1">
+                    <SelectProduct id={p._id} title={p.title} />
+                  </span>
+                )}
                 <Thumb src={p.coverImage} sizes="80px" className="aspect-[4/3] w-20" />
                 <div className="min-w-0 flex-1">
                   <Link href={`/admin/products/${p._id}/edit`} className="line-clamp-2 text-sm font-medium hover:underline">
@@ -122,15 +136,18 @@ export default async function AdminProductsPage({ searchParams }) {
 
         <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="border-b border-stone-100 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
                 <tr>
+                  <th scope="col" className="w-10 py-3 pr-0 pl-4">
+                    <SelectAllProducts className="align-middle" />
+                  </th>
                   <th scope="col" className="w-full px-4 py-3">Product</th>
-                  <th scope="col" className="hidden px-4 py-3 md:table-cell">Category</th>
+                  <th scope="col" className="hidden px-4 py-3 lg:table-cell">Category</th>
                   <th scope="col" className="px-4 py-3 text-right">Price</th>
                   <th scope="col" className="px-4 py-3">Status</th>
-                  <th scope="col" className="hidden px-4 py-3 text-right lg:table-cell">Sales</th>
-                  <th scope="col" className="hidden px-4 py-3 lg:table-cell">Created</th>
+                  <th scope="col" className="hidden px-4 py-3 text-right xl:table-cell">Sales</th>
+                  <th scope="col" className="hidden px-4 py-3 2xl:table-cell">Created</th>
                   <th scope="col" className="px-4 py-3 text-right">
                     <span className="sr-only">Actions</span>
                   </th>
@@ -141,11 +158,12 @@ export default async function AdminProductsPage({ searchParams }) {
                   const created = formatDateTime(p.createdAt);
                   return (
                     <tr key={p._id} className="transition-colors hover:bg-brand-50/50">
-                      <td className="max-w-0 px-4 py-3">
+                      <td className="py-3 pr-0 pl-4">{decidable(p) && <SelectProduct id={p._id} title={p.title} />}</td>
+                      <td className="max-w-0 min-w-52 px-4 py-3">
                         <div className="flex items-center gap-3">
                           <Thumb src={p.coverImage} sizes="64px" className="aspect-[4/3] w-16 rounded-xl" />
                           <div className="min-w-0">
-                            <Link href={`/admin/products/${p._id}/edit`} className="block truncate font-medium hover:underline" title={p.title}>
+                            <Link href={`/admin/products/${p._id}/edit`} className="line-clamp-2 font-medium leading-snug hover:underline" title={p.title}>
                               {p.title}
                             </Link>
                             <p className="mt-0.5 truncate text-xs text-stone-500" title={`/${p.slug}`}>
@@ -155,7 +173,7 @@ export default async function AdminProductsPage({ searchParams }) {
                           </div>
                         </div>
                       </td>
-                      <td className="hidden whitespace-nowrap px-4 py-3 md:table-cell">
+                      <td className="hidden whitespace-nowrap px-4 py-3 lg:table-cell">
                         {p.category ? (
                           <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">{p.category.name}</span>
                         ) : (
@@ -166,8 +184,8 @@ export default async function AdminProductsPage({ searchParams }) {
                       <td className="whitespace-nowrap px-4 py-3">
                         <ProductStatusCell product={p} />
                       </td>
-                      <td className="hidden px-4 py-3 text-right tabular-nums text-stone-600 lg:table-cell">{p.salesCount.toLocaleString('en-US')}</td>
-                      <td className="hidden whitespace-nowrap px-4 py-3 text-stone-600 lg:table-cell">
+                      <td className="hidden px-4 py-3 text-right tabular-nums text-stone-600 xl:table-cell">{p.salesCount.toLocaleString('en-US')}</td>
+                      <td className="hidden whitespace-nowrap px-4 py-3 text-stone-600 2xl:table-cell">
                         {created.date}
                         <span className="block text-xs text-stone-400">{created.time}</span>
                       </td>
@@ -199,7 +217,8 @@ export default async function AdminProductsPage({ searchParams }) {
             </table>
           </div>
         </div>
-        </>
+        <BulkBar />
+        </BulkSelectionProvider>
       )}
 
       <Pagination

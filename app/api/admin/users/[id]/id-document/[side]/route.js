@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth';
-import { openIdDocument } from '@/lib/data/seller-onboarding';
+import { openIdDocument } from '@/lib/data/seller-verification';
 
 const PRIVATE = { 'Cache-Control': 'private, no-store', 'X-Robots-Tag': 'noindex', 'X-Content-Type-Options': 'nosniff' };
 
-/** GET /api/admin/users/:id/id-document/front|back — a seller's uploaded ID, for the admin verifying it. Admins only. */
+/** GET /api/admin/users/:id/id-document/front|back|selfie — a seller's ID card or live selfie, for the admin verifying it. Admins only. */
 export async function GET(request, { params }) {
   const admin = await getRequestUser(request);
   if (admin?.role !== 'admin') return new NextResponse('Admin access required.', { status: admin ? 403 : 401, headers: PRIVATE });

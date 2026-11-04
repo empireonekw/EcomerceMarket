@@ -109,7 +109,7 @@ export default async function AdminUsersPage({ searchParams }) {
           />
         </div>
 
-        {/* ID check (sellers who opened their shop with the wizard): to review / verified / rejected. */}
+        {/* ID check (sellers who sent their ID after their first sale): to review / verified / rejected. */}
         <nav aria-label="Filter by ID check" className="mb-4 flex flex-wrap items-center gap-2 text-sm">
           <span className="text-stone-500">ID check:</span>
           {VERIFICATION_TABS.map((t) => (

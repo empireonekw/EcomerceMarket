@@ -32,12 +32,14 @@ const addressSchema = new Schema(
   { _id: false },
 );
 const phoneSchema = new Schema({ dial: { type: String, maxlength: 5 }, number: { type: String, maxlength: 14 } }, { _id: false });
-// Government ID (front and back) the seller uploaded: private files (uploads/private/…) only admins can open.
+// Identity check, asked for after the seller's first sale (lib/data/seller-verification.js): ID card front and back
+// plus a live camera selfie. Private files (uploads/private/…) only the seller and admins can open.
 export const VERIFICATION_STATUSES = ['pending', 'verified', 'rejected'];
 const verificationSchema = new Schema(
   {
     idFront: { type: String },
     idBack: { type: String },
+    selfie: { type: String }, // taken live with the camera, never uploaded from a file
     status: { type: String, enum: VERIFICATION_STATUSES, default: 'pending' },
     submittedAt: { type: Date },
     reviewedAt: { type: Date },
@@ -66,6 +68,7 @@ const sellerSchema = new Schema(
     paidPayout: { type: Number, default: 0, min: 0 }, // paid out so far
     joinedAt: { type: Date }, // seller account created
     storeSetupAt: { type: Date }, // shop named (/seller/onboarding)
+    verificationRequestedAt: { type: Date }, // first sale: asked to verify their identity (once)
   },
   { _id: false },
 );

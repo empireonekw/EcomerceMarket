@@ -1,6 +1,6 @@
 import ProductCard from '@/components/ProductCard';
 
-// Shop grid of tall (4:5) cards: one across on small phones, two from 480px, three on laptops, four on wide screens.
+// Shop grid of cards with landscape (4:3) covers, so the price shows without scrolling: one across on small phones, two from 480px, three on laptops, four on wide screens.
 const GRID = 'grid grid-cols-1 gap-x-5 gap-y-10 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12 xl:grid-cols-4';
 
 /** `emptyMessage` / `emptyHint` / `emptyAction` (e.g. a link) fill the box shown when there are no products. */
@@ -32,7 +32,7 @@ export function ProductGridSkeleton({ count = 8 }) {
     <ul className={GRID} aria-busy="true" aria-label="Loading products">
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="animate-pulse">
-          <div className="aspect-[4/5] rounded-[1.4rem] bg-stone-100" />
+          <div className="aspect-[4/3] rounded-[1.4rem] bg-stone-100" />
           <div className="px-1 pt-4">
             <div className="h-3 w-1/4 rounded-full bg-stone-100" />
             <div className="mt-3 h-6 w-4/5 rounded-full bg-stone-100" />
