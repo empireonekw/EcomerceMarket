@@ -1,6 +1,11 @@
 import { REMOTE_IMAGE_PATTERNS } from './lib/image-hosts.js';
 
 const isProd = process.env.NODE_ENV === 'production';
+// Checkout hands the buyer to PayFast with a form POST (lib/payfast.js). PayFast then moves the buyer between its own
+// hosts (ipg1 → ipg2, ipguat → ipguat2), so allow all of apps.net.pk, plus an override for testing.
+const PAYFAST_ORIGINS = ['https://*.apps.net.pk', process.env.PAYFAST_BASE_URL && new URL(process.env.PAYFAST_BASE_URL).origin]
+  .filter(Boolean)
+  .join(' ');
 const SOCKET_ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').origin.replace(/^http/, 'ws');
 
 /**
@@ -9,7 +14,8 @@ const SOCKET_ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localh
  * render per request and would switch off the caching the storefront relies on (node_modules/next/dist/docs/01-app/
  * 02-guides/content-security-policy.md). React needs 'unsafe-eval' in development only.
  * connect-src: this site (API + Socket.IO), Vercel Blob for seller uploads, reCAPTCHA. No plugins, no one may frame
- * this site, forms post here. The only third parties allowed at all are Google reCAPTCHA and Vercel Blob.
+ * this site, forms post here and to PayFast's hosted checkout (PAYFAST_ORIGINS). The only other third parties allowed are
+ * Google reCAPTCHA and Vercel Blob.
  */
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -25,7 +31,7 @@ const CONTENT_SECURITY_POLICY = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  `form-action 'self' ${PAYFAST_ORIGINS}`,
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   ...(isProd ? ['upgrade-insecure-requests'] : []),

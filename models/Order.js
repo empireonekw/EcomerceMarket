@@ -59,9 +59,28 @@ const orderSchema = new Schema(
     statusSetBy: { type: String, enum: ['auto', 'admin'], default: 'auto' },
     statusUpdatedAt: { type: Date },
     paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: 'pending' },
-    paymentProvider: { type: String, trim: true }, // "stripe", "free", "demo"…
+    paymentProvider: { type: String, trim: true }, // "payfast", "free", "demo"…
     paymentReference: { type: String, trim: true }, // provider session/intent ID — webhook idempotency
     paidAt: { type: Date },
+    buyerPhone: { type: String, trim: true, maxlength: 20 }, // PayFast requires a mobile number
+
+    // What the buyer was actually charged when it differs from the order currency (PayFast charges PKR):
+    // amount in minor units (paisa), its currency and the rate used. Seller earnings stay in `currency`.
+    charge: {
+      type: new Schema(
+        {
+          amount: { type: Number, min: 0 },
+          currency: { type: String, uppercase: true },
+          rate: { type: Number, min: 0 },
+          method: { type: String, trim: true }, // as PayFast reports it, e.g. "JazzCash", "Visa"
+          transactionId: { type: String, trim: true },
+          code: { type: String, trim: true }, // last PayFast result code
+          message: { type: String, trim: true, maxlength: 300 },
+        },
+        { _id: false },
+      ),
+      default: undefined,
+    },
 
     // SHA-256 of the receipt access token (the raw token only ever lives in the buyer's receipt URL).
     accessTokenHash: { type: String, select: false },

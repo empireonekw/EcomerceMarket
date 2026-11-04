@@ -27,12 +27,12 @@ export async function GET(request) {
 
 /**
  * POST /api/orders
- * Body: { email: string, items: [{ _id }], expectedTotal?: number (cents) }
+ * Body: { email: string, phone?: string, items: [{ _id }], expectedTotal?: number (cents) }
  *
- * Re-prices items from MongoDB, charges via lib/payments.js, stores a completed order and returns
- * signed, expiring download links plus a private receipt URL.
+ * Re-prices items from MongoDB and settles payment via lib/payments.js: free/demo orders complete now and return
+ * signed download links plus a private receipt URL; paid orders return the PayFast checkout form instead.
  *
- * Responses: 201 order · 400 invalid input · 402 payments not configured · 409 unavailable/price changed
+ * Responses: 201 completed · 202 pending (PayFast) · 400 invalid input · 402 payments unavailable · 409 unavailable/price changed
  */
 export async function POST(request) {
   const limit = rateLimit(`orders:${clientIp(request)}`, { limit: 10, windowMs: 60 * 1000 });
@@ -60,8 +60,9 @@ export async function POST(request) {
   try {
     // Signed-in buyers get the order linked to their account (guests can still check out).
     const buyer = await getRequestUser(request);
-    const order = await createOrder(payload, { userId: buyer?.id });
-    return NextResponse.json(order, { status: 201, headers: noStore });
+    const order = await createOrder(payload, { userId: buyer?.id, userName: buyer?.name, customerIp: clientIp(request) });
+    // 201: completed (free / demo) with downloads · 202: pending, `payment` is the form that opens PayFast.
+    return NextResponse.json(order, { status: order.payment ? 202 : 201, headers: noStore });
   } catch (err) {
     if (err instanceof OrderError) {
       return NextResponse.json({ error: err.message, code: err.code, details: err.details }, { status: err.status, headers: noStore });

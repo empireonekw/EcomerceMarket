@@ -6,6 +6,8 @@ import ClaimOrderButton from '@/components/ClaimOrderButton';
 import FileDownloads from '@/components/FileDownloads';
 import { getOrderReceipt } from '@/lib/data/orders';
 import { getCurrentUser } from '@/lib/auth';
+import { ClearCartWhenPaid, RefreshWhilePending } from '@/components/PaymentStatusHelpers';
+import { formatPkr } from '@/lib/pricing';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 
 // Private, per-buyer page: never cache, never index, never leak the token via Referer.
@@ -15,7 +17,22 @@ export const metadata = {
   referrer: 'no-referrer',
 };
 
-const PAYMENT_LABELS = { demo: 'Demo (no charge)', free: 'Free order' };
+const PAYMENT_LABELS = { demo: 'Demo (no charge)', free: 'Free order', payfast: 'PayFast' };
+
+/** The round icon above the heading, one per payment state. */
+function StateIcon({ state }) {
+  if (state === 'pending') {
+    return <span aria-hidden="true" className="mx-auto block size-14 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />;
+  }
+  const failed = state === 'failed';
+  return (
+    <span className={`mx-auto grid size-14 place-items-center rounded-full ${failed ? 'bg-red-50 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <path d={failed ? 'M7 7l10 10M17 7 7 17' : 'm5 12 4.5 4.5L19 7'} strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
 
 /** Ties the receipt to an account: already saved, save it now, or log in to save it. */
 function AccountLinkPanel({ order, viewer, orderId, token }) {
@@ -64,29 +81,63 @@ export default async function CheckoutSuccessPage({ searchParams }) {
   const linkFor = new Map(downloads.map((d) => [d.productId, d]));
   const orderNumber = order._id.slice(-8).toUpperCase();
   const placedAt = new Date(order.paidAt ?? order.createdAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  // paid → files · failed → try again · pending → PayFast hasn't confirmed yet (the page re-checks itself).
+  const state = order.paymentStatus === 'paid' ? 'paid' : order.paymentStatus === 'failed' || order.paymentStatus === 'refunded' ? 'failed' : 'pending';
+  const paymentLabel = [PAYMENT_LABELS[order.paymentProvider] ?? order.paymentProvider, order.charge?.method].filter(Boolean).join(' · ');
 
   return (
     <div className="container-page max-w-4xl py-10 sm:py-14">
       {/* ---------- Confirmation ---------- */}
       <header className="text-center">
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-100 text-emerald-600">
-          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="m5 12 4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <h1 className="headline mt-6 text-4xl text-balance sm:text-5xl">Thank you! Your files are ready.</h1>
-        <p className="mx-auto mt-3 max-w-lg text-stone-600">
-          Order <span className="font-medium text-ink">#{orderNumber}</span> for{' '}
-          <span className="font-medium text-ink">{order.buyerEmail}</span>. Bookmark this page. It’s your permanent
-          access link.
-        </p>
-        <div className="mt-5 flex justify-center">
-          <CopyLinkButton />
-        </div>
-        <AccountLinkPanel order={order} viewer={viewer} orderId={orderId} token={token} />
+        <StateIcon state={state} />
+        {state === 'paid' && (
+          <>
+            <ClearCartWhenPaid orderId={order._id} />
+            <h1 className="headline mt-6 text-4xl text-balance sm:text-5xl">Thank you! Your files are ready.</h1>
+            <p className="mx-auto mt-3 max-w-lg text-stone-600">
+              Order <span className="font-medium text-ink">#{orderNumber}</span> for{' '}
+              <span className="font-medium text-ink">{order.buyerEmail}</span>. Bookmark this page. It’s your permanent
+              access link.
+            </p>
+            <div className="mt-5 flex justify-center">
+              <CopyLinkButton />
+            </div>
+            <AccountLinkPanel order={order} viewer={viewer} orderId={orderId} token={token} />
+          </>
+        )}
+        {state === 'pending' && (
+          <div role="status">
+            <RefreshWhilePending />
+            <h1 className="headline mt-6 text-4xl text-balance sm:text-5xl">Confirming your payment…</h1>
+            <p className="mx-auto mt-3 max-w-lg text-stone-600">
+              Order <span className="font-medium text-ink">#{orderNumber}</span>. We’re waiting for PayFast to confirm it. This
+              usually takes a few seconds, and your files appear here as soon as it does. If you paid with a wallet, approve
+              the request in your JazzCash or Easypaisa app.
+            </p>
+          </div>
+        )}
+        {state === 'failed' && (
+          <div role="alert">
+            <h1 className="headline mt-6 text-4xl text-balance sm:text-5xl">Your payment didn’t go through</h1>
+            <p className="mx-auto mt-3 max-w-lg text-stone-600">
+              {order.charge?.message ? `PayFast said: “${order.charge.message}”. ` : ''}No money was taken for order{' '}
+              <span className="font-medium text-ink">#{orderNumber}</span>. Your cart is still saved, so you can try again or use
+              another payment method.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link href="/checkout" className="btn btn-lg btn-primary">
+                Try again
+              </Link>
+              <Link href="/contact" className="btn btn-lg btn-outline">
+                Contact support
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ---------- Downloads ---------- */}
+      {state === 'paid' && (
       <section className="mt-10" aria-labelledby="downloads-heading">
         <h2 id="downloads-heading" className="headline text-2xl">
           Your downloads
@@ -137,11 +188,12 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           })}
         </ul>
       </section>
+      )}
 
       {/* ---------- Receipt ---------- */}
       <section className="mt-10 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6" aria-labelledby="receipt-heading">
         <h2 id="receipt-heading" className="headline text-2xl">
-          Receipt
+          {state === 'paid' ? 'Receipt' : 'Order summary'}
         </h2>
         <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
           <div className="flex justify-between gap-4">
@@ -154,12 +206,20 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-stone-500">Payment</dt>
-            <dd className="font-medium">{PAYMENT_LABELS[order.paymentProvider] ?? order.paymentProvider}</dd>
+            <dd className="font-medium">{paymentLabel}</dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-stone-500">Status</dt>
-            <dd className="font-medium capitalize text-emerald-700">{order.status}</dd>
+            <dd className={`font-medium ${state === 'paid' ? 'text-emerald-700' : state === 'failed' ? 'text-red-600' : 'text-amber-700'}`}>
+              {state === 'paid' ? 'Paid' : state === 'failed' ? 'Not paid' : 'Awaiting payment'}
+            </dd>
           </div>
+          {order.charge?.transactionId && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-stone-500">Transaction ID</dt>
+              <dd className="font-medium break-all">{order.charge.transactionId}</dd>
+            </div>
+          )}
         </dl>
 
         <table className="mt-6 w-full text-sm">
@@ -194,9 +254,17 @@ export default async function CheckoutSuccessPage({ searchParams }) {
               </tr>
             )}
             <tr className="text-base font-medium text-ink">
-              <th scope="row" className="pt-3 text-left">Total paid</th>
+              <th scope="row" className="pt-3 text-left">{state === 'paid' ? 'Total paid' : 'Total'}</th>
               <td className="pt-3 text-right">{money(order.totalAmount)}</td>
             </tr>
+            {order.charge?.currency === 'PKR' && order.charge.rate !== 1 && (
+              <tr className="text-ink">
+                <th scope="row" className="pt-1 text-left font-normal text-stone-600">
+                  {state === 'paid' ? 'Charged' : 'To pay'} in rupees ($1 = Rs {order.charge.rate})
+                </th>
+                <td className="pt-1 text-right font-medium">{formatPkr(order.charge.amount)}</td>
+              </tr>
+            )}
           </tfoot>
         </table>
       </section>
