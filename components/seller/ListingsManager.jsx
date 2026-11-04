@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, LayoutGrid, List, Pencil, Pin, Plus, Search, Trash2, X } from 'lucide-react';
+import { BarChart3, Copy, ExternalLink, Eye, EyeOff, LayoutGrid, List, Menu, Pencil, Pin, Plus, Search, Share2, Star, Trash2, X } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { useToast } from '@/components/dashboard/Toaster';
@@ -70,6 +70,97 @@ function Switch({ checked, onChange, label }) {
     >
       <span className={`absolute size-5 rounded-full transition-all ${checked ? 'left-[1.375rem] bg-white' : 'left-0.5 bg-stone-400'}`} />
     </button>
+  );
+}
+
+const menuItem = 'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 disabled:pointer-events-none disabled:opacity-40';
+
+/**
+ * The ☰ menu on each listing card (like Etsy's): View in store, View stats (soon), Edit, Copy, Activate/Deactivate,
+ * Share, Delete. Opens upwards from the card footer; closes on outside click or Esc.
+ */
+function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const menuId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => !rootRef.current?.contains(e.target) && setOpen(false);
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const run = (fn) => () => {
+    setOpen(false);
+    fn();
+  };
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={`Options for ${p.title}`}
+        className={`grid size-8 place-items-center rounded-full text-stone-600 transition-colors hover:bg-stone-100 hover:text-ink ${open ? 'bg-stone-100 text-ink' : ''}`}
+      >
+        <Menu size={19} strokeWidth={1.9} aria-hidden="true" />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          className="absolute bottom-full right-0 z-30 mb-2 w-56 overflow-hidden rounded-2xl border border-stone-200 bg-white py-1.5 shadow-[0_18px_48px_-12px_rgba(20,20,20,0.3)]"
+        >
+          {live ? (
+            <a role="menuitem" href={`/products/${p.slug}`} target="_blank" rel="noopener" onClick={() => setOpen(false)} className={`${menuItem} bg-stone-50 font-medium text-ink`}>
+              View in store
+              <ExternalLink size={15} strokeWidth={1.9} aria-hidden="true" className="ml-auto" />
+            </a>
+          ) : (
+            <p className="px-4 py-2.5 text-xs text-stone-500">Not in the store yet — it shows here once it’s active.</p>
+          )}
+          <button type="button" role="menuitem" disabled className={menuItem} title="Coming soon">
+            <BarChart3 size={15} strokeWidth={1.9} aria-hidden="true" />
+            View stats
+            <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-stone-500">Soon</span>
+          </button>
+          <hr className="my-1.5 border-stone-100" />
+          <Link role="menuitem" href={`${BASE}/${p._id}/edit`} onClick={() => setOpen(false)} className={menuItem}>
+            <Pencil size={15} strokeWidth={1.9} aria-hidden="true" />
+            Edit
+          </Link>
+          <button type="button" role="menuitem" disabled={busy} onClick={run(onCopy)} className={menuItem}>
+            <Copy size={15} strokeWidth={1.9} aria-hidden="true" />
+            Copy
+          </button>
+          {p.status === 'approved' && (
+            <button type="button" role="menuitem" disabled={busy} onClick={run(onVisible)} className={menuItem}>
+              {live ? <EyeOff size={15} strokeWidth={1.9} aria-hidden="true" /> : <Eye size={15} strokeWidth={1.9} aria-hidden="true" />}
+              {live ? 'Deactivate' : 'Activate'}
+            </button>
+          )}
+          <hr className="my-1.5 border-stone-100" />
+          <button type="button" role="menuitem" disabled={!live} onClick={run(onShare)} className={menuItem} title={live ? undefined : 'Only active listings can be shared'}>
+            <Share2 size={15} strokeWidth={1.9} aria-hidden="true" />
+            Share
+          </button>
+          <hr className="my-1.5 border-stone-100" />
+          <button type="button" role="menuitem" disabled={busy} onClick={run(onDelete)} className={`${menuItem} text-red-600 hover:bg-red-50`}>
+            <Trash2 size={15} strokeWidth={1.9} aria-hidden="true" />
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -169,6 +260,51 @@ export default function ListingsManager({ items, counts, total, pagination, para
       toast.error('Could not update the listing', err.message);
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function copyListing(p) {
+    setBusy(`copy:${p._id}`);
+    try {
+      const res = await fetch(`/api/seller/products/${p._id}/copy`, { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+      toast.success('Listing copied', `“${data.title}” was saved as a draft.`);
+      startRefresh(() => router.refresh());
+    } catch (err) {
+      toast.error('Could not copy the listing', err.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function setFeatured(p, featured) {
+    setBusy(`star:${p._id}`);
+    try {
+      const res = await fetch(`/api/seller/products/${p._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shopFeatured: featured }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+      toast.success(featured ? 'Featured in your shop' : 'Removed from featured');
+      startRefresh(() => router.refresh());
+    } catch (err) {
+      toast.error('Could not update the listing', err.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function shareListing(p) {
+    const url = `${window.location.origin}/products/${p.slug}`;
+    try {
+      if (navigator.share) return await navigator.share({ title: p.title, url });
+      await navigator.clipboard.writeText(url);
+      toast.success('Link copied', url);
+    } catch (err) {
+      if (err?.name !== 'AbortError') toast.error('Could not share', 'Copy the link from the store page instead.');
     }
   }
 
@@ -333,18 +469,42 @@ export default function ListingsManager({ items, counts, total, pagination, para
                 )}
               </div>
             ) : grid ? (
-              <ul className="grid gap-5 sm:grid-cols-2 min-[1400px]:grid-cols-3">
+              <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 min-[1500px]:grid-cols-5">
                 {items.map((p) => {
                   const s = listingStatus(p);
+                  const live = s.key === 'active';
                   const isSelected = selected.has(p._id);
                   return (
                     <li
                       key={p._id}
-                      className={`flex flex-col overflow-hidden rounded-2xl border bg-white transition-shadow ${isSelected ? 'border-brand-600 ring-2 ring-brand-600/20' : 'border-stone-200 hover:shadow-lift'}`}
+                      className={`flex flex-col rounded-xl border bg-white transition-shadow ${isSelected ? 'border-brand-600 ring-2 ring-brand-600/20' : 'border-stone-200 hover:shadow-lift'}`}
                     >
-                      <div className="relative aspect-[4/3] bg-stone-100">
-                        {cover(p, '(min-width: 1280px) 300px, (min-width: 640px) 45vw, 92vw')}
-                        <label className="absolute left-3 top-3 grid size-8 cursor-pointer place-items-center rounded-lg bg-white/95 shadow-sm">
+                      <Link href={`${BASE}/${p._id}/edit`} className="relative block aspect-square overflow-hidden rounded-t-xl bg-stone-100">
+                        {cover(p, '(min-width: 1500px) 220px, (min-width: 1280px) 22vw, (min-width: 640px) 30vw, 46vw')}
+                        <span className="absolute bottom-2 left-2">
+                          <StatusBadge status={s.tone} label={s.label} />
+                        </span>
+                        {p.shopFeatured && (
+                          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium shadow-sm">
+                            <Pin size={11} strokeWidth={2} aria-hidden="true" className="text-brand-700" />
+                            Featured
+                          </span>
+                        )}
+                      </Link>
+                      <div className="flex flex-1 flex-col px-3 pb-2.5 pt-2.5">
+                        <Link href={`${BASE}/${p._id}/edit`} className="truncate text-sm font-semibold hover:underline" title={p.title}>
+                          {p.title}
+                        </Link>
+                        <p className="mt-1 text-sm tabular-nums text-stone-700">{usd(p.price)}</p>
+                        <p className="mt-0.5 text-xs text-stone-500">Updated {formatDateTime(p.updatedAt).date}</p>
+                        {showStats && (
+                          <p className="mt-1.5 w-fit rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-stone-600">
+                            {p.salesCount.toLocaleString('en-US')} sold · {formatPrice(p.earnings, 'USD')}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between border-t border-stone-100 px-2 py-1.5">
+                        <label className="grid size-8 cursor-pointer place-items-center rounded-full hover:bg-stone-100">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -353,36 +513,32 @@ export default function ListingsManager({ items, counts, total, pagination, para
                             className="size-4 accent-brand-600"
                           />
                         </label>
-                        {p.shopFeatured && (
-                          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-medium shadow-sm">
-                            <Pin size={12} strokeWidth={2} aria-hidden="true" className="text-brand-700" />
-                            Featured
-                          </span>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => setFeatured(p, !p.shopFeatured)}
+                          disabled={Boolean(busy)}
+                          aria-pressed={p.shopFeatured}
+                          aria-label={p.shopFeatured ? `Unfeature ${p.title}` : `Feature ${p.title} in your shop`}
+                          title={p.shopFeatured ? 'Featured — click to remove' : 'Feature in your shop'}
+                          className="grid size-8 place-items-center rounded-full transition-colors hover:bg-stone-100 disabled:opacity-50"
+                        >
+                          <Star
+                            size={18}
+                            strokeWidth={1.9}
+                            aria-hidden="true"
+                            className={p.shopFeatured ? 'fill-brand-500 text-brand-600' : 'text-stone-500'}
+                          />
+                        </button>
+                        <ListingMenu
+                          p={p}
+                          live={live}
+                          busy={Boolean(busy)}
+                          onCopy={() => copyListing(p)}
+                          onVisible={() => setVisible(p, !live)}
+                          onShare={() => shareListing(p)}
+                          onDelete={() => askDelete([p._id])}
+                        />
                       </div>
-                      <div className="flex flex-1 flex-col p-4">
-                        <Link href={`${BASE}/${p._id}/edit`} className="line-clamp-2 font-medium leading-snug hover:underline">
-                          {p.title}
-                        </Link>
-                        <p className="mt-1 text-sm tabular-nums text-stone-700">{usd(p.price)}</p>
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <StatusBadge status={s.tone} label={s.label} />
-                          <span className="text-xs text-stone-500">Updated {formatDateTime(p.updatedAt).date}</span>
-                        </div>
-                        {showStats && (
-                          <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-stone-100 pt-3 text-xs">
-                            <div>
-                              <dt className="text-stone-500">Sales</dt>
-                              <dd className="mt-0.5 text-sm font-medium tabular-nums">{p.salesCount.toLocaleString('en-US')}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-stone-500">You earned</dt>
-                              <dd className="mt-0.5 text-sm font-medium tabular-nums">{formatPrice(p.earnings, 'USD')}</dd>
-                            </div>
-                          </dl>
-                        )}
-                      </div>
-                      {actions(p, 'border-t border-stone-100 px-2 py-1.5')}
                     </li>
                   );
                 })}

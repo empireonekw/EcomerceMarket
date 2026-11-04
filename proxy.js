@@ -22,6 +22,10 @@ const LIMITS = {
   page: { limit: 240, windowMs: 60_000 }, // page loads and client-side navigations
 };
 
+// Rankkw's server calls these for every seller connected to it, all from one IP: they're left out of the per-IP limits
+// and check their own Bearer token or shared secret, with per-seller limits (lib/rankkw-link.js).
+const RANKKW_SERVER_ROUTES = /^\/api\/integrations\/rankkw\/(token|me|categories|upload-ticket|products|products\/status)$/;
+
 function tierOf(request) {
   const { pathname } = request.nextUrl;
   if (!pathname.startsWith('/api/')) return 'page';
@@ -50,7 +54,7 @@ export function proxy(request) {
   const { pathname: path } = request.nextUrl;
   // The check itself stays reachable (POST /api/robot-check has its own, stricter limit).
   const isVerify = path === VERIFY_PAGE || path === VERIFY_API;
-  if (ip !== 'local' && !isVerify) {
+  if (ip !== 'local' && !isVerify && !RANKKW_SERVER_ROUTES.test(path)) {
     const tier = tierOf(request);
     if (needsRobotCheck(ip, request.cookies.get(HUMAN_COOKIE)?.value)) return robotCheck(request, tier);
     const result = rateLimit(`global:${tier}:${ip}`, LIMITS[tier]);

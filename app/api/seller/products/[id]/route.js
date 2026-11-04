@@ -1,6 +1,6 @@
 import { getRequestUser } from '@/lib/auth';
 import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
-import { deleteSellerProduct, setSellerProductVisibility, updateSellerProduct } from '@/lib/data/seller';
+import { deleteSellerProduct, setSellerProductFeatured, setSellerProductVisibility, updateSellerProduct } from '@/lib/data/seller';
 import { refreshStorefront } from '@/lib/revalidate';
 
 async function sellerOrError(request) {
@@ -29,13 +29,14 @@ export async function PUT(request, { params }) {
   }
 }
 
-/** PATCH /api/seller/products/:id — { isPublished } hides or shows one of the seller's approved products. */
+/** PATCH /api/seller/products/:id — { isPublished } hides or shows an approved product; { shopFeatured } stars it. */
 export async function PATCH(request, { params }) {
   const { user, error } = await sellerOrError(request);
   if (error) return error;
   try {
     const { id } = await params;
     const body = await readJson(request);
+    if (typeof body.shopFeatured === 'boolean') return json(await setSellerProductFeatured(user.id, id, body.shopFeatured));
     const result = await setSellerProductVisibility(user.id, id, body.isPublished);
     refreshStorefront(result.slug);
     return json(result);
