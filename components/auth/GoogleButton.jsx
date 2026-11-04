@@ -23,8 +23,8 @@ function GoogleMark() {
 }
 
 /**
- * "Continue with Google" + an "or" divider: above the email form on /login, below the "Create account" button on
- * /signup (`placement="after"`: divider first, Terms note last). Hidden unless the OAuth
+ * "Continue with Google" + an "or" divider, below the submit button on /login and /signup (`placement="after"`: divider
+ * first, Terms note last; `placement="before"` puts it above a form instead). Hidden unless the OAuth
  * client is configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET → NEXT_PUBLIC_GOOGLE_SIGNIN in next.config.mjs).
  * A plain link: the server redirects to Google, then back to /api/auth/google/callback.
  */

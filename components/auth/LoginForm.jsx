@@ -77,7 +77,6 @@ export default function LoginForm({ next, registered = false, oauthError = null 
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      {!registered && <GoogleButton next={next} />}
       {registered && !formError && (
         <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
           <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />
@@ -127,6 +126,9 @@ export default function LoginForm({ next, registered = false, oauthError = null 
           Log in
         </SubmitButton>
       </div>
+
+      {/* Below the form, like /signup. */}
+      {!registered && <GoogleButton next={next} placement="after" />}
     </form>
   );
 }
