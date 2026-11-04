@@ -3,11 +3,13 @@ import Link from 'next/link';
 import { Download, LayoutGrid, MessageSquare, ShoppingBag, Star, UserRound } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { getUserPurchases } from '@/lib/data/orders';
-import { getUserReviewMap } from '@/lib/data/reviews';
+import { getUserReviews } from '@/lib/data/reviews';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { Avatar } from '@/components/UserMenu';
 import { DeleteAccount, NameForm, PasswordForm, SessionControls } from '@/components/profile/AccountForms';
-import ReviewButton from '@/components/profile/ReviewButton';
+import ReviewDialog from '@/components/reviews/ReviewDialog';
+import Stars from '@/components/Stars';
+import VerifiedBadge from '@/components/VerifiedBadge';
 import Pagination from '@/components/Pagination';
 import FileDownloads from '@/components/FileDownloads';
 import SignOutButton from '@/components/SignOutButton';
@@ -19,6 +21,7 @@ const ROLE_LABELS = { admin: 'Administrator', seller: 'Seller', customer: 'Custo
 const TABS = [
   { id: 'profile', label: 'Profile', icon: UserRound },
   { id: 'downloads', label: 'My Purchases', icon: ShoppingBag },
+  { id: 'reviews', label: 'My Reviews', icon: Star },
 ];
 // The active section: a white pill lifted off the tinted canvas (same as the admin and seller dashboards).
 const ACTIVE = 'bg-white font-medium text-ink shadow-[0_1px_2px_rgba(16,16,16,0.06),0_6px_16px_-8px_rgba(16,16,16,0.18)]';
@@ -84,7 +87,14 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
                   Download File
                 </a>
               )}
-              <ReviewButton productId={p.productId} productTitle={p.title} authorName={authorName} existingRating={reviews[p.productId]} />
+              {reviews[p.productId] ? (
+                <span className="inline-flex items-center gap-2 text-sm text-stone-500">
+                  <Stars rating={reviews[p.productId].rating} size={14} />
+                  <ReviewDialog productId={p.productId} productTitle={p.title} authorName={authorName} review={reviews[p.productId]} trigger="link" />
+                </span>
+              ) : (
+                <ReviewDialog productId={p.productId} productTitle={p.title} authorName={authorName} />
+              )}
             </div>
             {p.files?.length > 1 && <FileDownloads files={p.files} />}
           </li>
@@ -92,6 +102,64 @@ function DownloadsTab({ purchases, reviews, authorName, page }) {
       </ul>
       <Pagination page={current} totalPages={totalPages} basePath="/profile" params={{ tab: 'downloads' }} />
     </>
+  );
+}
+
+/** My reviews: every review the buyer wrote, the product and shop it went to, and Edit (3 times). */
+function ReviewsTab({ reviews, authorName }) {
+  if (reviews.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-14 text-center">
+        <p className="font-medium">No reviews yet</p>
+        <p className="mx-auto mt-2 max-w-md text-sm text-stone-500">After you buy something, you can review it from My Purchases or its product page.</p>
+        <Link href="/profile?tab=downloads" className="btn btn-md btn-dark mt-6">
+          Go to My Purchases
+        </Link>
+      </div>
+    );
+  }
+  return (
+    <ul className="space-y-3">
+      {reviews.map((r) => (
+        <li key={r.id} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-card sm:p-5">
+          <div className="flex gap-4">
+            <Link href={`/products/${r.product.slug}`} className="relative aspect-[4/3] w-20 shrink-0 overflow-hidden rounded-xl bg-stone-100 sm:w-24">
+              {r.product.coverImage && <Image src={r.product.coverImage} alt="" fill sizes="96px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
+            </Link>
+            <div className="min-w-0 flex-1">
+              <Link href={`/products/${r.product.slug}`} className="line-clamp-2 font-medium hover:underline">
+                {r.product.title}
+              </Link>
+              {r.shop && (
+                <p className="mt-0.5 flex min-w-0 items-center gap-1 text-sm text-stone-500">
+                  <span className="shrink-0">Reviewed for</span>
+                  <span className="truncate font-medium text-stone-700">{r.shop.name}</span>
+                  {r.shop.verified && <VerifiedBadge size={13} />}
+                </p>
+              )}
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500">
+                <Stars rating={r.rating} size={14} />
+                <span>{fmtDate(r.createdAt)}</span>
+                {r.editCount > 0 && <span>· Edited {r.editCount}×</span>}
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-stone-700">{r.body}</p>
+          {r.hidden ? (
+            <p className="mt-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-800">
+              <span className="font-medium">Removed by Sellpify.</span> {r.hiddenReason}
+            </p>
+          ) : (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-stone-100 pt-3">
+              <span className="text-xs text-stone-500">
+                {r.editsLeft > 0 ? `You can edit it ${r.editsLeft} more time${r.editsLeft === 1 ? '' : 's'}` : 'No edits left'}
+              </span>
+              {r.editsLeft > 0 && <ReviewDialog productId={r.productId} productTitle={r.product.title} authorName={authorName} review={r} />}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -155,9 +223,11 @@ export default async function ProfilePage({ searchParams }) {
   const { tab: rawTab, page } = await searchParams;
   const requested = TABS.some((t) => t.id === rawTab) ? rawTab : 'profile';
   const user = await requireUser(`/profile${requested === 'profile' ? '' : `?tab=${requested}`}`);
-  const isCustomer = user.role === 'customer';
+  // Anyone who buys (shoppers, and sellers, who can shop too) sees purchases and reviews; admins only their profile.
+  const isCustomer = user.role !== 'admin';
   const tab = isCustomer ? requested : 'profile';
-  const [purchases, reviews] = isCustomer ? await Promise.all([getUserPurchases(user.id), getUserReviewMap(user.id)]) : [[], {}];
+  const [purchases, myReviews] = isCustomer ? await Promise.all([getUserPurchases(user.id), getUserReviews(user.id)]) : [[], []];
+  const reviews = Object.fromEntries(myReviews.map((r) => [String(r.productId), r]));
   const downloads = purchases.reduce((n, p) => n + (p.downloadCount ?? 0), 0);
   const item = (active) => `flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition ${active ? ACTIVE : IDLE}`;
 
@@ -190,7 +260,8 @@ export default async function ProfilePage({ searchParams }) {
               ))}
               {isCustomer && (
                 <li className="shrink-0">
-                  <Link href="/messages" className={item(false)}>
+                  {/* Sellers' inbox lives in their workspace. */}
+                  <Link href={user.role === 'seller' && user.storeName ? '/seller/messages' : '/messages'} className={item(false)}>
                     <MessageSquare size={18} strokeWidth={1.75} aria-hidden="true" />
                     <span className="flex-1">Messages</span>
                   </Link>
@@ -228,12 +299,18 @@ export default async function ProfilePage({ searchParams }) {
             <section aria-label="Your activity" className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
               <Stat icon={ShoppingBag} label="Purchases" value={purchases.length} />
               <Stat icon={Download} label="Downloads" value={downloads} />
-              <Stat icon={Star} label="Reviews written" value={Object.keys(reviews).length} />
+              <Stat icon={Star} label="Reviews written" value={myReviews.length} />
             </section>
           )}
 
           <div className="mt-8">
-            {tab === 'downloads' ? <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} page={page} /> : <ProfileTab user={user} purchaseCount={purchases.length} />}
+            {tab === 'downloads' ? (
+              <DownloadsTab purchases={purchases} reviews={reviews} authorName={user.name} page={page} />
+            ) : tab === 'reviews' ? (
+              <ReviewsTab reviews={myReviews} authorName={user.name} />
+            ) : (
+              <ProfileTab user={user} purchaseCount={purchases.length} />
+            )}
           </div>
         </div>
       </div>

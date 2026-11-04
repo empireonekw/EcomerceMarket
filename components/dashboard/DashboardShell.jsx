@@ -22,6 +22,7 @@ import {
   Receipt,
   Store,
   Users,
+  Star,
 } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
 import { LogoImage } from '@/components/Logo';
@@ -71,6 +72,7 @@ const AREAS = {
         label: 'People',
         items: [
           { href: '/admin/users', label: 'Users', icon: Users, match: (p) => p.startsWith('/admin/users') },
+          { href: '/admin/reviews', label: 'Reviews', icon: Star, match: (p) => p.startsWith('/admin/reviews') },
           { href: '/admin/messages', label: 'Messages', icon: Mail, match: (p) => p.startsWith('/admin/messages'), badge: 'unread' },
         ],
       },
@@ -91,6 +93,7 @@ const AREAS = {
         label: 'Store',
         items: [
           { href: '/seller/listings', label: 'Listings', icon: Package, match: (p) => p.startsWith('/seller/listings') },
+          { href: '/seller/reviews', label: 'Reviews', icon: Star, match: (p) => p.startsWith('/seller/reviews') },
           { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },
         ],
       },

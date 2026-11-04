@@ -8,6 +8,9 @@ import AddToCartButton from '@/components/AddToCartButton';
 import BuyNowButton from '@/components/BuyNowButton';
 import MessageSellerButton from '@/components/messages/MessageSellerButton';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import Stars from '@/components/Stars';
+import ProductReviews from '@/components/reviews/ProductReviews';
+import { getProductReviews, getProductReviewSummary } from '@/lib/data/reviews';
 import { getProductBySlug, getRelatedProducts, getShopSummary } from '@/lib/data/products';
 import { deliveryLabel, formatFileSize, formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL, tagHref } from '@/lib/utils';
 import { LICENSES, labelOf } from '@/lib/listing';
@@ -42,7 +45,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function productJsonLd(product) {
+function productJsonLd(product, reviews) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -58,6 +61,10 @@ function productJsonLd(product) {
       price: (product.price / 100).toFixed(2),
       availability: 'https://schema.org/InStock',
     },
+    // Star rating in search results, once there are reviews.
+    ...(reviews.count > 0 && {
+      aggregateRating: { '@type': 'AggregateRating', ratingValue: reviews.average.toFixed(1), reviewCount: reviews.count, bestRating: 5, worstRating: 1 },
+    }),
   };
 }
 
@@ -72,7 +79,12 @@ export default async function ProductPage({ params }) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [related, shop] = await Promise.all([getRelatedProducts(product, 3), getShopSummary(product.sellerId)]);
+  const [related, shop, reviewSummary, firstReviews] = await Promise.all([
+    getRelatedProducts(product, 3),
+    getShopSummary(product.sellerId),
+    getProductReviewSummary(product._id),
+    getProductReviews(product._id),
+  ]);
   const fileSize = formatFileSize(product.fileSize);
   const discount =
     product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
@@ -91,7 +103,7 @@ export default async function ProductPage({ params }) {
       <script
         type="application/ld+json"
         // Escape "<" so product text can never close the script tag.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product)).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, reviewSummary)).replace(/</g, '\\u003c') }}
       />
 
       <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
@@ -150,6 +162,15 @@ export default async function ProductPage({ params }) {
             </Link>
           )}
           <h1 className="headline mt-4 text-4xl leading-[1.1] text-balance sm:text-5xl">{product.title}</h1>
+          {reviewSummary.count > 0 && (
+            <a href="#reviews" className="mt-3 inline-flex items-center gap-2 text-sm text-stone-600 hover:text-ink">
+              <Stars rating={reviewSummary.average} size={15} />
+              <span className="font-medium text-ink">{reviewSummary.average.toFixed(1)}</span>
+              <span className="underline underline-offset-2">
+                {reviewSummary.count} review{reviewSummary.count === 1 ? '' : 's'}
+              </span>
+            </a>
+          )}
           {product.shortDescription && <p className="mt-3 text-lg text-stone-600 text-pretty">{product.shortDescription}</p>}
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -274,6 +295,9 @@ export default async function ProductPage({ params }) {
           </ul>
         )}
       </section>
+
+      {/* ---------- Reviews ---------- */}
+      <ProductReviews productId={product._id} productTitle={product.title} summary={reviewSummary} initial={firstReviews} />
 
       {/* ---------- Related ---------- */}
       {related.length > 0 && (
