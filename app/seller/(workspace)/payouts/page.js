@@ -34,7 +34,8 @@ export default async function SellerPayoutsPage() {
         description={`${NO_PLATFORM_FEE ? 'No platform fees. You keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance. Our team sends it to the details below.`}
       />
 
-      {data.verification !== 'verified' && (
+      {/* Identity is only asked for after the first sale (or once they've started it). */}
+      {data.verification !== 'verified' && (data.verificationRequested || data.verification) && (
         <div role="status" className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-sky-200 bg-sky-50 p-5">
           <ShieldCheck size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-sky-700" />
           <div className="min-w-0 flex-1">
