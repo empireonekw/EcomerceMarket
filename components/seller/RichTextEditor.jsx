@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bold, Italic, List, ListOrdered, Underline } from 'lucide-react';
-import { domToRichText, richTextToHtml } from '@/lib/rich-text';
+import { domToRichText, pastedToRichText, richTextToHtml } from '@/lib/rich-text';
 
 const TOOLS = [
   { command: 'bold', label: 'Bold', shortcut: 'Ctrl+B', icon: Bold },
@@ -15,7 +15,7 @@ const TOOLS = [
 /**
  * Description editor with a small toolbar: bold, italic, underline, bulleted and numbered lists.
  * Formats as you type; `value` / `onChange` use the stored marker format (lib/rich-text.js), never HTML.
- * Pasted content is inserted as plain text so formatting from other sites can't sneak in.
+ * Pasted content keeps only these formats (lib/rich-text.js pastedToRichText): nothing else from other sites gets in.
  */
 export default function RichTextEditor({ id, value, onChange, onBlur, invalid, describedBy, minHeight = '11rem' }) {
   const editorRef = useRef(null);
@@ -91,8 +91,12 @@ export default function RichTextEditor({ id, value, onChange, onBlur, invalid, d
         onInput={emit}
         onBlur={onBlur}
         onPaste={(e) => {
+          // Keep the pasted text's bold / italic / underline / lists / headings, rebuilt from our own format (escaped
+          // text and a few tags), so no outside HTML or styling gets into the description.
           e.preventDefault();
-          document.execCommand('insertText', false, e.clipboardData.getData('text/plain'));
+          const pasted = pastedToRichText(e.clipboardData.getData('text/html'), e.clipboardData.getData('text/plain'));
+          document.execCommand('insertHTML', false, richTextToHtml(pasted));
+          emit();
         }}
         style={{ minHeight }}
         className="max-h-[32rem] overflow-y-auto px-4 py-3 text-[15px] leading-relaxed focus:outline-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"

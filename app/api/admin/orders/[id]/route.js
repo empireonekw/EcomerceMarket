@@ -1,6 +1,8 @@
 import { revalidatePath } from 'next/cache';
 import { getRequestUser } from '@/lib/auth';
 import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
+import { setOrderStatus } from '@/lib/data/admin';
+import { deleteOrder, OrderError } from '@/lib/data/orders';
 import { deleteOrder, setOrderStatus } from '@/lib/data/admin';
 import { refreshStorefront } from '@/lib/revalidate';
 
@@ -23,6 +25,10 @@ export async function PATCH(request, { params }) {
   }
 }
 
+/**
+ * DELETE /api/admin/orders/:id — permanently delete an order (test purchases), undoing its sale: ledger lines, seller
+ * balances, product sales counts, its reviews (lib/data/orders.js deleteOrder). Admin session only (same-origin).
+ */
 /** DELETE /api/admin/orders/:id — deletes an order and undoes its booking (lib/data/admin.js deleteOrder). Admin session only. */
 export async function DELETE(request, { params }) {
   const admin = await getRequestUser(request);
@@ -31,6 +37,10 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = await params;
     const result = await deleteOrder(id);
+    revalidatePath('/admin'); // dashboard totals and recent orders
+    return json(result);
+  } catch (err) {
+    if (err instanceof OrderError) return json({ error: err.message }, err.status);
     revalidatePath('/admin');
     refreshStorefront(); // sales counts changed
     return json(result);

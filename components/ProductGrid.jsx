@@ -6,9 +6,11 @@ const GRID = 'grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-[repeat(auto-fill,m
 
 /**
  * `emptyMessage` / `emptyHint` / `emptyAction` (e.g. a link) fill the box shown when there are no products.
+ * `showShop={false}`: the cards leave out the rating / "By shop" row (a shop's own page).
  */
 export default function ProductGrid({
   products,
+  showShop = true,
   preloadCount = 0,
   emptyMessage = 'No products found.',
   emptyHint = 'Try a different search or category.',
@@ -28,7 +30,7 @@ export default function ProductGrid({
     <ul className={GRID}>
       {products.map((product, i) => (
         <li key={product._id}>
-          <ProductCard product={product} preload={i < preloadCount} />
+          <ProductCard product={product} preload={i < preloadCount} showShop={showShop} />
         </li>
       ))}
     </ul>

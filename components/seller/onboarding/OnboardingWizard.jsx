@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Building2, Check, CheckCircle2, Clock, CreditCard, Loader2, Lock, PartyPopper, Smartphone, X } from 'lucide-react';
+import { Building2, Check, CheckCircle2, Clock, CreditCard, Loader2, Lock, PartyPopper, Smartphone, Sparkles, X } from 'lucide-react';
 import ImageUpload from '@/components/seller/onboarding/ImageUpload';
 import { walletIdLabel, WALLET_OPTIONS } from '@/lib/validation';
 import { checkStep, COUNTRIES, countryOf, CURRENCIES, DIAL_CODES, ONBOARDING_STEPS } from '@/lib/seller-onboarding';
@@ -139,6 +139,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
   const [agree, setAgree] = useState(false);
   const [done, setDone] = useState(null);
   const [name, setName] = useState({ state: 'idle' }); // live shop name check: idle | checking | ok | taken
+  const [nameIdeas, setNameIdeas] = useState([]); // available names built from what was typed
   const termsRef = useRef(null);
   const topRef = useRef(null);
   const step = ONBOARDING_STEPS[current].id;
@@ -149,17 +150,24 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
   };
   const setNested = (stepId, key, patch) => set(stepId, { [key]: { ...data[stepId][key], ...patch } });
 
-  // Shop name: checked as you type (after a short pause) against every other shop.
+  // Shop name: checked as you type (after a short pause) against every other shop; from the 2nd letter the same
+  // request also brings name ideas that are still free.
   const storeName = data.identity.storeName.trim();
   useEffect(() => {
-    if (step !== 'identity' || storeName.length < 3) return setName({ state: 'idle' });
-    setName({ state: 'checking' });
+    if (step !== 'identity' || storeName.length < 2) {
+      setName({ state: 'idle' });
+      setNameIdeas([]);
+      return;
+    }
+    const full = storeName.length >= 3; // shorter than a valid name: ideas only, no available / taken verdict
+    setName({ state: full ? 'checking' : 'idle' });
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
         const res = await fetch(`/api/seller/onboarding/store-name?name=${encodeURIComponent(storeName)}`, { signal: controller.signal });
         const body = await res.json();
-        setName(body.available ? { state: 'ok' } : { state: 'taken', error: body.error });
+        setNameIdeas(body.suggestions ?? []);
+        if (full) setName(body.available ? { state: 'ok' } : { state: 'taken', error: body.error });
       } catch {
         if (!controller.signal.aborted) setName({ state: 'idle' });
       }
@@ -343,6 +351,27 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                         ? `“${storeName}” is available.`
                         : "3–60 characters: letters, numbers, spaces and . & ' - only.")}
                 </p>
+                {nameIdeas.length > 0 && (
+                  <div className="mt-4">
+                    <p className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
+                      <Sparkles size={15} strokeWidth={1.75} aria-hidden="true" className="text-brand-600" />
+                      {name.state === 'taken' ? 'Try one of these instead' : 'Ideas that are free'}
+                    </p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {nameIdeas.map((idea) => (
+                        <li key={idea}>
+                          <button
+                            type="button"
+                            onClick={() => set('identity', { storeName: idea })}
+                            className="rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-sm text-stone-700 transition-colors hover:border-ink hover:text-ink"
+                          >
+                            {idea}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               <Field
