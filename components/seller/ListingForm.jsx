@@ -241,7 +241,7 @@ function UploadingTile({ upload, video = false }) {
  * @param {{ categories: Array<{ _id, name, slug }>, listing?: object, uploads: 'blob' | 'local' | null }} props
  *   `listing` = edit mode; `uploads` = where files go (lib/uploads.js → uploadDriver()), null when uploads are off
  */
-export default function ListingForm({ categories, listing, uploads, autoApprove = false }) {
+export default function ListingForm({ categories, recentCategories = [], listing, uploads, autoApprove = false }) {
   const router = useRouter();
   const toast = useToast();
   const previewRef = useRef(null);
@@ -739,6 +739,7 @@ export default function ListingForm({ categories, listing, uploads, autoApprove 
               <CategorySelect
                 className="mt-3 max-w-3xl"
                 categories={categories}
+                recent={recentCategories}
                 value={values.category}
                 // Only a complete pick marks it touched: a main still waiting for its sub isn't an error until Publish.
                 onChange={(id) => (update('category', id), id && touch('category'))}

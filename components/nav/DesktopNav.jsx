@@ -57,7 +57,11 @@ function ShopMenu({ categories, active }) {
 
   return (
     <div
-      className="relative flex items-center"
+      // One pill around "Shop" and its arrow, styled like NavLink: white when this is the current section, a light
+      // white on hover and while the menu is open (hovering the menu below counts as hovering the pill).
+      className={`group/shop relative flex items-center rounded-full transition-colors ${
+        active ? 'bg-white shadow-[0_1px_2px_rgba(20,20,20,0.06)] ring-1 ring-stone-200' : open ? 'bg-white/80' : 'hover:bg-white/80'
+      }`}
       // Hover is for a real mouse only: a tap also fires "enter", which would open the menu just before the
       // tap's click toggles it shut again.
       onPointerEnter={(e) => e.pointerType === 'mouse' && show()}
@@ -71,9 +75,13 @@ function ShopMenu({ categories, active }) {
         }
       }}
     >
-      <NavLink href="/products" active={active} className="pr-1.5">
+      <Link
+        href="/products"
+        aria-current={active ? 'page' : undefined}
+        className={`rounded-full py-2 pr-1 pl-3.5 text-sm transition-colors ${active || open ? 'text-gray-900' : 'text-stone-600 group-hover/shop:text-black'}`}
+      >
         Shop
-      </NavLink>
+      </Link>
       <button
         type="button"
         // No focus on press: focusing opens the menu (onFocus), and the click would then toggle it straight shut.
@@ -83,7 +91,7 @@ function ShopMenu({ categories, active }) {
         aria-expanded={open}
         aria-controls={panelId}
         aria-label="Shop categories"
-        className="-ml-0.5 grid size-6 place-items-center rounded-full text-stone-500 transition-colors hover:bg-white hover:text-black"
+        className={`mr-2 grid size-6 place-items-center rounded-full transition-colors ${active || open ? 'text-gray-900' : 'text-stone-500 group-hover/shop:text-black'}`}
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" className={`size-3.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="currentColor">
           <path d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z" />

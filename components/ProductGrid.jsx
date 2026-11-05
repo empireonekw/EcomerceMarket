@@ -1,17 +1,14 @@
 import ProductCard from '@/components/ProductCard';
 
-// Shop grid of cards with landscape (4:3) covers, so the price shows without scrolling: one across on small phones, two from 480px, three on laptops, four on wide screens.
-const GRID = 'grid grid-cols-1 gap-x-5 gap-y-10 min-[480px]:grid-cols-2 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12 xl:grid-cols-4';
-// `wide` (product list pages beside the category column): five, then six across on big monitors.
-const WIDE = `${GRID} 2xl:grid-cols-5 min-[1800px]:grid-cols-6`;
+// Portrait cards (components/ProductCard.jsx) about Etsy's size: two across on phones, then as many ~16rem+ columns as
+// fit (four on a laptop beside the category column, five on big monitors), each stretched to share the row evenly.
+const GRID = 'grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] sm:gap-x-5';
 
 /**
- * `wide`: the full-width grid of the product list pages (more columns). `emptyMessage` / `emptyHint` / `emptyAction`
- * (e.g. a link) fill the box shown when there are no products.
+ * `emptyMessage` / `emptyHint` / `emptyAction` (e.g. a link) fill the box shown when there are no products.
  */
 export default function ProductGrid({
   products,
-  wide = false,
   preloadCount = 0,
   emptyMessage = 'No products found.',
   emptyHint = 'Try a different search or category.',
@@ -28,7 +25,7 @@ export default function ProductGrid({
   }
 
   return (
-    <ul className={wide ? WIDE : GRID}>
+    <ul className={GRID}>
       {products.map((product, i) => (
         <li key={product._id}>
           <ProductCard product={product} preload={i < preloadCount} />
@@ -39,20 +36,18 @@ export default function ProductGrid({
 }
 
 /** Mirrors ProductCard's exact dimensions so content doesn't shift when data arrives (no CLS). */
-export function ProductGridSkeleton({ count = 8, wide = false }) {
+export function ProductGridSkeleton({ count = 8 }) {
   return (
-    <ul className={wide ? WIDE : GRID} aria-busy="true" aria-label="Loading products">
+    <ul className={GRID} aria-busy="true" aria-label="Loading products">
       {Array.from({ length: count }, (_, i) => (
         <li key={i} className="animate-pulse">
-          <div className="aspect-[4/3] rounded-[1.4rem] bg-stone-100" />
-          <div className="px-1 pt-4">
-            <div className="h-3 w-1/4 rounded-full bg-stone-100" />
-            <div className="mt-3 h-6 w-4/5 rounded-full bg-stone-100" />
-            <div className="mt-2.5 h-4 w-full rounded-full bg-stone-100" />
-            <div className="mt-3.5 flex items-center justify-between border-t border-dashed border-stone-200 pt-3">
-              <div className="h-7 w-20 rounded-full bg-stone-100" />
-              <div className="h-9 w-20 rounded-full bg-stone-100" />
-            </div>
+          <div className="aspect-[4/5] rounded-2xl bg-stone-100" />
+          <div className="pt-3">
+            <div className="h-4 w-1/3 rounded-full bg-stone-100" />
+            <div className="mt-2 h-5 w-5/6 rounded-full bg-stone-100" />
+            <div className="mt-2 h-4 w-1/2 rounded-full bg-stone-100" />
+            <div className="mt-2.5 h-6 w-1/4 rounded-full bg-stone-100" />
+            <div className="mt-3 h-10 w-32 rounded-full bg-stone-100" />
           </div>
         </li>
       ))}

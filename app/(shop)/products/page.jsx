@@ -110,7 +110,7 @@ export default async function ProductsPage({ searchParams }) {
           </header>
 
           <div className="mt-6">
-            <ProductGrid wide products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
+            <ProductGrid products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
           </div>
 
           <Pagination page={pagination.page} totalPages={pagination.totalPages} params={base} />

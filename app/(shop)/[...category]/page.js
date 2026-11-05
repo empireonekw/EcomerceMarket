@@ -141,7 +141,7 @@ export default async function CategoryPage({ params, searchParams }) {
           {category.description && <p className="mt-3 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{category.description}</p>}
 
           <div className="mt-6">
-            <ProductGrid wide products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
+            <ProductGrid products={items} preloadCount={pagination.page === 1 ? 4 : 0} />
           </div>
 
           <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath={categoryHref(category)} params={base} />
