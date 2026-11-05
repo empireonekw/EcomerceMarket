@@ -72,7 +72,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD).replace(/</g, '\\u003c') }} />
-      <HeroShowcase products={heroProducts} />
+      <HeroShowcase />
       <FormatStrip />
       <Statement />
 
