@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from '@/components/PrefetchLink';
-import { ArrowRight, Download, Link2, Star } from 'lucide-react';
+import { ArrowRight, Award, Download, Link2, Star } from 'lucide-react';
 import AddToCartButton from '@/components/AddToCartButton';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
@@ -38,7 +38,8 @@ export default function ProductCard({ product, preload = false, showShop = true 
   } = product;
   const href = `/products/${slug}`;
   const discount = compareAtPrice > price ? Math.round((1 - price / compareAtPrice) * 100) : 0;
-  const bestseller = salesCount >= BESTSELLER_MIN_SALES;
+  // A big seller on its own, or from a shop with 5+ sales in total (lib/data/products.js withCardDetails).
+  const bestseller = salesCount >= BESTSELLER_MIN_SALES || Boolean(shop?.bestSeller);
   const accessLink = isAccessLink({ deliveryType, fileFormat });
   const sizes = '(min-width: 640px) 340px, 48vw';
 
@@ -70,9 +71,15 @@ export default function ProductCard({ product, preload = false, showShop = true 
           </span>
         )}
 
-        {(bestseller || fileFormat) && (
+        {fileFormat && (
           <span className="absolute top-3 left-3 max-w-[70%] truncate rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink shadow-sm @[17rem]:text-sm">
-            {bestseller ? 'Bestseller' : fileFormat}
+            {fileFormat}
+          </span>
+        )}
+        {bestseller && (
+          <span className="absolute right-3 bottom-3 inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-semibold text-amber-950 shadow-[0_6px_16px_-6px_rgba(180,110,0,0.7)] ring-1 ring-amber-500/40 @[17rem]:text-sm">
+            <Award size={14} strokeWidth={2.25} aria-hidden="true" />
+            Best seller
           </span>
         )}
       </div>
