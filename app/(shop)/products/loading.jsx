@@ -20,7 +20,7 @@ export default function ProductsLoading() {
             <div className="h-10 w-44 animate-pulse rounded-full bg-stone-100" />
           </div>
           <div className="mt-6">
-            <ProductGridSkeleton wide count={12} />
+            <ProductGridSkeleton count={12} />
           </div>
         </div>
       </div>

@@ -17,18 +17,16 @@ export default async function AdminDashboardPage() {
     <>
       <PageHeader
         title="Dashboard Overview"
-        description="Users, sellers, sales and catalog at a glance."
+        description={`Users, sellers, sales and catalog at a glance.${
+          stats.orders.demo ? ` Test orders from the demo checkout (${stats.orders.demo}) aren’t counted.` : ''
+        }`}
       />
 
       <section aria-label="Platform overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Platform Revenue"
           value={usd(stats.revenue.total)}
-          sub={
-            stats.revenue.demo > 0
-              ? `${usd(stats.revenue.demo)} from demo orders · ${usd(stats.revenue.last30d)} last 30d`
-              : `${usd(stats.revenue.last30d)} in the last 30 days`
-          }
+          sub={`${usd(stats.revenue.last30d)} in the last 30 days`}
           icon={DollarSign}
           featured
         />
@@ -90,9 +88,9 @@ export default async function AdminDashboardPage() {
         </a>
       </section>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:items-start">
         {/* Recent orders */}
-        <section className="rounded-2xl border border-stone-200 bg-white" aria-labelledby="recent-orders">
+        <section className="min-w-0 rounded-2xl border border-stone-200 bg-white" aria-labelledby="recent-orders">
           <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
             <h2 id="recent-orders" className="headline text-xl">
               Recent orders
@@ -136,8 +134,8 @@ export default async function AdminDashboardPage() {
           )}
         </section>
 
-        {/* Top sellers */}
-        <section className="rounded-2xl border border-stone-200 bg-white" aria-labelledby="top-products">
+        {/* Top sellers: the products with the most real sales */}
+        <section className="min-w-0 rounded-2xl border border-stone-200 bg-white" aria-labelledby="top-products">
           <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
             <h2 id="top-products" className="headline text-xl">
               Top sellers
@@ -146,22 +144,33 @@ export default async function AdminDashboardPage() {
               Manage →
             </Link>
           </div>
-          <ol className="divide-y divide-stone-100">
-            {stats.topProducts.map((p, i) => (
-              <li key={p._id} className="flex items-center gap-3 px-5 py-3">
-                <span className="w-4 text-sm font-medium text-stone-400 tabular-nums">{i + 1}</span>
-                <div className="relative size-10 shrink-0 overflow-hidden rounded-lg bg-stone-100">
-                  {p.coverImage && (
-                    <Image src={p.coverImage} alt="" fill sizes="40px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />
-                  )}
-                </div>
-                <Link href={`/admin/products/${p._id}/edit`} className="min-w-0 flex-1 truncate text-sm font-medium hover:underline">
-                  {p.title}
-                </Link>
-                <span className="text-sm text-stone-500 tabular-nums">{p.salesCount.toLocaleString('en-US')} sold</span>
-              </li>
-            ))}
-          </ol>
+          {stats.topProducts.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title="No sales yet">The best-selling products show here after their first real sales.</EmptyState>
+            </div>
+          ) : (
+            <ol className="divide-y divide-stone-100">
+              {stats.topProducts.map((p, i) => (
+                <li key={p._id} className="flex items-center gap-3 px-5 py-3.5">
+                  <span className="w-4 shrink-0 text-sm font-medium text-stone-400 tabular-nums">{i + 1}</span>
+                  <div className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                    {p.coverImage && (
+                      <Image src={p.coverImage} alt="" fill sizes="44px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/admin/products/${p._id}/edit`} className="block truncate text-sm font-medium hover:underline" title={p.title}>
+                      {p.title}
+                    </Link>
+                    <p className="text-xs text-stone-500 tabular-nums">{usd(p.gross)} in sales</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-700 tabular-nums">
+                    {p.sold.toLocaleString('en-US')} sold
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
       </div>
     </>

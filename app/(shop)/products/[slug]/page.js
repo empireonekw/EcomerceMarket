@@ -107,7 +107,7 @@ export default async function ProductPage({ params }) {
   if (!product) notFound();
 
   const [related, shop, reviewSummary, firstReviews, categories] = await Promise.all([
-    getRelatedProducts(product, 4),
+    getRelatedProducts(product, 4), // one row of the grid on a laptop
     getShopSummary(product.sellerId),
     getProductReviewSummary(product._id),
     getProductReviews(product._id),
