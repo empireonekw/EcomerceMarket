@@ -17,14 +17,14 @@ export const HERO_SLIDES = [
   { src: unsplash('1573227890085-12ab5d68a170'), alt: 'Handmade leather teardrop earrings' },
 ];
 
-// The four photos framing the hero headline: left top, left bottom, right top, right bottom — the kinds of digital
-// products sold here (résumé templates, wedding stationery, planners, crochet patterns). Phones and tablets show left
+// The four photos framing the hero headline: left top, left bottom, right top, right bottom — bright crochet and
+// craft photos (free Unsplash licence). Phones and tablets show left
 // top, right top and right bottom in a row.
 export const HERO_PHOTOS = [
-  { src: unsplash('1586281380349-632531db7ed4'), alt: 'A résumé on a clipboard next to a laptop' },
-  { src: unsplash('1606800052052-a08af7148866'), alt: 'Wedding rings resting on wedding stationery' },
-  { src: unsplash('1506784983877-45594efa4cbe'), alt: 'A monthly planner page with handwritten goals' },
-  { src: unsplash('1648005539099-709d5be525fb'), alt: 'Balls of yarn and a crochet hook for a crochet pattern' },
+  { src: unsplash('1700171518313-5dd219beaaa6'), alt: 'Bright crocheted flowers on a blue surface' },
+  { src: unsplash('1728393287642-13bee7126ae8'), alt: 'A crocheted blanket and a crochet kit' },
+  { src: unsplash('1777283316185-9eff9eac098c'), alt: 'Colourful handmade crochet bags' },
+  { src: unsplash('1648005539099-709d5be525fb'), alt: 'Yarn and a crochet hook' },
 ];
 
 // Optional photo behind the whole hero, under a paper-coloured veil (HeroShowcase.jsx). null = the faint grid instead.
