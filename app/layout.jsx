@@ -26,18 +26,20 @@ const fraunces = Fraunces({
 export const metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | Templates, E-books, Software & Vectors`,
+    default: 'Sellpify Buy & Sell Digital Products, Physical Products, Dropshipping & More',
     template: `%s | ${siteConfig.name}`,
   },
-  description: siteConfig.description,
+  description:
+    'Explore Sellpify, an online marketplace to buy and sell digital products, physical goods, printables, templates, handmade items, dropshipping products and creative assets.',
   verification: {
     google: '0i7FeCq6qfqS25NS3eUoaN-dCwcAQJYTkPnj1u_Wzl0',
   },
   openGraph: {
     type: 'website',
     siteName: siteConfig.name,
-    title: siteConfig.name,
-    description: siteConfig.description,
+    title: 'Sellpify – Buy & Sell Digital Products, Physical Products, Dropshipping & More',
+    description:
+      'Explore Sellpify, an online marketplace to buy and sell digital products, physical goods, printables, templates, handmade items, dropshipping products and creative assets.',
     url: '/',
   },
   twitter: { card: 'summary_large_image' },
