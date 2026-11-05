@@ -17,9 +17,15 @@ export const HERO_SLIDES = [
   { src: unsplash('1573227890085-12ab5d68a170'), alt: 'Handmade leather teardrop earrings' },
 ];
 
-// The four photos framing the hero headline: left top, left bottom, right top, right bottom.
-// Phones and tablets show left top, right top and right bottom in a row.
-export const HERO_PHOTOS = [HERO_SLIDES[0], HERO_SLIDES[1], HERO_SLIDES[2], HERO_SLIDES[3]];
+// The four photos framing the hero headline: left top, left bottom, right top, right bottom — the kinds of digital
+// products sold here (résumé templates, wedding stationery, planners, crochet patterns). Phones and tablets show left
+// top, right top and right bottom in a row.
+export const HERO_PHOTOS = [
+  { src: unsplash('1586281380349-632531db7ed4'), alt: 'A résumé on a clipboard next to a laptop' },
+  { src: unsplash('1606800052052-a08af7148866'), alt: 'Wedding rings resting on wedding stationery' },
+  { src: unsplash('1506784983877-45594efa4cbe'), alt: 'A monthly planner page with handwritten goals' },
+  { src: unsplash('1648005539099-709d5be525fb'), alt: 'Balls of yarn and a crochet hook for a crochet pattern' },
+];
 
 // Optional photo behind the whole hero, under a paper-coloured veil (HeroShowcase.jsx). null = the faint grid instead.
 // e.g. { src: 'https://images.unsplash.com/photo-1631945788919-24e76faead25?auto=format&fit=crop&w=2000&q=70' } (cotton cord spools)

@@ -11,7 +11,7 @@ import Reviews from '@/components/home/Reviews';
 import Faq from '@/components/home/Faq';
 import SectionHeading from '@/components/home/SectionHeading';
 import TalkToSellers from '@/components/home/TalkToSellers';
-import { getProducts } from '@/lib/data/products';
+import { getHeroProducts, getProducts } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 import Reveal from '@/components/Reveal';
 import { siteConfig } from '@/lib/site';
@@ -61,14 +61,18 @@ const SITE_JSON_LD = [
 export default async function HomePage() {
   // Same data function that powers GET /api/products: Server Components query MongoDB
   // directly instead of making an HTTP round-trip to their own API.
-  const [{ items: latest }, allCategories] = await Promise.all([getProducts({ sort: 'newest', limit: 8 }), getCategories()]);
+  const [{ items: latest }, allCategories, heroProducts] = await Promise.all([
+    getProducts({ sort: 'newest', limit: 8 }),
+    getCategories(),
+    getHeroProducts(4).catch(() => []), // the hero falls back to its stock photos
+  ]);
   const categories = allCategories.filter((c) => !c.parent); // main categories; counts include their sub-categories
   const productCount = categories.reduce((n, c) => n + (c.totalCount ?? 0), 0);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD).replace(/</g, '\\u003c') }} />
-      <HeroShowcase />
+      <HeroShowcase products={heroProducts} />
       <FormatStrip />
       <Statement />
 

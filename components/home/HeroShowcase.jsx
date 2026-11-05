@@ -1,14 +1,18 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { HERO_BACKGROUND, HERO_PHOTOS } from '@/components/home/heroSlides';
 import { NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 
-/** One rounded photo card. `className` places and sizes it; the photo fills it. */
+/** One rounded photo card. `className` places and sizes it; the photo fills it. A shop listing links to its page. */
 function Photo({ photo, className, sizes }) {
+  const cls = `absolute overflow-hidden rounded-2xl bg-stone-200 shadow-[0_18px_40px_rgba(20,20,20,0.14)] ${className}`;
+  const image = <Image src={photo.src} alt={photo.alt} fill sizes={sizes} placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />;
+  if (!photo.href) return <div className={cls}>{image}</div>;
   return (
-    <div className={`absolute overflow-hidden rounded-2xl bg-stone-200 shadow-[0_18px_40px_rgba(20,20,20,0.14)] ${className}`}>
-      <Image src={photo.src} alt={photo.alt} fill sizes={sizes} placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />
-    </div>
+    <Link href={photo.href} title={photo.alt} className={`${cls} transition-[scale] duration-300 hover:scale-[1.03]`}>
+      {image}
+    </Link>
   );
 }
 
@@ -17,9 +21,13 @@ function Photo({ photo, className, sizes }) {
  * mirrored clusters of maker photos over soft colour shapes, filling the screen below the navbar. On load the text rises in,
  * the shapes grow and the photos float up in turn (CSS only, skipped under "reduce motion"). Below `lg` the photos
  * sit in a short row under the search. Server markup only (the search is a plain GET form to /products).
+ * `products`: real listings from the shop (lib/data/products.js getHeroProducts) — their cover photos are shown and
+ * link to the listing; with fewer than four, the stock photos in heroSlides.js are used instead.
  */
-export default function HeroShowcase() {
-  const [leftTop, leftBottom, rightTop, rightBottom] = HERO_PHOTOS;
+export default function HeroShowcase({ products = [] }) {
+  const photos =
+    products.length >= 4 ? products.slice(0, 4).map((p) => ({ src: p.coverImage, alt: p.title, href: `/products/${p.slug}` })) : HERO_PHOTOS;
+  const [leftTop, leftBottom, rightTop, rightBottom] = photos;
   const sideSizes = '(min-width: 1280px) 220px, 18vw';
 
   return (
