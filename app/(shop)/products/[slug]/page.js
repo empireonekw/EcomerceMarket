@@ -85,6 +85,12 @@ function timeOn(since) {
   return months < 12 ? `${months} month${months === 1 ? '' : 's'}` : `${Math.floor(months / 12)} year${months >= 24 ? 's' : ''}`;
 }
 
+/** "Includes 300 sales and 40 reviews from the seller's other shop, checked by Sellpify." (imported totals) */
+function importedNote({ sales, reviews }) {
+  const parts = [sales > 0 && `${sales.toLocaleString('en-US')} sale${sales === 1 ? '' : 's'}`, reviews > 0 && `${reviews} review${reviews === 1 ? '' : 's'}`].filter(Boolean);
+  return `Includes ${parts.join(' and ')} from the seller’s other shop, checked by ${siteConfig.name}.`;
+}
+
 const fmtDate = (d) => new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
 /** One row of the right column's "Highlights" / "Delivery" lists: an icon and text. */
@@ -128,6 +134,7 @@ export default async function ProductPage({ params }) {
     coverImage: product.coverImage,
     accessLink,
   };
+  const intro = String(product.description ?? '').split(/\n\s*\n/)[0].trim(); // first paragraph, for the buy box
   const photos = product.images?.length ? product.images : [product.coverImage].filter(Boolean);
   const country = shop?.country && countryOf(shop.country)?.name;
   const shopAge = timeOn(shop?.since);
@@ -191,10 +198,14 @@ export default async function ProductPage({ params }) {
 
           {/* Shop and rating */}
           <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
-            <span className="flex items-center gap-1 font-semibold text-ink">
-              {shop ? shop.name : siteConfig.name}
-              {shop?.verified && <VerifiedBadge size={15} />}
-            </span>
+            {shop ? (
+              <Link href={`/shop/${shop.id}`} className="flex items-center gap-1 font-semibold text-ink underline-offset-4 hover:underline">
+                {shop.name}
+                {shop.verified && <VerifiedBadge size={15} />}
+              </Link>
+            ) : (
+              <span className="font-semibold text-ink">{siteConfig.name}</span>
+            )}
             {reviewSummary.count > 0 ? (
               <a href="#reviews" className="inline-flex items-center gap-1.5 text-stone-600 hover:text-ink">
                 <Stars rating={reviewSummary.average} size={14} />
@@ -219,6 +230,21 @@ export default async function ProductPage({ params }) {
               Secure checkout
             </li>
           </ul>
+
+          {/* A taste of the description right above the buttons: the seller's summary, or the description's first
+              paragraph with its formatting (bold etc.), cut to three lines. The full text is further down. */}
+          {(product.shortDescription || intro) && (
+            <div className="mt-6 rounded-2xl bg-stone-50 px-4 py-3.5">
+              {product.shortDescription ? (
+                <p className="line-clamp-3 text-[15px] leading-relaxed text-stone-700">{product.shortDescription}</p>
+              ) : (
+                <RichText text={intro} className="line-clamp-3 text-[15px] leading-relaxed text-stone-700" />
+              )}
+              <a href="#about" className="mt-1.5 inline-block text-sm font-semibold text-ink underline-offset-4 hover:underline">
+                Read the full description
+              </a>
+            </div>
+          )}
 
           <div className="mt-6 space-y-3">
             <BuyNowButton product={cartProduct} />
@@ -252,11 +278,10 @@ export default async function ProductPage({ params }) {
           </section>
 
           {/* ---------- Description ---------- */}
-          <section className="mt-10 border-t border-stone-200 pt-8" aria-labelledby="about-heading">
+          <section id="about" className="mt-10 scroll-mt-28 border-t border-stone-200 pt-8" aria-labelledby="about-heading">
             <h2 id="about-heading" className="text-lg font-semibold text-ink">
               About this item
             </h2>
-            {product.shortDescription && <p className="mt-3 text-[15px] font-medium leading-relaxed text-stone-800">{product.shortDescription}</p>}
             <div className="mt-3">
               <ExpandableText>
                 <RichText text={product.description} className="text-[15px] leading-relaxed text-stone-700" />
@@ -315,7 +340,9 @@ export default async function ProductPage({ params }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Meet the seller</p>
                   <h2 id="seller-heading" className="mt-0.5 flex items-center gap-1.5 font-serif text-2xl text-ink">
-                    <span className="truncate">{shop.name}</span>
+                    <Link href={`/shop/${shop.id}`} className="truncate underline-offset-4 hover:underline">
+                      {shop.name}
+                    </Link>
                     {shop.verified && <VerifiedBadge size={20} />}
                     {country && <span className="font-sans text-sm font-normal text-stone-500">· {country}</span>}
                   </h2>
@@ -343,6 +370,9 @@ export default async function ProductPage({ params }) {
                       </>
                     )}
                   </p>
+                  {(shop.imported.sales > 0 || shop.imported.reviews > 0) && (
+                    <p className="mt-1.5 text-xs text-stone-500">{importedNote(shop.imported)}</p>
+                  )}
                   {shop.verified && (
                     <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-sky-800">
                       <BadgeCheck size={15} strokeWidth={2} aria-hidden="true" />
@@ -351,7 +381,10 @@ export default async function ProductPage({ params }) {
                   )}
                   {shop.description && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-600">{shop.description}</p>}
                 </div>
-                <div className="shrink-0 sm:w-44">
+                <div className="flex shrink-0 flex-col gap-2 sm:w-44">
+                  <Link href={`/shop/${shop.id}`} className="btn btn-md btn-dark w-full">
+                    Visit shop
+                  </Link>
                   <MessageSellerButton
                     product={{ id: product._id, slug: product.slug, title: product.title, coverImage: product.coverImage }}
                     shop={{ id: shop.id, name: shop.name, verified: shop.verified }}
@@ -371,12 +404,18 @@ export default async function ProductPage({ params }) {
                         <p className="mt-3 text-xs text-stone-500">
                           <span className="font-medium text-stone-700">{r.authorName}</span> · {fmtDate(r.createdAt)}
                         </p>
-                        <p className="mt-0.5 truncate text-xs text-stone-500">
-                          Purchased:{' '}
-                          <Link href={`/products/${r.productSlug}`} className="underline underline-offset-2 hover:text-ink">
-                            {r.productTitle}
-                          </Link>
-                        </p>
+                        {r.imported ? (
+                          <p className="mt-1.5">
+                            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">From the seller’s other shop</span>
+                          </p>
+                        ) : (
+                          <p className="mt-0.5 truncate text-xs text-stone-500">
+                            Purchased:{' '}
+                            <Link href={`/products/${r.productSlug}`} className="underline underline-offset-2 hover:text-ink">
+                              {r.productTitle}
+                            </Link>
+                          </p>
+                        )}
                       </li>
                     ))}
                   </ul>

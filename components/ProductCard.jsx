@@ -16,9 +16,10 @@ const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFra
  * a badge on it; then the delivery line, a one-line title, rating and shop, price with any discount, and
  * "Add to cart" · "More like this". Every row is always there, so cards in a row are the same height.
  * The title link is stretched over the whole card; the buttons sit above it. Laid out by its own width (@container).
- * Pass `preload` only for above-the-fold cards (first row) to improve LCP.
+ * Pass `preload` only for above-the-fold cards (first row) to improve LCP. `showShop={false}` (on a shop's own page)
+ * leaves out the rating and "By shop" row, for every card alike.
  */
-export default function ProductCard({ product, preload = false }) {
+export default function ProductCard({ product, preload = false, showShop = true }) {
   const {
     _id,
     title,
@@ -92,20 +93,22 @@ export default function ProductCard({ product, preload = false }) {
           </Link>
         </h3>
 
-        <p className="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-stone-600 @[17rem]:text-sm">
-          {rating?.count > 0 && (
-            <>
-              <span className="font-semibold text-ink tabular-nums">{rating.average.toFixed(1)}</span>
-              <Star size={14} aria-hidden="true" className="shrink-0 fill-ink text-ink" />
-              <span className="tabular-nums">({compact.format(rating.count)})</span>
-              <span aria-hidden="true" className="px-0.5">
-                ·
-              </span>
-            </>
-          )}
-          <span className="truncate">By {shop?.name ?? 'Sellpify'}</span>
-          {shop?.verified && <VerifiedBadge size={14} />}
-        </p>
+        {showShop && (
+          <p className="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-stone-600 @[17rem]:text-sm">
+            {rating?.count > 0 && (
+              <>
+                <span className="font-semibold text-ink tabular-nums">{rating.average.toFixed(1)}</span>
+                <Star size={14} aria-hidden="true" className="shrink-0 fill-ink text-ink" />
+                <span className="tabular-nums">({compact.format(rating.count)})</span>
+                <span aria-hidden="true" className="px-0.5">
+                  ·
+                </span>
+              </>
+            )}
+            <span className="truncate">By {shop?.name ?? 'Sellpify'}</span>
+            {shop?.verified && <VerifiedBadge size={14} />}
+          </p>
+        )}
 
         <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5">
           <span

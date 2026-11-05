@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Clock, DollarSign, MessageSquare, Package, ShoppingBag, Wallet } from 'lucide-react';
 import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import SellerVerificationPanel from '@/components/admin/SellerVerificationPanel';
+import ImportedRecordsPanel from '@/components/admin/ImportedRecordsPanel';
+import { getImportedRecords } from '@/lib/data/imported';
 import PagedList from '@/components/dashboard/PagedList';
 import { Panel, StatCard, StatusBadge, RoleBadge, ProviderBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { ActivityLog, EarningsPanel, ProductMonthlyPanel } from '@/components/dashboard/SellerAnalytics';
@@ -35,8 +37,8 @@ export default async function AdminUserPage({ params }) {
   const u = await getAdminUserDetail(id); // authorizes the admin first
   if (!u) notFound();
   const s = u.selling;
-  const [monthly, byProduct, activity] = s
-    ? await Promise.all([getMonthlyEarnings(u.id, 12), getProductMonthlyEarnings(u.id, 6), getSellerActivity(u.id)])
+  const [monthly, byProduct, activity, imported] = s
+    ? await Promise.all([getMonthlyEarnings(u.id, 12), getProductMonthlyEarnings(u.id, 6), getSellerActivity(u.id), getImportedRecords(u.id)])
     : [];
 
   return (
@@ -155,6 +157,12 @@ export default async function AdminUserPage({ params }) {
           {u.shop?.verification && (
             <Panel title="Verification">
               <SellerVerificationPanel userId={u.id} shop={u.shop} />
+            </Panel>
+          )}
+
+          {u.shop?.storeName && imported && (
+            <Panel title="Sales & reviews from their other shop">
+              <ImportedRecordsPanel sellerId={u.id} records={imported} />
             </Panel>
           )}
         </div>

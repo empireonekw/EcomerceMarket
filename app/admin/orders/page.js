@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Form from 'next/form';
 import Pagination from '@/components/Pagination';
 import OrderStatusSelect from '@/components/admin/OrderStatusSelect';
+import DeleteOrderButton from '@/components/admin/DeleteOrderButton';
 import { PageHeader, EmptyState, ProviderBadge, buttonClasses, formatDateTime } from '@/components/dashboard/ui';
 import { getAdminOrders } from '@/lib/data/admin';
 import { formatPrice } from '@/lib/utils';
@@ -79,8 +80,9 @@ export default async function AdminOrdersPage({ searchParams }) {
                     <OrderStatusSelect order={o} />
                     <ProviderBadge provider={o.paymentProvider} />
                   </span>
-                  <span className="text-xs text-stone-500">
+                  <span className="flex items-center gap-1 text-xs text-stone-500">
                     {date} · {time}
+                    <DeleteOrderButton order={o} />
                   </span>
                 </div>
               </li>
@@ -98,6 +100,9 @@ export default async function AdminOrdersPage({ searchParams }) {
                   <th scope="col" className="px-4 py-3 text-right">Total paid</th>
                   <th scope="col" className="px-4 py-3">Status</th>
                   <th scope="col" className="px-4 py-3">Date</th>
+                  <th scope="col" className="w-12 px-2 py-3">
+                    <span className="sr-only">Delete</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-100">
@@ -135,6 +140,9 @@ export default async function AdminOrdersPage({ searchParams }) {
                       <td className="whitespace-nowrap px-4 py-3.5 text-stone-600">
                         {date}
                         <span className="block text-xs text-stone-400">{time}</span>
+                      </td>
+                      <td className="px-2 py-3">
+                        <DeleteOrderButton order={o} />
                       </td>
                     </tr>
                   );
