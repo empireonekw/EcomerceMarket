@@ -21,7 +21,7 @@ import { siteConfig } from '@/lib/site';
 export const revalidate = 300;
 
 export const metadata = {
-  description: `Shop templates, e-books, software, vectors and more from independent creators on ${siteConfig.name}. Secure checkout, instant download, and sellers keep 100% of every sale.`,
+  description: siteConfig.description,
   alternates: { canonical: '/' },
 };
 
