@@ -8,7 +8,7 @@ import { getOnboarding, saveOnboardingStep, submitOnboarding } from '@/lib/data/
  *   GET  → { step, data } saved progress
  *   PUT  { step, data } → saves one step (after checking it) → { step, data }
  *   POST { agreeTerms: true } → opens the shop → { storeName }
- * Saving and opening need a verified email (lib/data/email-verification.js).
+ * Saving and opening need a verified email while email verification is switched on (lib/auth.js).
  */
 const UNVERIFIED = 'Please verify your email first (Account settings).';
 export async function GET(request) {
@@ -24,7 +24,7 @@ export async function GET(request) {
 export async function PUT(request) {
   const user = await getRequestUser(request); // same-origin enforced for writes
   if (!user) return unauthorized();
-  if (!user.emailVerified) return forbidden(UNVERIFIED);
+  if (user.mustVerifyEmail) return forbidden(UNVERIFIED);
   if (!rateLimit(`onboarding:${user.id}`, { limit: 60, windowMs: 10 * 60_000 }).ok) {
     return json({ error: 'Too many saves in a short time. Please wait a minute.' }, 429);
   }
@@ -39,7 +39,7 @@ export async function PUT(request) {
 export async function POST(request) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
-  if (!user.emailVerified) return forbidden(UNVERIFIED);
+  if (user.mustVerifyEmail) return forbidden(UNVERIFIED);
   if (!rateLimit(`onboarding:${user.id}`, { limit: 60, windowMs: 10 * 60_000 }).ok) {
     return json({ error: 'Too many attempts in a short time. Please wait a minute.' }, 429);
   }

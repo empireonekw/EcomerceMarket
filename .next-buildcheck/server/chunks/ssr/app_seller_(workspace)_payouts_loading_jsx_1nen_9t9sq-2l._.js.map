@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../app/seller/%28workspace%29/payouts/loading.jsx"],"sourcesContent":["export { SellerPayoutsSkeleton as default } from '@/components/dashboard/RouteSkeletons';\n"],"names":[],"mappings":"uCAAA,IAAA,EAAA,EAAA,CAAA,CAAA"}

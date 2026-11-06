@@ -1,3 +1,0 @@
-module.exports=[73990,e=>{"use strict";var a=e.i(65044);e.s(["M",0,function(){(0,a.revalidateTag)("categories",{expire:0}),(0,a.revalidatePath)("/"),(0,a.revalidatePath)("/products/[slug]","page")},"A",0,function(...e){for(let t of((0,a.revalidatePath)("/"),new Set(e.filter(Boolean))))(0,a.revalidatePath)(`/products/${t}`);(0,a.revalidateTag)("categories","max")}])},66063,e=>{e.v(a=>Promise.all(["server/chunks/[root-of-the-server]__1ezwulvl14xkz._.js","server/chunks/lib_uploads_1pr7dzv81f7t9.js"].map(a=>e.l(a))).then(()=>a(41873)))}];
-
-//# sourceMappingURL=lib_19jqhdfxjpevu._.js.map

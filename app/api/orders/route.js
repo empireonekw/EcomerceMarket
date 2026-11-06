@@ -32,7 +32,8 @@ export async function GET(request) {
  * Re-prices items from MongoDB and settles payment via lib/payments.js: free/demo orders complete now and return
  * signed download links plus a private receipt URL; paid orders return the PayFast checkout form instead.
  *
- * Signed-in buyers must have verified their email (403 code 'email_unverified'); guests check out with any email.
+ * While email verification is switched on (lib/auth.js), signed-in buyers must have verified their email
+ * (403 code 'email_unverified'); guests check out with any email.
  *
  * Responses: 201 completed · 202 pending (PayFast) · 400 invalid input · 402 payments unavailable · 403 email not verified ·
  * 409 unavailable/price changed
@@ -63,7 +64,7 @@ export async function POST(request) {
   try {
     // Signed-in buyers get the order linked to their account (guests can still check out).
     const buyer = await getRequestUser(request);
-    if (buyer && !buyer.emailVerified) {
+    if (buyer?.mustVerifyEmail) {
       return NextResponse.json(
         { error: 'Please verify your email before buying (Account settings).', code: 'email_unverified' },
         { status: 403, headers: noStore },

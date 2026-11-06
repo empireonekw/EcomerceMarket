@@ -172,7 +172,7 @@ function ProfileTab({ user, purchaseCount }) {
         <dl className="mt-4 space-y-3 text-sm">
           {[
             ['Name', user.name],
-            ['Email', `${user.email}${user.emailVerified ? ' (verified)' : ' (not verified yet)'}`],
+            ['Email', `${user.email}${user.emailVerified ? ' (verified)' : ''}`],
             ['Member since', fmtDate(user.createdAt, { dateStyle: 'long' })],
             ['Account type', ROLE_LABELS[user.role] ?? 'Customer'],
             ...(user.role === 'customer' ? [['Purchases', String(purchaseCount)]] : []),
@@ -191,7 +191,7 @@ function ProfileTab({ user, purchaseCount }) {
         )}
       </section>
       <div className="space-y-6">
-        {!user.emailVerified && <EmailVerification email={user.email} />}
+        {user.mustVerifyEmail && <EmailVerification email={user.email} />}
         <NameForm initialName={user.name} />
         <PasswordForm email={user.email} />
         <SessionControls expiresAt={user.session.expiresAt} />

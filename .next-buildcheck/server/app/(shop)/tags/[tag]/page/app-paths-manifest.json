@@ -1,3 +1,0 @@
-{
-  "/(shop)/tags/[tag]/page": "app/(shop)/tags/[tag]/page.js"
-}

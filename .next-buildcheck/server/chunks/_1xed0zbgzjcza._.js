@@ -1,3 +1,0 @@
-module.exports=[73990,e=>{"use strict";var r=e.i(65044);e.s(["M",0,function(){(0,r.revalidateTag)("categories",{expire:0}),(0,r.revalidatePath)("/"),(0,r.revalidatePath)("/products/[slug]","page")},"A",0,function(...e){for(let s of((0,r.revalidatePath)("/"),new Set(e.filter(Boolean))))(0,r.revalidatePath)(`/products/${s}`);(0,r.revalidateTag)("categories","max")}])},66063,e=>{e.v(e=>Promise.resolve().then(()=>e(41873)))},60154,e=>{e.v(r=>Promise.all(["server/chunks/[root-of-the-server]__1jbkhoft5_sin._.js","server/chunks/node_modules_@vercel_blob_dist_index_1znnkemaydhrn.js","server/chunks/node_modules_1nygk-9e9zcil._.js","server/chunks/node_modules_0hadv5mk9ho5-._.js"].map(r=>e.l(r))).then(()=>r(98005)))}];
-
-//# sourceMappingURL=_1xed0zbgzjcza._.js.map
