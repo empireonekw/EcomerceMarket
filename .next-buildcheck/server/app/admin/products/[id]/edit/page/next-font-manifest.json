@@ -1,0 +1,12 @@
+{
+  "pages": {},
+  "app": {
+    "[project]/app/admin/products/[id]/edit/page": [
+      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+      "static/media/8010b10db0d5feb2-s.p.1q-jjomgjvbjf.woff2",
+      "static/media/791bf8c4bb753ed6-s.p.0ggqn9ig56u4s.woff2"
+    ]
+  },
+  "appUsingSizeAdjust": true,
+  "pagesUsingSizeAdjust": false
+}

@@ -52,7 +52,7 @@ export async function POST(request) {
     await connectDB();
     // The owner admin signs in with ADMIN_PASSWORD, which also restores the account if it was removed (lib/owner-admin.js).
     const owner = isOwnerAdminEmail(email) ? await ensureOwnerAdmin(password) : null;
-    const user = owner ?? (await User.findOne({ email }).select('+password seller.verification.status name email role createdAt tokenVersion blockedAt seller.storeName'));
+    const user = owner ?? (await User.findOne({ email }).select('+password seller.verification.status name email role createdAt emailVerifiedAt tokenVersion blockedAt seller.storeName'));
     const valid = Boolean(owner) || (await bcrypt.compare(password, user?.password ?? (await getDummyHash())));
 
     // One generic message for every failure mode, so the form never reveals which emails exist.

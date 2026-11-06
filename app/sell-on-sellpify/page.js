@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Store } from 'lucide-react';
 import AuthBackground from '@/components/auth/AuthBackground';
+import EmailVerification from '@/components/EmailVerification';
 import Logo from '@/components/Logo';
 import OnboardingWizard from '@/components/seller/onboarding/OnboardingWizard';
 import { getCurrentUser } from '@/lib/auth';
@@ -28,7 +29,7 @@ function Gate({ title, text, children }) {
 /**
  * "Sell on Sellpify": the shop-opening wizard (components/seller/onboarding/OnboardingWizard.jsx). Any shopping
  * account can open a shop here (it keeps its purchases); signed-out visitors log in or create an account first.
- * Sellers whose shop is open go to their dashboard; admins can't open shops.
+ * Sellers whose shop is open go to their dashboard; admins can't open shops; everyone else verifies their email first.
  */
 export default async function SellOnSellpifyPage() {
   const user = await getCurrentUser();
@@ -59,6 +60,12 @@ export default async function SellOnSellpifyPage() {
           Go to the admin dashboard
         </Link>
       </Gate>
+    );
+  } else if (!user.emailVerified) {
+    content = (
+      <div className="mx-auto my-auto w-full max-w-lg py-16">
+        <EmailVerification email={user.email} title="First, verify your email" text="Buyers and Sellpify reach you by email about orders and payouts." />
+      </div>
     );
   } else {
     content = (

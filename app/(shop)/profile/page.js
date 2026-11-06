@@ -10,6 +10,7 @@ import { DeleteAccount, NameForm, PasswordForm, SessionControls } from '@/compon
 import ReviewDialog from '@/components/reviews/ReviewDialog';
 import Stars from '@/components/Stars';
 import VerifiedBadge from '@/components/VerifiedBadge';
+import EmailVerification from '@/components/EmailVerification';
 import Pagination from '@/components/Pagination';
 import FileDownloads from '@/components/FileDownloads';
 import SignOutButton from '@/components/SignOutButton';
@@ -171,7 +172,7 @@ function ProfileTab({ user, purchaseCount }) {
         <dl className="mt-4 space-y-3 text-sm">
           {[
             ['Name', user.name],
-            ['Email', user.email],
+            ['Email', `${user.email}${user.emailVerified ? ' (verified)' : ' (not verified yet)'}`],
             ['Member since', fmtDate(user.createdAt, { dateStyle: 'long' })],
             ['Account type', ROLE_LABELS[user.role] ?? 'Customer'],
             ...(user.role === 'customer' ? [['Purchases', String(purchaseCount)]] : []),
@@ -190,6 +191,7 @@ function ProfileTab({ user, purchaseCount }) {
         )}
       </section>
       <div className="space-y-6">
+        {!user.emailVerified && <EmailVerification email={user.email} />}
         <NameForm initialName={user.name} />
         <PasswordForm email={user.email} />
         <SessionControls expiresAt={user.session.expiresAt} />

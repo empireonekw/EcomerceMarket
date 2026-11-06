@@ -39,8 +39,8 @@ export async function GET(request) {
     const google = await googleIdentity({ code, verifier: flow.verifier, redirectUri: googleRedirectUri(request.url) });
     await connectDB();
     let user =
-      (await User.findOne({ googleId: google.sub }).select('name email role createdAt tokenVersion blockedAt googleId seller.storeName')) ??
-      (await User.findOne({ email: google.email }).select('name email role createdAt tokenVersion blockedAt googleId seller.storeName'));
+      (await User.findOne({ googleId: google.sub }).select('name email role createdAt emailVerifiedAt tokenVersion blockedAt googleId seller.storeName')) ??
+      (await User.findOne({ email: google.email }).select('name email role createdAt emailVerifiedAt tokenVersion blockedAt googleId seller.storeName'));
 
     if (user?.role === 'admin' || (!user && isOwnerAdminEmail(google.email))) return fail('google_admin');
     if (user?.blockedAt) return fail('suspended');
@@ -57,6 +57,7 @@ export async function GET(request) {
     } else if (!user.googleId) {
       user.googleId = google.sub; // Google confirmed this email belongs to them: link it for next time
     }
+    user.emailVerifiedAt ??= new Date(); // Google only signs in with verified addresses (googleIdentity)
     user.lastLoginAt = new Date();
     await user.save();
 

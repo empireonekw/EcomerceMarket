@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/seller/%28workspace%29/messages/loading.jsx"],"sourcesContent":["import { SellerMessagesSkeleton } from '@/components/dashboard/RouteSkeletons';\n\nexport default SellerMessagesSkeleton;\n"],"names":[],"mappings":"6CAAA,AAEe,EAFf,CAAA,CAAA,OAEe,CAAsB"}
