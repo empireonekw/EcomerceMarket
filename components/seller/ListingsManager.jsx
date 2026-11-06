@@ -76,7 +76,7 @@ function Switch({ checked, onChange, label }) {
 const menuItem = 'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 disabled:pointer-events-none disabled:opacity-40';
 
 /**
- * The ☰ menu on each listing card (like Etsy's): View in store, View stats (soon), Edit, Copy, Activate/Deactivate,
+ * The ☰ menu on each listing card (like Etsy's): View in store, View stats, Edit, Copy, Activate/Deactivate,
  * Share, Delete. Opens upwards from the card footer; closes on outside click or Esc.
  */
 function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
@@ -128,11 +128,10 @@ function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
           ) : (
             <p className="px-4 py-2.5 text-xs text-stone-500">Not in the store yet — it shows here once it’s active.</p>
           )}
-          <button type="button" role="menuitem" disabled className={menuItem} title="Coming soon">
+          <Link role="menuitem" href={`${BASE}/${p._id}/stats`} onClick={() => setOpen(false)} className={menuItem}>
             <BarChart3 size={15} strokeWidth={1.9} aria-hidden="true" />
             View stats
-            <span className="ml-auto rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-stone-500">Soon</span>
-          </button>
+          </Link>
           <hr className="my-1.5 border-stone-100" />
           <Link role="menuitem" href={`${BASE}/${p._id}/edit`} onClick={() => setOpen(false)} className={menuItem}>
             <Pencil size={15} strokeWidth={1.9} aria-hidden="true" />

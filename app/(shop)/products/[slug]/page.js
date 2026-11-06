@@ -13,6 +13,7 @@ import VerifiedBadge from '@/components/VerifiedBadge';
 import Stars from '@/components/Stars';
 import ProductReviews from '@/components/reviews/ProductReviews';
 import { getProductReviews, getProductReviewSummary } from '@/lib/data/reviews';
+import ProductViewTracker from '@/components/ProductViewTracker';
 import { getProductBySlug, getRelatedProducts, getShopSummary } from '@/lib/data/products';
 import { getCategories } from '@/lib/data/categories';
 import { countryOf } from '@/lib/seller-onboarding';
@@ -141,6 +142,7 @@ export default async function ProductPage({ params }) {
 
   return (
     <div className="container-page py-6 sm:py-10">
+      <ProductViewTracker productId={String(product._id)} />
       <script
         type="application/ld+json"
         // Escape "<" so product text can never close the script tag.

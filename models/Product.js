@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { slugify } from '../lib/utils.js';
 import { isAllowedImageUrl } from '../lib/image-hosts.js';
-import { isUploadedSource, isUploadedVideo, ITEM_TYPES, LICENSES, LISTING_LIMITS, MADE_BY, MADE_WHEN } from '../lib/listing.js';
+import { isUploadedSource, isUploadedVideo, ITEM_TYPES, LICENSES, LISTING_LIMITS, MADE_BY, MADE_WHEN, LEGACY_MADE_WHEN } from '../lib/listing.js';
 
 const { Schema } = mongoose;
 
@@ -134,7 +134,7 @@ const productSchema = new Schema(
     // How it's made + licence (seller listing form). Optional for platform products and drafts.
     madeBy: { type: String, enum: MADE_BY.map((o) => o.value) },
     itemType: { type: String, enum: ITEM_TYPES.map((o) => o.value) },
-    madeWhen: { type: String, enum: MADE_WHEN.map((o) => o.value) },
+    madeWhen: { type: String, enum: [...MADE_WHEN.map((o) => o.value), ...LEGACY_MADE_WHEN] },
     license: { type: String, enum: LICENSES.map((o) => o.value) },
     rightsConfirmed: { type: Boolean }, // seller confirmed they may sell everything in the listing
     shopFeatured: { type: Boolean, default: false }, // seller's own pin: listed first on their Listings page
