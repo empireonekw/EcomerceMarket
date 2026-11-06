@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import ListingForm from '@/components/seller/ListingForm';
 import { requireSellerStore } from '@/lib/auth';
-import { getCategories } from '@/lib/data/categories';
+import { getFormCategories } from '@/lib/data/categories';
 import { getMarketplaceSettings } from '@/lib/data/settings';
 import { getRecentListingCategories, getSellerProductForEdit } from '@/lib/data/seller';
 import { uploadDriver } from '@/lib/uploads';
@@ -14,7 +14,7 @@ export default async function EditListingPage({ params }) {
   const seller = await requireSellerStore(`/seller/listings/${id}/edit`);
   const [listing, categories, settings, recentCategories] = await Promise.all([
     getSellerProductForEdit(seller.id, id),
-    getCategories(),
+    getFormCategories(),
     getMarketplaceSettings(),
     getRecentListingCategories(seller.id),
   ]);

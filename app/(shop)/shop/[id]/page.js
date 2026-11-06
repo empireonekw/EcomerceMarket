@@ -1,6 +1,6 @@
 import Form from 'next/form';
 import { notFound } from 'next/navigation';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, Star } from 'lucide-react';
 import Link from '@/components/PrefetchLink';
 import BackLink from '@/components/BackLink';
 import ChipScroller from '@/components/ChipScroller';
@@ -10,7 +10,10 @@ import ProductGrid from '@/components/ProductGrid';
 import SortMenu from '@/components/SortMenu';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { getProducts, getPublicShop, getShopFeaturedProducts } from '@/lib/data/products';
+import { getProducts, getPublicShop, getShopSummary } from '@/lib/data/products';
 import { countryOf } from '@/lib/seller-onboarding';
+import { importedNote, timeOn } from '@/lib/shop-stats';
+import { siteConfig } from '@/lib/site';
 import { parseProductQuery, PRODUCT_SORTS } from '@/lib/utils';
 
 export async function generateMetadata({ params }) {
@@ -25,12 +28,12 @@ export async function generateMetadata({ params }) {
 
 /**
  * A shop's page (/shop/[id], linked from the seller's name on product pages): the shop's banner, logo, name and about
- * line, then all its listings, with its categories on the left, a search box and sorting. Listings only: no sales
- * figures or ratings.
+ * line, its stars, sales and time on Sellpify (like Etsy), then all its listings, with its categories on the left, a
+ * search box and sorting.
  */
 export default async function ShopPage({ params, searchParams }) {
   const { id } = await params;
-  const shop = await getPublicShop(id);
+  const [shop, stats] = await Promise.all([getPublicShop(id), getShopSummary(id)]);
   if (!shop) notFound();
 
   const query = parseProductQuery(await searchParams);
@@ -51,6 +54,8 @@ export default async function ShopPage({ params, searchParams }) {
   };
   const sections = [{ id: undefined, name: 'All', count: shop.total }, ...shop.categories];
   const country = shop.country && countryOf(shop.country)?.name;
+  const shopAge = timeOn(stats?.since);
+  const compact = (n) => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n).toLowerCase(); // 1.9k
 
   return (
     <div className="container-wide py-6 sm:py-10">
@@ -83,6 +88,32 @@ export default async function ShopPage({ params, searchParams }) {
               <MapPin size={14} strokeWidth={1.75} aria-hidden="true" />
               {country}
             </p>
+          )}
+          {stats && (
+            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-stone-600">
+              {stats.rating.count > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Star size={16} aria-hidden="true" className="fill-amber-400 text-amber-400" />
+                  <span className="font-semibold text-ink">{stats.rating.average.toFixed(1)}</span>({stats.rating.count.toLocaleString('en-US')})
+                  <span className="sr-only">stars from reviews</span>
+                </span>
+              )}
+              {stats.rating.count > 0 && <span aria-hidden="true" className="hidden h-4 w-px bg-stone-300 sm:block" />}
+              <span>
+                <span className="font-semibold text-ink">{compact(stats.sales)}</span> sale{stats.sales === 1 ? '' : 's'}
+              </span>
+              {shopAge && (
+                <>
+                  <span aria-hidden="true" className="hidden h-4 w-px bg-stone-300 sm:block" />
+                  <span>
+                    <span className="font-semibold text-ink">{shopAge}</span> on {siteConfig.name}
+                  </span>
+                </>
+              )}
+            </p>
+          )}
+          {stats && (stats.imported.sales > 0 || stats.imported.reviews > 0) && (
+            <p className="mt-1 text-xs text-stone-500">{importedNote(stats.imported)}</p>
           )}
           {shop.description && <p className="mt-2 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{shop.description}</p>}
         </div>

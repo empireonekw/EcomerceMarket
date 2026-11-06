@@ -19,4 +19,7 @@ const importedReviewSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
+// In development a hot reload re-runs this file, but mongoose would keep the model compiled from the old schema (still
+// requiring the removed `platform` field). Drop it, so schema edits apply without restarting the server.
+if (process.env.NODE_ENV !== 'production' && mongoose.models.ImportedReview) mongoose.deleteModel('ImportedReview');
 export default mongoose.models.ImportedReview || mongoose.model('ImportedReview', importedReviewSchema);
