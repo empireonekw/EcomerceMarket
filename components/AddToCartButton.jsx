@@ -1,5 +1,6 @@
 'use client';
 
+import { trackListing } from '@/lib/track';
 import { Check, Plus } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
@@ -34,7 +35,7 @@ export default function AddToCartButton({ product, compact = false, outlined = f
   return (
     <button
       type="button"
-      onClick={() => addToCart(product)}
+      onClick={() => (addToCart(product), trackListing(product._id, 'cart'))}
       aria-label={compact ? `${label}: ${product.title}` : undefined}
       className={`${base} ${compact ? 'btn-dark' : 'btn-outline'}`}
     >
@@ -59,7 +60,7 @@ function OutlinedButton({ product, className }) {
   return (
     <button
       type="button"
-      onClick={() => addToCart(product)}
+      onClick={() => (addToCart(product), trackListing(product._id, 'cart'))}
       aria-label={`${product.price === 0 ? 'Add free item' : 'Add to cart'}: ${product.title}`}
       className={`${base} border-ink text-ink hover:bg-ink hover:text-white`}
     >

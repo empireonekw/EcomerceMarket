@@ -78,7 +78,8 @@ function initialValues(listing) {
     fileFormat: listing?.fileFormat ?? '',
     madeBy: listing?.madeBy ?? '',
     itemType: listing?.itemType ?? '',
-    madeWhen: listing?.madeWhen ?? '',
+    // Only "2026 – present" is offered: pre-selected for new listings and for old ones with a retired value.
+    madeWhen: MADE_WHEN.some((o) => o.value === listing?.madeWhen) ? listing.madeWhen : MADE_WHEN[0].value,
     license: listing?.license ?? '',
     rightsConfirmed: listing?.rightsConfirmed ?? false,
     shopFeatured: listing?.shopFeatured ?? false,
@@ -1035,9 +1036,6 @@ export default function ListingForm({ categories, recentCategories = [], listing
                   aria-describedby={show('madeWhen') ? 'madeWhen-error' : undefined}
                   className={`${inputCls(show('madeWhen'))} appearance-none pr-10 ${values.madeWhen ? '' : 'text-stone-500'}`}
                 >
-                  <option value="" disabled>
-                    When was it made?
-                  </option>
                   {MADE_WHEN.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
