@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/admin/system/loading.jsx"],"sourcesContent":["import { AdminSystemSkeleton } from '@/components/dashboard/RouteSkeletons';\n\nexport default AdminSystemSkeleton;\n"],"names":[],"mappings":"6CAAA,AAEe,EAFf,CAAA,CAAA,OAEe,CAAmB"}

@@ -96,6 +96,14 @@ const userSchema = new Schema(
       select: false, // never returned unless explicitly requested with .select('+password')
     },
     termsAcceptedAt: { type: Date }, // set when the user accepts the Terms at signup
+    // Email confirmed with a 6-digit code (lib/data/email-verification.js) or by Google sign-in. Needed to buy while
+    // signed in and to open a shop.
+    emailVerifiedAt: { type: Date },
+    // The latest code sent: only its hash is stored. Private.
+    emailOtp: {
+      type: new Schema({ hash: String, sentAt: Date, expiresAt: Date, attempts: { type: Number, default: 0 } }, { _id: false }),
+      select: false,
+    },
     phone: { type: String, trim: true, maxlength: 20 }, // E.164 ("+923001234567"), required at email sign-up (Google sign-ups may not have one); never public
     googleId: { type: String, select: false }, // "Continue with Google" account id (app/api/auth/google/callback)
     // The shop-opening wizard's saved steps until it's submitted (lib/data/seller-onboarding.js), so a seller can
@@ -161,4 +169,7 @@ userSchema.pre('save', async function hashPassword() {
   this.password = await bcrypt.hash(this.password, 12);
 });
 
+// In development a hot reload re-runs this file, but mongoose would keep the model compiled from the old schema and
+// silently drop new fields (e.g. emailOtp) on save. Drop it, so schema edits apply without restarting the server.
+if (process.env.NODE_ENV !== 'production' && mongoose.models.User) mongoose.deleteModel('User');
 export default mongoose.models.User || mongoose.model('User', userSchema);

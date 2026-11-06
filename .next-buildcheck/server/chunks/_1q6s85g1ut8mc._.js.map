@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../lib/downloads.js"],"sourcesContent":["// Purchases can be re-downloaded for life. To stop a link being shared around, each purchased item is\n// throttled to this many downloads per hour (app/api/downloads/[token]/route.js) instead of a lifetime cap.\nexport const DOWNLOADS_PER_HOUR = 10;\n"],"names":["DOWNLOADS_PER_HOUR"],"mappings":"kDAEkC"}

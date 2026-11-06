@@ -1,0 +1,11 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/auth/google/route.js")
+R.c("server/chunks/lib_google-auth_074l8yhxj58q6.js")
+R.c("server/chunks/node_modules_next_dist_1ixxkvkbot_zu._.js")
+R.c("server/chunks/[root-of-the-server]__1v7zr-apz4ldo._.js")
+R.c("server/chunks/[root-of-the-server]__12uj0887q1ayr._.js")
+R.c("server/chunks/node_modules_next_dist_1_ivl1lz1kmno._.js")
+R.c("server/chunks/node_modules_next_1lo724y0ayaf6._.js")
+R.c("server/chunks/_0-u794ne9xhem._.js")
+R.c("server/chunks/_next-internal_server_app_api_auth_google_route_actions_0rae5gvzf4gaa.js")
+R.m(39856)
+module.exports=R.m(39856).exports

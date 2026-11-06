@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../../app/admin/users/%5Bid%5D/loading.jsx"],"sourcesContent":["export { AdminUserSkeleton as default } from '@/components/dashboard/RouteSkeletons';\n"],"names":[],"mappings":"uCAAA,IAAA,EAAA,EAAA,CAAA,CAAA"}

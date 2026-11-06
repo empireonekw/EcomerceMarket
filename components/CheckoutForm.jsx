@@ -10,6 +10,7 @@ import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { chargeAmount, formatPkr, formatTaxRate } from '@/lib/pricing';
 import { CreditCard, Landmark, QrCode, Smartphone } from 'lucide-react';
 import { PENDING_ORDER_KEY } from '@/components/PaymentStatusHelpers';
+import EmailVerification from '@/components/EmailVerification';
 
 /** A policy linked under the pay button (opens in a new tab so the buyer doesn't leave checkout). */
 function PolicyLink({ href, children }) {
@@ -154,6 +155,10 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
       {/* ---------- Details ---------- */}
       <form onSubmit={onSubmit} className="order-2 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 lg:order-1" noValidate={false}>
         <h2 className="headline text-2xl">Contact</h2>
+        {/* Signed-in buyers verify their email before paying (the order API checks it too). */}
+        {user && !user.emailVerified && (
+          <EmailVerification email={user.email} title="Verify your email to buy" text="Your receipts and downloads are sent here." className="mt-3" />
+        )}
         {user ? (
           <p className="mt-2 flex items-center gap-2 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -248,7 +253,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
 
         <button
           type="submit"
-          disabled={status === 'submitting'}
+          disabled={status === 'submitting' || (user && !user.emailVerified)}
           className="btn btn-lg btn-primary mt-6 w-full"
         >
           {status === 'submitting' ? (

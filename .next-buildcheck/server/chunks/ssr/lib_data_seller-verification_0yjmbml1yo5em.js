@@ -1,0 +1,3 @@
+module.exports=[17178,a=>a.a(async(b,c)=>{try{var d=a.i(64328),e=a.i(11213),f=a.i(74731);a.i(87945);var g=a.i(93822),h=a.i(80877),i=a.i(92586),j=a.i(55208),k=b([g,h,i]);async function l(a){if(!d.default.isValidObjectId(a))return{status:null,note:"",requested:!1};await (0,e.f)();let b=await j.U.findById(a).select("seller.verificationRequestedAt seller.verification.status seller.verification.note seller.verification.submittedAt").lean(),c=b?.seller?.verification;return(0,f.j)({status:c?.status??null,note:c?.note??"",submittedAt:c?.submittedAt??null,requested:!!b?.seller?.verificationRequestedAt})}[g,h,i]=k.then?(await k)():k,a.s(["f",0,l]),c()}catch(a){c(a)}},!1)];
+
+//# sourceMappingURL=lib_data_seller-verification_0yjmbml1yo5em.js.map

@@ -32,7 +32,10 @@ export async function GET(request) {
  * Re-prices items from MongoDB and settles payment via lib/payments.js: free/demo orders complete now and return
  * signed download links plus a private receipt URL; paid orders return the PayFast checkout form instead.
  *
- * Responses: 201 completed · 202 pending (PayFast) · 400 invalid input · 402 payments unavailable · 409 unavailable/price changed
+ * Signed-in buyers must have verified their email (403 code 'email_unverified'); guests check out with any email.
+ *
+ * Responses: 201 completed · 202 pending (PayFast) · 400 invalid input · 402 payments unavailable · 403 email not verified ·
+ * 409 unavailable/price changed
  */
 export async function POST(request) {
   const limit = rateLimit(`orders:${clientIp(request)}`, { limit: 10, windowMs: 60 * 1000 });
@@ -60,6 +63,12 @@ export async function POST(request) {
   try {
     // Signed-in buyers get the order linked to their account (guests can still check out).
     const buyer = await getRequestUser(request);
+    if (buyer && !buyer.emailVerified) {
+      return NextResponse.json(
+        { error: 'Please verify your email before buying (Account settings).', code: 'email_unverified' },
+        { status: 403, headers: noStore },
+      );
+    }
     const order = await createOrder(payload, { userId: buyer?.id, userName: buyer?.name, customerIp: clientIp(request) });
     // 201: completed (free / demo) with downloads · 202: pending, `payment` is the form that opens PayFast.
     return NextResponse.json(order, { status: order.payment ? 202 : 201, headers: noStore });
