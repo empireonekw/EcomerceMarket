@@ -2,14 +2,14 @@ import Link from 'next/link';
 import ProductForm from '@/components/dashboard/ProductForm';
 import { PageHeader } from '@/components/dashboard/ui';
 import { requireAdmin } from '@/lib/auth';
-import { getCategories } from '@/lib/data/categories';
+import { getFormCategories } from '@/lib/data/categories';
 import { uploadDriver } from '@/lib/uploads';
 
 export const metadata = { title: 'Add New Product' };
 
 export default async function AddProductPage() {
   await requireAdmin();
-  const categories = await getCategories();
+  const categories = await getFormCategories();
 
   return (
     <>
