@@ -224,10 +224,26 @@ export default function ListingsManager({ items, counts, total, pagination, para
           `${n(data.done)} deleted`,
           data.sold ? `${n(data.sold)} had been bought — those buyers keep their downloads.` : undefined,
         );
+      } else if (action === 'activate') {
+        // Approved listings are shown; complete drafts are submitted (live at once, or into review); the rest still need work.
+        const live = data.done + (data.live ?? 0);
+        const inReview = (data.submitted ?? 0) - (data.live ?? 0);
+        const incomplete = data.incomplete ?? [];
+        const lines = [
+          inReview > 0 && `${n(inReview)} sent for review.`,
+          incomplete.length > 0 &&
+            `${n(incomplete.length)} still need details: ${incomplete
+              .slice(0, 3)
+              .map((d) => `“${d.title.slice(0, 40)}” (${d.needs.join(', ')})`)
+              .join('; ')}${incomplete.length > 3 ? `; and ${incomplete.length - 3} more` : ''}. Open them to finish.`,
+          data.skipped > 0 && `${n(data.skipped)} already in review.`,
+        ].filter(Boolean);
+        const toastFn = live || inReview ? toast.success : toast.error;
+        toastFn(live || inReview ? `${n(live)} now live` : 'Nothing could be activated yet', lines.join(' ') || undefined);
       } else {
         toast.success(
-          `${n(data.done)} ${action === 'activate' ? 'activated' : 'deactivated'}`,
-          data.skipped ? `${n(data.skipped)} skipped. Only approved listings can be shown or hidden.` : undefined,
+          `${n(data.done)} deactivated`,
+          data.skipped ? `${n(data.skipped)} skipped. Only active listings can be hidden.` : undefined,
         );
       }
       dialogRef.current?.close();
