@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BarChart3, Copy, ExternalLink, Eye, EyeOff, LayoutGrid, List, Menu, Pencil, Pin, Plus, Search, Share2, Star, Trash2, X } from 'lucide-react';
+import { AlertTriangle, BarChart3, Copy, ExternalLink, Eye, EyeOff, LayoutGrid, List, Menu, Pencil, Pin, Plus, Search, Share2, Star, Trash2, X } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { useToast } from '@/components/dashboard/Toaster';
@@ -171,6 +171,8 @@ export default function ListingsManager({ items, counts, total, pagination, para
   const router = useRouter();
   const toast = useToast();
   const dialogRef = useRef(null);
+  const missingRef = useRef(null); // pop-up: listings that couldn't go live and what each is missing
+  const [missing, setMissing] = useState([]);
   const dialogTitle = useId();
   const [query, setQuery] = useState(params.q);
   const [selected, setSelected] = useState(() => new Set());
@@ -229,17 +231,15 @@ export default function ListingsManager({ items, counts, total, pagination, para
         const live = data.done + (data.live ?? 0);
         const inReview = (data.submitted ?? 0) - (data.live ?? 0);
         const incomplete = data.incomplete ?? [];
-        const lines = [
-          inReview > 0 && `${n(inReview)} sent for review.`,
-          incomplete.length > 0 &&
-            `${n(incomplete.length)} still need details: ${incomplete
-              .slice(0, 3)
-              .map((d) => `“${d.title.slice(0, 40)}” (${d.needs.join(', ')})`)
-              .join('; ')}${incomplete.length > 3 ? `; and ${incomplete.length - 3} more` : ''}. Open them to finish.`,
-          data.skipped > 0 && `${n(data.skipped)} already in review.`,
-        ].filter(Boolean);
-        const toastFn = live || inReview ? toast.success : toast.error;
-        toastFn(live || inReview ? `${n(live)} now live` : 'Nothing could be activated yet', lines.join(' ') || undefined);
+        const lines = [inReview > 0 && `${n(inReview)} sent for review.`, data.skipped > 0 && `${n(data.skipped)} already in review.`].filter(Boolean);
+        if (live || inReview) toast.success(`${n(live)} now live`, lines.join(' ') || undefined);
+        // Anything that couldn't go live: a pop-up names each listing and exactly what it's missing.
+        if (incomplete.length) {
+          setMissing(incomplete);
+          requestAnimationFrame(() => missingRef.current?.showModal());
+        } else if (!live && !inReview) {
+          toast.info('Nothing to activate', lines.join(' ') || 'These listings are already live or in review.');
+        }
       } else {
         toast.success(
           `${n(data.done)} deactivated`,
@@ -726,6 +726,49 @@ export default function ListingsManager({ items, counts, total, pagination, para
           </label>
         </aside>
       </div>
+
+      {/* ---------- Pop-up: listings that couldn't be activated, and what each one is missing ---------- */}
+      <dialog
+        ref={missingRef}
+        aria-labelledby="missing-title"
+        onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
+        className="m-auto w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-3xl p-0 text-left text-ink shadow-2xl backdrop:bg-black/40"
+      >
+        <div className="border-b border-stone-100 p-6">
+          <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-amber-50 text-amber-700">
+            <AlertTriangle size={20} strokeWidth={1.9} />
+          </span>
+          <h2 id="missing-title" className="mt-4 text-lg font-semibold">
+            {missing.length === 1 ? '1 listing is missing details' : `${missing.length} listings are missing details`}
+          </h2>
+          <p className="mt-1 text-sm text-stone-600">Add what’s listed below, then select them and press Activate again.</p>
+        </div>
+        <ul className="max-h-[55vh] divide-y divide-stone-100 overflow-y-auto">
+          {missing.map((m) => (
+            <li key={m.id} className="flex items-center gap-3 px-6 py-3">
+              <span className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                {m.coverImage && <Image src={m.coverImage} alt="" fill sizes="48px" className="object-cover" />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink" title={m.title}>
+                  {m.title}
+                </p>
+                <p className="mt-0.5 text-xs text-amber-800">
+                  <span className="font-semibold">Missing:</span> {m.needs.join(', ')}
+                </p>
+              </div>
+              <Link href={`${BASE}/${m.id}/edit`} className="btn btn-sm btn-outline shrink-0">
+                Edit
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-end border-t border-stone-100 bg-stone-50/60 px-6 py-4">
+          <button type="button" onClick={() => missingRef.current?.close()} className="btn btn-md btn-dark">
+            Got it
+          </button>
+        </div>
+      </dialog>
 
       {/* ---------- Delete confirmation (single or bulk) ---------- */}
       <dialog
