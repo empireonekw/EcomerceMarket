@@ -512,6 +512,14 @@ export default function ListingsManager({ items, counts, total, pagination, para
                         </Link>
                         <p className="mt-1 text-sm tabular-nums text-stone-700">{usd(p.price)}</p>
                         <p className="mt-0.5 text-xs text-stone-500">Updated {formatDateTime(p.updatedAt).date}</p>
+                        {p.needs?.length > 0 && (
+                          <Link href={`${BASE}/${p._id}/edit`} className="mt-1.5 block rounded-lg bg-amber-50 px-2 py-1 text-[11px] leading-snug text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100">
+                            <span className="font-semibold">To publish, add:</span> {p.needs.join(', ')}
+                          </Link>
+                        )}
+                        {p.needs?.length === 0 && (
+                          <p className="mt-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800 ring-1 ring-emerald-200">Ready: select it and press Activate</p>
+                        )}
                         {showStats && (
                           <p className="mt-1.5 w-fit rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-stone-600">
                             {p.salesCount.toLocaleString('en-US')} sold · {formatPrice(p.earnings, 'USD')}
