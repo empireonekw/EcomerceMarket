@@ -9,7 +9,7 @@ import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
 import SortMenu from '@/components/SortMenu';
 import VerifiedBadge from '@/components/VerifiedBadge';
-import { getProducts, getPublicShop, getShopSummary } from '@/lib/data/products';
+import { getProducts, getPublicShop, getShopFeaturedProducts, getShopSummary } from '@/lib/data/products';
 import { countryOf } from '@/lib/seller-onboarding';
 import { importedNote, timeOn } from '@/lib/shop-stats';
 import { siteConfig } from '@/lib/site';
@@ -37,8 +37,13 @@ export default async function ShopPage({ params, searchParams }) {
 
   const query = parseProductQuery(await searchParams);
   const section = shop.categories.find((c) => c.id === query.category) ?? null;
-  // Featured listings come first in "All items" (lib/data/products.js getProducts with sellerId).
-  const { items, pagination } = await getProducts({ ...query, category: section?.id, sellerId: shop.id });
+  // Featured listings (up to 4): their own row on the shop's main view (not while searching or browsing a section),
+  // and also first in "All items" below (lib/data/products.js getProducts with sellerId).
+  const browsing = Boolean(query.q || section || Number(query.page) > 1);
+  const [{ items, pagination }, featured] = await Promise.all([
+    getProducts({ ...query, category: section?.id, sellerId: shop.id }),
+    browsing ? [] : getShopFeaturedProducts(shop.id),
+  ]);
 
   const base = `/shop/${shop.id}`;
   const keep = { q: query.q, category: section?.id, sort: query.sort === 'newest' ? undefined : query.sort };
@@ -113,6 +118,18 @@ export default async function ShopPage({ params, searchParams }) {
           {shop.description && <p className="mt-2 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{shop.description}</p>}
         </div>
       </header>
+
+      {/* ---------- Featured: up to 4 listings the seller starred ---------- */}
+      {featured.length > 0 && (
+        <section aria-labelledby="shop-featured" className="mt-10">
+          <h2 id="shop-featured" className="text-2xl font-semibold tracking-[-0.01em] text-ink">
+            Featured
+          </h2>
+          <div className="mt-5">
+            <ProductGrid products={featured} showShop={false} preloadCount={featured.length} />
+          </div>
+        </section>
+      )}
 
       {/* ---------- Listings: sections on the left, search, sort and the grid ---------- */}
       <div className="mt-10 grid grid-cols-1 gap-x-8 border-t border-stone-200 pt-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
