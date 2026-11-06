@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from '@/components/PrefetchLink';
-import { ArrowRight, Award, Download, Link2, Pin, Star } from 'lucide-react';
+import { ArrowRight, Award, Download, Link2, Star } from 'lucide-react';
 import AddToCartButton from '@/components/AddToCartButton';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { formatPrice, isAccessLink, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
@@ -35,7 +35,6 @@ export default function ProductCard({ product, preload = false, showShop = true 
     salesCount,
     rating,
     shop,
-    shopFeatured,
   } = product;
   const href = `/products/${slug}`;
   const discount = compareAtPrice > price ? Math.round((1 - price / compareAtPrice) * 100) : 0;
@@ -75,13 +74,6 @@ export default function ProductCard({ product, preload = false, showShop = true 
         {fileFormat && (
           <span className="absolute top-3 left-3 max-w-[70%] truncate rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink shadow-sm @[17rem]:text-sm">
             {fileFormat}
-          </span>
-        )}
-        {/* On the seller's own shop page: their featured listings are pinned first. */}
-        {!showShop && shopFeatured && (
-          <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-white shadow-sm @[17rem]:text-sm">
-            <Pin size={13} strokeWidth={2.25} aria-hidden="true" />
-            Pinned
           </span>
         )}
         {bestseller && (
