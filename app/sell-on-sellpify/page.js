@@ -61,7 +61,7 @@ export default async function SellOnSellpifyPage() {
         </Link>
       </Gate>
     );
-  } else if (!user.emailVerified) {
+  } else if (user.mustVerifyEmail) {
     content = (
       <div className="mx-auto my-auto w-full max-w-lg py-16">
         <EmailVerification email={user.email} title="First, verify your email" text="Buyers and Sellpify reach you by email about orders and payouts." />

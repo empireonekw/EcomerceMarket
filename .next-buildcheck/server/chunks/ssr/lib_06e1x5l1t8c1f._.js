@@ -1,3 +1,0 @@
-(()=>{"use strict";module.exports=[98772,a=>{a.i(66680);let b=a=>(process.env[a]??"").trim();a.s(["f",0,()=>!!(b("PAYFAST_MERCHANT_ID")&&b("PAYFAST_SECURED_KEY"))])},62560,a=>{a.i(66680),a.i(98772),a.s(["f",0,()=>"true"===process.env.DEMO_CHECKOUT&&!function(){if("production"===process.env.VERCEL_ENV)return!0;try{let a=new URL("http://localhost:3000").hostname;return!("localhost"===a||"127.0.0.1"===a||"[::1]"===a||a.endsWith(".localhost")||a.endsWith(".test"))}catch{return!0}}()])}]})();
-
-//# sourceMappingURL=lib_06e1x5l1t8c1f._.js.map

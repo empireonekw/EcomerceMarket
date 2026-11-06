@@ -155,8 +155,8 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
       {/* ---------- Details ---------- */}
       <form onSubmit={onSubmit} className="order-2 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 lg:order-1" noValidate={false}>
         <h2 className="headline text-2xl">Contact</h2>
-        {/* Signed-in buyers verify their email before paying (the order API checks it too). */}
-        {user && !user.emailVerified && (
+        {/* While email verification is on, signed-in buyers verify before paying (the order API checks it too). */}
+        {user?.mustVerifyEmail && (
           <EmailVerification email={user.email} title="Verify your email to buy" text="Your receipts and downloads are sent here." className="mt-3" />
         )}
         {user ? (
@@ -253,7 +253,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
 
         <button
           type="submit"
-          disabled={status === 'submitting' || (user && !user.emailVerified)}
+          disabled={status === 'submitting' || user?.mustVerifyEmail}
           className="btn btn-lg btn-primary mt-6 w-full"
         >
           {status === 'submitting' ? (

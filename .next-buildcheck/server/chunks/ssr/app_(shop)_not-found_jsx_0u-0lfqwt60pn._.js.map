@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../app/%28shop%29/not-found.jsx"],"sourcesContent":["// notFound() inside the storefront (e.g. unknown product slug) keeps the shop header/footer.\nexport { default, metadata } from '../not-found';\n"],"names":[],"mappings":"uCACA,IAAA,EAAA,EAAA,CAAA,CAAA"}

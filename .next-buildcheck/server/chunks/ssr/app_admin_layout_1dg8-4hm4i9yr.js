@@ -1,3 +1,0 @@
-module.exports=[35852,a=>{"use strict";var b=a.i(7997),c=a.i(5246),d=a.i(17010),e=a.i(58077),f=a.i(69087),g=a.i(46635),h=a.i(86190);let i={title:{default:"Admin",template:`%s \xb7 ${h.S.name} Admin`},robots:{index:!1,follow:!1}};async function j({children:a}){let h=await (0,g.D)(),i=(await (0,c.cookies)()).get(d.SIDEBAR_COOKIE)?.value==="collapsed";return(0,b.jsx)(e.ToastProvider,{children:(0,b.jsx)(f.MessagingProvider,{unreadUrl:"/api/admin/support/unread",unreadEvent:"support:unread",children:(0,b.jsx)(d.default,{area:"admin",user:h,sidebarCollapsed:i,children:a})})})}a.s(["default",0,j,"metadata",0,i])},72966,function(a){a.n(a.i(35852))}];
-
-//# sourceMappingURL=app_admin_layout_1dg8-4hm4i9yr.js.map

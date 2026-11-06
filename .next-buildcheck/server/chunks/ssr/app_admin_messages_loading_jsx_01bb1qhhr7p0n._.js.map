@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../../app/admin/messages/loading.jsx"],"sourcesContent":["export { AdminMessagesSkeleton as default } from '@/components/dashboard/RouteSkeletons';\n"],"names":[],"mappings":"uCAAA,IAAA,EAAA,EAAA,CAAA,CAAA"}

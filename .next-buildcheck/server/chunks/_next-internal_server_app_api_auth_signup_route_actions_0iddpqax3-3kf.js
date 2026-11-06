@@ -1,3 +1,0 @@
-module.exports=[4826,s=>{"use strict";s.s([])}];
-
-//# sourceMappingURL=_next-internal_server_app_api_auth_signup_route_actions_0iddpqax3-3kf.js.map
