@@ -1,7 +1,7 @@
 import { json, unauthorized, readJson, errorResponse } from '@/lib/api';
 import { createSellerProduct } from '@/lib/data/seller';
 import { InputError } from '@/lib/data/product-writes';
-import { LISTING_LIMITS, UPLOAD_RULES } from '@/lib/listing';
+import { LISTING_LIMITS, MADE_WHEN, UPLOAD_RULES } from '@/lib/listing';
 import { rateLimit } from '@/lib/rate-limit';
 import { rankkwSeller, readFileToken } from '@/lib/rankkw-link';
 import { refreshStorefront } from '@/lib/revalidate';
@@ -44,6 +44,9 @@ export async function POST(request) {
       seller.id,
       {
         ...pick(body, ['title', 'description', 'shortDescription', 'tags', 'price', 'category', 'madeBy', 'itemType', 'madeWhen', 'license', 'rightsConfirmed', 'fileFormat']),
+        // Etsy's "when made" (and Sellpify's older choices) don't map onto today's list: a value it no longer
+        // offers gets the form's default instead of failing with "Choose when it was made."
+        madeWhen: MADE_WHEN.some((o) => o.value === body.madeWhen) ? body.madeWhen : MADE_WHEN[0].value,
         images: photos.map((p) => p.url),
         videos: videos.map((v) => v.url),
         deliveryType: 'file',
