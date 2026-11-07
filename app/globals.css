@@ -5,21 +5,39 @@
   /* Editorial serif for display headlines (the homepage hero). Loaded in app/layout.jsx. */
   --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
 
+  /* ---- Type & rhythm (betterwebtype / Primer): one scale, every line height a multiple of 4px.
+     xs 12/16 · sm 14/20 · base 16/24 · lg 18/28 · xl 20/28 · 2xl 24/32 · 3xl 30/36 · 4xl 36/40 · 5xl 48/52 · 6xl 60/64 ·
+     7xl 72/76. Display sizes (3xl+) also tighten their letter spacing as they grow, so headings read as one family. */
+  --text-3xl--letter-spacing: -0.015em;
+  --text-4xl--line-height: calc(40 / 36);
+  --text-4xl--letter-spacing: -0.02em;
+  --text-5xl--line-height: calc(52 / 48);
+  --text-5xl--letter-spacing: -0.025em;
+  --text-6xl--line-height: calc(64 / 60);
+  --text-6xl--letter-spacing: -0.03em;
+  --text-7xl--line-height: calc(76 / 72);
+  --text-7xl--letter-spacing: -0.03em;
+  --leading-display: 1.08; /* big serif headlines */
+  --leading-heading: 1.2; /* section and card headings */
+  --tracking-caps: 0.12em; /* small uppercase labels (eyebrows) */
+
   /* Palette — warm "sunset" scale. Ink text on every fill (never white): contrast stays ≥ 4.5:1.
      brand  = Honey Bronze (#edae49): buttons, active states, key highlights. 300 is the light sun shade (#f7dc6f).
               700–900 are deep golds for brand-coloured text, icons and focus rings on light backgrounds.
      peach  = Burnt Peach (#df7c52): secondary accent (illustrations, gradients, step markers).
      berry  = Lobster Pink (#d86357): warm accent for badges, gradients and the occasional emphasis. */
-  --color-brand-50: #fdf8ec;
-  --color-brand-100: #fbedca;
-  --color-brand-200: #f8e2a0;
-  --color-brand-300: #f7dc6f;
-  --color-brand-400: #f1c35a;
-  --color-brand-500: #edae49;
-  --color-brand-600: #dc9a2f;
-  --color-brand-700: #925f10;
-  --color-brand-800: #66420c;
-  --color-brand-900: #3e2808;
+  /* In OKLCH so each step is an even change in perceived lightness (L) along one hue. 300 (#f7dc6f), 500 (#edae49) and
+     700–900 (text on white, ≥ 4.5:1) are the hand-picked anchors; the steps between are spaced evenly around them. */
+  --color-brand-50: oklch(98% 0.016 88);
+  --color-brand-100: oklch(95.5% 0.042 88);
+  --color-brand-200: oklch(92.5% 0.084 91);
+  --color-brand-300: oklch(89.5% 0.132 95.7); /* #f7dc6f */
+  --color-brand-400: oklch(84.4% 0.135 85);
+  --color-brand-500: oklch(79.2% 0.137 76); /* #edae49 */
+  --color-brand-600: oklch(70.5% 0.138 73);
+  --color-brand-700: oklch(52.9% 0.108 71); /* #925f10 */
+  --color-brand-800: oklch(41.1% 0.082 71.3); /* #66420c */
+  --color-brand-900: oklch(29.7% 0.056 72.2); /* #3e2808 */
   --color-peach-50: #fdf2ec;
   --color-peach-100: #fadecf;
   --color-peach-300: #eca383;
@@ -161,6 +179,22 @@ html:has(dialog[open]:modal) {
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-700;
+  }
+  /* Modern text layout (Chrome web guidance): headings balance their lines, paragraphs avoid one-word last lines,
+     numbers in tables line up. Inside <main> only: the footer keeps its exact current look. */
+  main :is(h1, h2, h3, h4) {
+    text-wrap: balance;
+  }
+  main :is(p, li, dd, blockquote) {
+    text-wrap: pretty;
+  }
+  main :is(table, [class*='tabular-nums']) {
+    font-variant-numeric: tabular-nums;
+  }
+  html {
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
   }
   /* Confirm dialogs often sit inside table cells (whitespace-nowrap): they must wrap their own text. */
   dialog {
@@ -332,4 +366,27 @@ html[data-reveal] .reveal:not([data-in]) {
     opacity: 0.45;
     transform: scale(0.75) rotate(20deg);
   }
+}
+
+/* ---- Surface textures. Layer over a colour or gradient: `bg-brand-50 texture-grain`.
+   grain  : fine film grain (SVG noise), the Background.supply look; adds depth to flat bands without a pattern.
+   dither : a 4×4 ordered (Bayer) dither in ink, the Ditther look; for small accents, at very low opacity.
+   Both are inline SVG (no extra requests) and never affect text: they sit in a ::before layer behind the content. */
+@utility texture-grain {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .05 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+@utility texture-dither {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' shape-rendering='crispEdges' fill='%23141414'%3E%3Crect x='0' y='0' width='2' height='2'/%3E%3Crect x='4' y='4' width='2' height='2'/%3E%3Crect x='4' y='0' width='2' height='2' opacity='.5'/%3E%3Crect x='0' y='4' width='2' height='2' opacity='.5'/%3E%3Crect x='2' y='2' width='2' height='2' opacity='.25'/%3E%3Crect x='6' y='6' width='2' height='2' opacity='.25'/%3E%3C/svg%3E");
+  background-size: 8px 8px;
 }

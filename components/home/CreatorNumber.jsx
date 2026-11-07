@@ -34,9 +34,9 @@ export default function CreatorNumber() {
             className="inline-block bg-gradient-to-r from-brand-500 via-peach-500 to-berry-500 bg-[length:200%_100%] bg-clip-text pr-[0.04em] text-transparent tabular-nums motion-safe:animate-[gradient-pan_8s_ease-in-out_infinite_alternate]"
           />
         </p>
-        <p className="mt-3 text-xs font-semibold tracking-[0.12em] text-stone-500 uppercase">of every sale</p>
+        <p className="mt-3 text-xs font-semibold tracking-caps text-stone-500 uppercase">of every sale</p>
 
-        <h2 id="creators-heading" className="mx-auto mt-12 max-w-2xl font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink text-balance sm:text-[3rem]">
+        <h2 id="creators-heading" className="mx-auto mt-12 max-w-2xl font-serif text-4xl leading-display tracking-tight text-ink text-balance sm:text-5xl">
           Sell your work. Keep what you earn.
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-lg text-stone-600">

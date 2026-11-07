@@ -21,7 +21,7 @@ export const metadata = { title: 'Products' };
 function ProductStatusCell({ product }) {
   if (product.status === 'approved') return <PublishToggle id={product._id} title={product.title} isPublished={product.isPublished} />;
   return (
-    <div className="flex flex-col items-start gap-1.5">
+    <div className="flex flex-col items-start gap-2">
       <StatusBadge status={product.status} label={product.status === 'pending' ? 'Awaiting review' : 'Rejected'} />
       <ModerationActions id={product._id} title={product.title} />
     </div>
@@ -30,7 +30,7 @@ function ProductStatusCell({ product }) {
 
 const decidable = (p) => p.status === 'pending' || p.status === 'rejected';
 
-const field = 'h-10 rounded-xl border border-stone-200 bg-stone-50 px-3.5 text-sm transition-colors hover:border-stone-300 focus:border-ink focus:bg-white focus:outline-none';
+const field = 'h-10 rounded-xl border border-stone-200 bg-stone-50 px-4 text-sm transition-colors hover:border-stone-300 focus:border-ink focus:bg-white focus:outline-none';
 
 export default async function AdminProductsPage({ searchParams }) {
   const sp = await searchParams;
@@ -49,7 +49,7 @@ export default async function AdminProductsPage({ searchParams }) {
       <ApprovalModeSwitch autoApprove={settings.autoApproveListings} awaiting={awaitingReview} />
 
       {/* Filters: plain GET form → URL state, shareable and back-button friendly. */}
-      <Form action="/admin/products" className="mb-5 flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-2.5 sm:flex-row sm:flex-wrap sm:items-center">
+      <Form action="/admin/products" className="mb-5 flex flex-col gap-2 rounded-2xl border border-stone-200 bg-white p-3 sm:flex-row sm:flex-wrap sm:items-center">
         <label htmlFor="q" className="sr-only">
           Search products
         </label>
@@ -137,7 +137,7 @@ export default async function AdminProductsPage({ searchParams }) {
         <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-stone-100 text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+              <thead className="border-b border-stone-100 text-xs font-semibold uppercase tracking-wider text-stone-400">
                 <tr>
                   <th scope="col" className="w-10 py-3 pr-0 pl-4">
                     <SelectAllProducts className="align-middle" />
@@ -153,7 +153,7 @@ export default async function AdminProductsPage({ searchParams }) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100 [&_td]:py-3.5">
+              <tbody className="divide-y divide-stone-100 [&_td]:py-4">
                 {items.map((p) => {
                   const created = formatDateTime(p.createdAt);
                   return (
@@ -175,7 +175,7 @@ export default async function AdminProductsPage({ searchParams }) {
                       </td>
                       <td className="hidden whitespace-nowrap px-4 py-3 lg:table-cell">
                         {p.category ? (
-                          <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-700">{p.category.name}</span>
+                          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">{p.category.name}</span>
                         ) : (
                           <span className="text-xs text-stone-400">–</span>
                         )}

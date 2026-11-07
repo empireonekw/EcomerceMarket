@@ -45,7 +45,7 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
         type="button"
         onClick={() => dialogRef.current?.showModal()}
         disabled={busy}
-        className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
+        className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
       >
         {busy && <span aria-hidden="true" className="size-3.5 animate-spin rounded-full border-2 border-red-200 border-t-red-600" />}
         {busy ? 'Deleting…' : 'Delete'}
@@ -61,10 +61,10 @@ export default function DeleteProductButton({ id, title, redirectTo }) {
           <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50">
             <Trash2 size={20} strokeWidth={1.9} />
           </span>
-          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
+          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-tight">
             Delete this product permanently?
           </h2>
-          <p className="mt-3 truncate rounded-xl bg-stone-50 px-3.5 py-2.5 text-sm font-medium text-stone-800 ring-1 ring-stone-200/70" title={title}>
+          <p className="mt-3 truncate rounded-xl bg-stone-50 px-4 py-3 text-sm font-medium text-stone-800 ring-1 ring-stone-200/70" title={title}>
             {title}
           </p>
           <p className="mt-3 text-sm leading-relaxed text-stone-600">

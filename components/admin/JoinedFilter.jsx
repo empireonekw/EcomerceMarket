@@ -4,7 +4,7 @@ import { useId } from 'react';
 import { CalendarDays } from 'lucide-react';
 import { FilterTabs, usePendingNav } from '@/components/dashboard/PendingNav';
 
-const field = 'h-10 rounded-full border border-stone-300 bg-white px-3.5 text-sm tabular-nums focus:border-black focus:outline-none';
+const field = 'h-10 rounded-full border border-stone-300 bg-white px-4 text-sm tabular-nums focus:border-black focus:outline-none';
 
 /**
  * Admin → Users sign-up filter: Any time / Today / Yesterday, or a custom date range (from–to, inclusive).

@@ -157,7 +157,7 @@ function Step({ number, title, hint, icon: Icon, kind, value, onDone, driver, er
             </div>
             <div className="text-sm">
               <p className="font-medium text-emerald-700">Added</p>
-              <button type="button" onClick={() => (cameraOnly ? setCamera(true) : onDone(''))} className="mt-1 inline-flex items-center gap-1.5 font-medium text-ink underline-offset-2 hover:underline">
+              <button type="button" onClick={() => (cameraOnly ? setCamera(true) : onDone(''))} className="mt-1 inline-flex items-center gap-2 font-medium text-ink underline-offset-2 hover:underline">
                 <RefreshCw size={14} strokeWidth={1.75} aria-hidden="true" />
                 {cameraOnly ? 'Retake' : 'Replace'}
               </button>

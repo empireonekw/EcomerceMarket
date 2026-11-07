@@ -39,7 +39,7 @@ export default function BackLink({ fallback = '/products', className = '' }) {
     <a
       href={fallback}
       onClick={back}
-      className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-stone-200 bg-white pr-3.5 pl-2.5 text-sm font-medium text-stone-700 transition-colors hover:border-ink hover:text-ink ${className}`}
+      className={`inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-stone-200 bg-white pr-4 pl-3 text-sm font-medium text-stone-700 transition-colors hover:border-ink hover:text-ink ${className}`}
     >
       <ArrowLeft size={16} strokeWidth={1.75} aria-hidden="true" />
       Back

@@ -27,7 +27,7 @@ export default function Statement() {
       <svg aria-hidden="true" viewBox="0 0 1440 60" preserveAspectRatio="none" className="-mb-px block h-6 w-full text-brand-100 sm:h-8 lg:h-10">
         <path d="M0 38C220 12 470 4 720 18s500 34 720 14v28H0Z" fill="currentColor" />
       </svg>
-      <section aria-labelledby="statement-heading" className="relative isolate overflow-x-clip bg-gradient-to-b from-brand-100 via-brand-50 to-white pt-16 pb-20 sm:pt-20 sm:pb-24">
+      <section aria-labelledby="statement-heading" className="texture-grain relative isolate overflow-x-clip bg-gradient-to-b from-brand-100 via-brand-50 to-white pt-16 pb-20 sm:pt-20 sm:pb-24">
         <Glow className="top-10 left-[8%] size-72 bg-brand-200/50" />
         <Glow className="right-[6%] bottom-0 size-80 bg-peach-100/70" />
         <Sparkle className="top-[22%] left-[12%] hidden size-6 text-brand-500 md:block" />
@@ -35,7 +35,7 @@ export default function Statement() {
         <span aria-hidden="true" className="pointer-events-none absolute right-[9%] bottom-[16%] -z-10 hidden size-24 rounded-full border border-brand-300/70 md:block" />
         <div className="container-page">        <Reveal className="mx-auto max-w-5xl text-center">
             <Eyebrow className="justify-center">Why {siteConfig.name}</Eyebrow>
-            <h2 id="statement-heading" className="mt-6 font-serif text-[2rem] leading-[1.3] font-normal tracking-[-0.02em] text-ink sm:text-[2.75rem] lg:text-[3.4rem]">
+            <h2 id="statement-heading" className="mt-6 font-serif text-3xl leading-heading font-normal tracking-tight text-ink sm:text-5xl lg:text-6xl">
               Independent creators
               <Pill photo={HERO_SLIDES[0]} rotate="-rotate-3" />
               sell what they make. You get it <Marker>the moment you pay</Marker>,
@@ -47,7 +47,7 @@ export default function Statement() {
             <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-stone-600">
               A curated marketplace for digital goods: templates, printables, e-books and design assets made by independent creators.
             </p>
-            <Link href="/about" className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-white">
+            <Link href="/about" className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink px-4 py-2 text-sm font-medium transition-colors hover:bg-ink hover:text-white">
               About us
               <ArrowUpRight size={15} strokeWidth={2} aria-hidden="true" />
             </Link>

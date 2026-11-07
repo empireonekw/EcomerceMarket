@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import IntentLink from '@/components/IntentLink';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
@@ -23,6 +24,7 @@ import {
   Store,
   Users,
   Star,
+  LifeBuoy,
 } from 'lucide-react';
 import { skeletonFor } from '@/components/dashboard/RouteSkeletons';
 import { LogoImage } from '@/components/Logo';
@@ -103,6 +105,7 @@ const AREAS = {
           { href: '/seller/sales', label: 'Sales History', icon: Receipt, match: (p) => p.startsWith('/seller/sales') },
           { href: '/seller/payouts', label: 'Payouts & Bank Details', icon: Banknote, match: (p) => p.startsWith('/seller/payouts') },
           { href: '/seller/messages', label: 'Messages', icon: MessageSquare, match: (p) => p.startsWith('/seller/messages'), badge: 'unread' },
+          { href: '/support', label: 'Help & Support', icon: LifeBuoy, match: () => false },
         ],
       },
     ],
@@ -136,7 +139,7 @@ function Brand({ area, onNavigate, compact = false, collapsed = false }) {
     <Link
       href={area.home}
       onNavigate={() => onNavigate(area.home)}
-      className={`flex items-center gap-3 ${compact ? '' : 'rounded-2xl bg-white p-2.5 shadow-card ring-1 ring-black/[0.04]'}`}
+      className={`flex items-center gap-3 ${compact ? '' : 'rounded-2xl bg-white p-3 shadow-card ring-1 ring-black/[0.04]'}`}
     >
       <LogoImage height={40} eager />
       <span className="min-w-0 truncate border-l border-black/10 pl-3 text-xs leading-tight text-stone-500">
@@ -150,7 +153,7 @@ function Brand({ area, onNavigate, compact = false, collapsed = false }) {
 function Badge({ count }) {
   if (!count) return null;
   return (
-    <span className="min-w-5 rounded-full bg-brand-500 px-1.5 py-0.5 text-center text-[11px] leading-none font-semibold text-ink tabular-nums">
+    <span className="min-w-5 rounded-full bg-brand-500 px-2 py-0.5 text-center text-xs leading-none font-semibold text-ink tabular-nums">
       <span className="sr-only">, </span>
       {count > 99 ? '99+' : count}
       <span className="sr-only"> unread</span>
@@ -166,17 +169,16 @@ function NavGroup({ item, pathname, onNavigate, collapsed }) {
   if (collapsed) {
     return (
       <li>
-        <Link
+        <IntentLink
           href={children[0].href}
-          prefetch
-          onNavigate={() => onNavigate(children[0].href)}
+                    onNavigate={() => onNavigate(children[0].href)}
           title={label}
           aria-current={activeChild ? 'page' : undefined}
           className={`mx-auto grid size-11 place-items-center rounded-xl transition ${activeChild ? ACTIVE : IDLE}`}
         >
           <Icon {...ICON} className={activeChild ? 'text-brand-700' : ''} />
           <span className="sr-only">{label}</span>
-        </Link>
+        </IntentLink>
       </li>
     );
   }
@@ -188,7 +190,7 @@ function NavGroup({ item, pathname, onNavigate, collapsed }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls={id}
-        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13.5px] transition ${activeChild && !open ? ACTIVE : IDLE}`}
+        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition ${activeChild && !open ? ACTIVE : IDLE}`}
       >
         <Icon {...ICON} className={`shrink-0 ${activeChild ? 'text-brand-700' : ''}`} />
         <span className={`flex-1 ${activeChild ? 'font-medium text-ink' : ''}`}>{label}</span>
@@ -202,15 +204,14 @@ function NavGroup({ item, pathname, onNavigate, collapsed }) {
               key={c.href}
               className="relative pl-4 before:absolute before:top-0 before:left-0 before:h-1/2 before:w-3 before:rounded-bl-[9px] before:border-b before:border-l before:border-stone-300 after:absolute after:top-0 after:bottom-0 after:left-0 after:border-l after:border-stone-300 last:after:hidden"
             >
-              <Link
+              <IntentLink
                 href={c.href}
-                prefetch
-                onNavigate={() => onNavigate(c.href)}
+                                onNavigate={() => onNavigate(c.href)}
                 aria-current={active ? 'page' : undefined}
-                className={`flex items-center rounded-xl px-3 py-1.5 text-[13px] transition ${active ? ACTIVE : IDLE}`}
+                className={`flex items-center rounded-xl px-3 py-2 text-sm transition ${active ? ACTIVE : IDLE}`}
               >
                 {c.label}
-              </Link>
+              </IntentLink>
             </li>
           );
         })}
@@ -256,7 +257,7 @@ function SidebarBody({ pathname, area, user, onNavigate, collapsed = false, onTo
             {collapsed ? (
               i > 0 && <hr className="mx-auto mb-3 w-6 border-black/10" />
             ) : (
-              <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">{section.label}</p>
+              <p className="mb-2 px-3 text-xs font-semibold tracking-wider text-stone-400 uppercase">{section.label}</p>
             )}
             <ul className="space-y-0.5">
               {section.items.map((item) => {
@@ -268,13 +269,12 @@ function SidebarBody({ pathname, area, user, onNavigate, collapsed = false, onTo
                 const count = badge === 'unread' ? unread : 0;
                 return (
                   <li key={href}>
-                    <Link
+                    <IntentLink
                       href={href}
-                      prefetch
-                      onNavigate={() => onNavigate(href)}
+                                            onNavigate={() => onNavigate(href)}
                       aria-current={active ? 'page' : undefined}
                       title={collapsed ? label : undefined}
-                      className={`${collapsed ? 'relative mx-auto grid size-11 place-items-center' : 'flex items-center gap-3 px-3 py-2 text-[13.5px]'} rounded-xl transition ${active ? ACTIVE : IDLE}`}
+                      className={`${collapsed ? 'relative mx-auto grid size-11 place-items-center' : 'flex items-center gap-3 px-3 py-2 text-sm'} rounded-xl transition ${active ? ACTIVE : IDLE}`}
                     >
                       <Icon {...ICON} className={`shrink-0 ${active ? 'text-brand-700' : ''}`} />
                       {collapsed ? (
@@ -291,7 +291,7 @@ function SidebarBody({ pathname, area, user, onNavigate, collapsed = false, onTo
                           <Badge count={count} />
                         </>
                       )}
-                    </Link>
+                    </IntentLink>
                   </li>
                 );
               })}
@@ -346,17 +346,17 @@ function TopBar({ area, user, onNavigate }) {
         {first && <span className="font-medium text-ink">{first}</span>}
       </p>
       <div className="flex items-center gap-2">
-        <Link href={area.messages} prefetch onNavigate={() => onNavigate(area.messages)} className={`relative ${round}`} aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
+        <IntentLink href={area.messages} onNavigate={() => onNavigate(area.messages)} className={`relative ${round}`} aria-label={unread ? `Messages, ${unread} unread` : 'Messages'}>
           <Bell size={18} strokeWidth={1.75} aria-hidden="true" />
           {unread > 0 && <span aria-hidden="true" className="absolute top-2 right-2.5 size-2 rounded-full bg-brand-500 ring-2 ring-white" />}
-        </Link>
+        </IntentLink>
         <a href="/" target="_blank" rel="noopener" className={round} aria-label={`View ${siteConfig.name} (opens in a new tab)`}>
           <ArrowUpRight size={18} strokeWidth={1.75} aria-hidden="true" />
         </a>
-        <Link href={area.action.href} prefetch onNavigate={() => onNavigate(area.action.href)} className="btn btn-md btn-primary ml-1 shadow-[0_8px_20px_-10px_rgba(220,154,47,0.8)]">
+        <IntentLink href={area.action.href} onNavigate={() => onNavigate(area.action.href)} className="btn btn-md btn-primary ml-1 shadow-[0_8px_20px_-10px_rgba(220,154,47,0.8)]">
           <Plus size={16} strokeWidth={2} aria-hidden="true" />
           {area.action.label}
-        </Link>
+        </IntentLink>
       </div>
     </div>
   );

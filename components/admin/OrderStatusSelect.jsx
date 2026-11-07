@@ -55,7 +55,7 @@ export default function OrderStatusSelect({ order }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-2">
       <span className="relative inline-flex">
         <label htmlFor={`order-status-${order._id}`} className="sr-only">
           Status of order {orderNo}
@@ -65,7 +65,7 @@ export default function OrderStatusSelect({ order }) {
           value={current.status}
           disabled={saving}
           onChange={(e) => change(e.target.value)}
-          className={`h-7 cursor-pointer appearance-none rounded-full pl-2.5 pr-7 text-xs font-medium ring-1 ring-inset transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-60 ${TONES[current.status]}`}
+          className={`h-7 cursor-pointer appearance-none rounded-full pl-3 pr-7 text-xs font-medium ring-1 ring-inset transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-60 ${TONES[current.status]}`}
         >
           {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
             <option key={value} value={value} className="bg-white text-ink">
@@ -82,7 +82,7 @@ export default function OrderStatusSelect({ order }) {
       </span>
       <span
         title={manual ? 'Set by an admin — choose “Automatic” to follow the payment again' : 'Set automatically from the payment'}
-        className="text-[11px] font-medium uppercase tracking-wide text-stone-400"
+        className="text-xs font-medium uppercase tracking-wide text-stone-400"
       >
         {manual ? 'Manual' : 'Auto'}
       </span>

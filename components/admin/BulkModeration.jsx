@@ -87,7 +87,7 @@ export function SelectAllRow() {
   const { selectable } = useSelection();
   if (!selectable.length) return null;
   return (
-    <label className="mb-3 flex items-center gap-2.5 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium md:hidden">
+    <label className="mb-3 flex items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm font-medium md:hidden">
       <SelectAllProducts />
       Select all awaiting a decision ({selectable.length})
     </label>
@@ -146,7 +146,7 @@ export function ApproveAllButton({ count }) {
   }
 
   return confirming ? (
-    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-stone-200 bg-white p-1.5 pl-4 text-sm sm:flex-nowrap">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-stone-200 bg-white p-2 pl-4 text-sm sm:flex-nowrap">
       <span className="whitespace-nowrap">Put all {count} live?</span>
       <button type="button" onClick={() => setConfirming(false)} disabled={busy} className="btn btn-sm text-stone-600 hover:bg-stone-100">
         Cancel

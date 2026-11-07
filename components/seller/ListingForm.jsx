@@ -118,7 +118,7 @@ function toPayload(v) {
 // ---------------------------------------------------------------------------
 
 const inputCls = (err) =>
-  `mt-2 h-12 w-full rounded-xl border bg-white px-4 text-[15px] placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
+  `mt-2 h-12 w-full rounded-xl border bg-white px-4 text-base placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
   }`;
 
@@ -134,7 +134,7 @@ function Card({ title, description, children }) {
 
 function Label({ htmlFor, children, required, as: As = 'label' }) {
   return (
-    <As {...(As === 'label' ? { htmlFor } : {})} className="block text-[15px] font-medium text-black">
+    <As {...(As === 'label' ? { htmlFor } : {})} className="block text-base font-medium text-black">
       {children}
       {required && (
         <span aria-hidden="true" className="ml-0.5 text-red-600">
@@ -164,10 +164,10 @@ function RadioList({ name, options, value, onChange, error }) {
       role="radiogroup"
       aria-invalid={Boolean(error) || undefined}
       aria-describedby={error ? `${name}-error` : undefined}
-      className="mt-3 space-y-2.5"
+      className="mt-3 space-y-3"
     >
       {options.map((o, i) => (
-        <label key={o.value} className="flex cursor-pointer items-start gap-3 text-[15px]">
+        <label key={o.value} className="flex cursor-pointer items-start gap-3 text-base">
           <input
             type="radio"
             id={i === 0 ? name : undefined}
@@ -227,7 +227,7 @@ function UploadingTile({ upload, video = false }) {
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-stone-200">
         <div className="h-full rounded-full bg-brand-500 transition-[width]" style={{ width: `${upload.progress}%` }} />
       </div>
-      <p className="mt-1 text-[11px] tabular-nums text-stone-500">Uploading… {upload.progress}%</p>
+      <p className="mt-1 text-xs tabular-nums text-stone-500">Uploading… {upload.progress}%</p>
     </li>
   );
 }
@@ -466,7 +466,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
     <div>
       {/* ---------- Header ---------- */}
       <div>
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-stone-600">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-stone-600">
           <Link href="/seller/listings" className="underline underline-offset-2 hover:text-black">
             Listings
           </Link>
@@ -498,7 +498,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                 type="button"
                 onClick={() => scrollTo(s.id)}
                 aria-current={activeSection === s.id ? 'true' : undefined}
-                className={`relative shrink-0 whitespace-nowrap border-b-2 py-4 text-[15px] transition-colors ${
+                className={`relative shrink-0 whitespace-nowrap border-b-2 py-4 text-base transition-colors ${
                   activeSection === s.id ? 'border-brand-600 font-medium text-brand-700' : 'border-transparent text-stone-700 hover:text-black'
                 }`}
               >
@@ -591,7 +591,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                   type="button"
                   onClick={() => setShowPhotoLink((v) => !v)}
                   aria-expanded={showPhotoLink}
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm text-stone-600 underline-offset-2 hover:text-black hover:underline"
+                  className="mt-3 inline-flex items-center gap-2 text-sm text-stone-600 underline-offset-2 hover:text-black hover:underline"
                 >
                   <Link2 size={15} strokeWidth={1.75} aria-hidden="true" />
                   Add a photo from a link instead
@@ -655,7 +655,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={url} alt={`Photo ${i + 1}`} className="size-full object-cover" draggable={false} />
                       {i === 0 && (
-                        <span className="absolute left-2 top-2 rounded-full bg-ink px-2 py-0.5 text-[11px] font-medium text-white">Cover</span>
+                        <span className="absolute left-2 top-2 rounded-full bg-ink px-2 py-0.5 text-xs font-medium text-white">Cover</span>
                       )}
                       <button
                         type="button"
@@ -763,7 +763,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                 aria-describedby={show('title') ? 'title-error' : undefined}
                 className={inputCls(show('title'))}
               />
-              <div className="mt-1.5 flex justify-between gap-4">
+              <div className="mt-2 flex justify-between gap-4">
                 <ErrorText id="title-error">{show('title')}</ErrorText>
                 <span className="ml-auto text-sm tabular-nums text-stone-500">
                   {values.title.length}/{LISTING_LIMITS.title}
@@ -799,7 +799,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                 onChange={(e) => update('shortDescription', e.target.value)}
                 className={inputCls(show('shortDescription'))}
               />
-              <p className="mt-1.5 text-right text-sm tabular-nums text-stone-500">
+              <p className="mt-2 text-right text-sm tabular-nums text-stone-500">
                 {values.shortDescription.length}/{LISTING_LIMITS.summary}
               </p>
             </div>
@@ -945,7 +945,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
                   />
                   <ErrorText id="downloadUrl-error">{show('downloadUrl')}</ErrorText>
                   {hint && !show('downloadUrl') && (
-                    <p className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-sky-50 px-3.5 py-2.5 text-xs text-sky-800">
+                    <p className="mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs text-sky-800">
                       {hint.text}
                       {hint.fix && (
                         <button type="button" onClick={() => update('linkUrl', hint.fix())} className="font-medium underline underline-offset-2">
@@ -1105,7 +1105,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
           >
             <div className="flex max-w-2xl items-start justify-between gap-6">
               <div>
-                <p className="text-[15px] font-medium">Feature this listing</p>
+                <p className="text-base font-medium">Feature this listing</p>
                 <Help>Pin it to the top of your Listings and the Featured filter so it’s always at hand.</Help>
               </div>
               <button
@@ -1151,7 +1151,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
       </form>
 
       {/* ---------- Sticky actions: a floating bar inside the content, not an edge-to-edge strip ---------- */}
-      <div className="sticky bottom-3 z-20 mt-8 rounded-2xl border border-stone-200 bg-white/95 px-3 py-2.5 shadow-[0_12px_32px_-14px_rgba(20,20,20,0.3)] backdrop-blur sm:bottom-4 sm:px-4">
+      <div className="sticky bottom-3 z-20 mt-8 rounded-2xl border border-stone-200 bg-white/95 px-3 py-3 shadow-[0_12px_32px_-14px_rgba(20,20,20,0.3)] backdrop-blur sm:bottom-4 sm:px-4">
         <div className="flex items-center gap-2">
           <Link href="/seller/listings" className="btn btn-md px-3 text-stone-700 hover:bg-stone-100 sm:px-5">
             Cancel
@@ -1161,7 +1161,7 @@ export default function ListingForm({ categories, recentCategories = [], listing
               <Eye size={16} strokeWidth={1.75} aria-hidden="true" className="sm:hidden" />
               <span className="max-sm:sr-only">Preview</span>
             </button>
-            <button type="button" onClick={() => save('draft')} disabled={Boolean(saving)} className="btn btn-md btn-outline max-sm:px-3.5">
+            <button type="button" onClick={() => save('draft')} disabled={Boolean(saving)} className="btn btn-md btn-outline max-sm:px-4">
               {saving === 'draft' ? 'Saving…' : 'Save as draft'}
             </button>
             <button type="submit" form="listing-form" disabled={Boolean(saving)} className="btn btn-md btn-dark">
@@ -1246,16 +1246,16 @@ export default function ListingForm({ categories, recentCategories = [], listing
               ]
                 .filter(([, v]) => v)
                 .map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 px-4 py-2.5">
+                  <div key={k} className="flex justify-between gap-4 px-4 py-3">
                     <dt className="text-stone-500">{k}</dt>
                     <dd className="text-right font-medium">{v}</dd>
                   </div>
                 ))}
             </dl>
             {values.tags.length > 0 && (
-              <ul className="mt-4 flex flex-wrap gap-1.5">
+              <ul className="mt-4 flex flex-wrap gap-2">
                 {values.tags.map((t) => (
-                  <li key={t} className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600">
+                  <li key={t} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
                     #{t}
                   </li>
                 ))}

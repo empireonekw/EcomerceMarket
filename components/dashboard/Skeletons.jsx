@@ -53,7 +53,7 @@ export function FilterBarSkeleton() {
 export function TableSkeleton({ rows = 8, cols = 5, thumb = true }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-      <div className="flex gap-6 border-b border-stone-200 bg-stone-50 px-5 py-3.5">
+      <div className="flex gap-6 border-b border-stone-200 bg-stone-50 px-5 py-4">
         {Array.from({ length: cols }, (_, i) => (
           <div key={i} className={`h-3 ${i === 0 ? 'w-40' : 'w-16'} ${bar}`} />
         ))}

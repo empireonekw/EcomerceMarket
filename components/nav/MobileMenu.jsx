@@ -28,7 +28,7 @@ export default function MobileMenu({ categories }) {
   }, [open]);
 
   const linkCls = (active) =>
-    `flex items-center justify-between rounded-full px-4 py-2.5 text-[15px] transition-colors ${active ? 'bg-white text-gray-900 ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white hover:text-black'}`;
+    `flex items-center justify-between rounded-full px-4 py-3 text-base transition-colors ${active ? 'bg-white text-gray-900 ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white hover:text-black'}`;
 
   return (
     <div ref={rootRef} className="lg:hidden">

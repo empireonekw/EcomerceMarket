@@ -78,7 +78,7 @@ export default function ApprovalModeSwitch({ autoApprove, awaiting }) {
                 aria-checked={on}
                 disabled={saving}
                 onClick={() => pick(auto)}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors ${
+                className={`inline-flex h-9 items-center gap-2 rounded-full px-4 text-sm font-medium transition-colors ${
                   on ? 'bg-ink text-white shadow-sm' : 'text-stone-600 hover:text-ink'
                 }`}
               >

@@ -69,7 +69,9 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
       let firstTicket = probe.ticket;
       const socket = io({
         path: '/socket.io',
-        transports: ['websocket', 'polling'],
+        // WebSocket only: the server runs several workers, and a long-polling session would need every request to
+        // reach the same one (server.js). If WebSockets are blocked, the inbox keeps working by polling the API.
+        transports: ['websocket'],
         autoConnect: !sleepingRef.current,
         // A fresh one-time ticket for every (re)connection attempt.
         auth: (cb) => {
@@ -105,7 +107,7 @@ export function MessagingProvider({ enabled = true, unreadUrl = '/api/messages/u
         }
       });
       socket.on(unreadEvent, ({ count }) => setUnread(count ?? 0));
-      for (const event of ['message:new', 'inbox:changed', 'typing', 'support:new']) socket.on(event, (p) => dispatch(event, p));
+      for (const event of ['message:new', 'message:update', 'inbox:changed', 'typing', 'support:new', 'support:update']) socket.on(event, (p) => dispatch(event, p));
     })();
 
     return () => {

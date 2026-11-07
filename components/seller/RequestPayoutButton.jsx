@@ -29,7 +29,7 @@ export default function RequestPayoutButton({ disabled, reason }) {
   }
 
   return (
-    <div className="flex flex-col items-start gap-1.5">
+    <div className="flex flex-col items-start gap-2">
       <button type="button" onClick={request} disabled={disabled || pending} className={buttonClasses.primary}>
         <Send size={16} strokeWidth={1.75} aria-hidden="true" />
         {pending ? 'Requesting…' : 'Request payout'}

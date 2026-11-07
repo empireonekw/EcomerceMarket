@@ -7,6 +7,7 @@ import { Archive, ArrowLeft, Flag, Inbox as InboxIcon, Loader2, Mail, Send, Star
 import { MESSAGE_LIMITS } from '@/lib/validation';
 import { siteConfig } from '@/lib/site';
 import { inboxApi } from '@/components/messages/inbox-api';
+import { AttachButton, AttachmentTray, MessageImages, MessageText, useImageAttachments } from '@/components/messages/MessageAttachments';
 import { useMessaging, useMessagingEvents } from '@/components/messages/MessagingProvider';
 import VerifiedBadge from '@/components/VerifiedBadge';
 
@@ -46,9 +47,9 @@ function Bubble({ message, otherName }) {
   if (message.system && !message.team) {
     // Automatic notice (listing approved, rejected…)
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white px-5 py-4 text-[15px] leading-relaxed">
+      <div className="mx-auto max-w-lg rounded-2xl border border-stone-200 bg-white px-5 py-4 text-base leading-relaxed">
         <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-500">{siteConfig.name} · Notice</p>
-        <p className="whitespace-pre-wrap break-words">{message.body}</p>
+        <MessageText message={message} />
         <p className="mt-2 text-xs text-stone-400">{clock(message.at)}</p>
       </div>
     );
@@ -60,10 +61,14 @@ function Bubble({ message, otherName }) {
         <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-500 text-xs font-semibold text-ink">
           {siteConfig.name.charAt(0)}
         </span>
-        <div className="flex max-w-[85%] flex-col items-start gap-1.5 sm:max-w-[70%]">
-          <div className="whitespace-pre-wrap break-words rounded-2xl rounded-bl-md border border-brand-100 bg-brand-50 px-4 py-2.5 text-[15px] leading-relaxed text-ink">{message.body}</div>
+        <div className="flex max-w-[85%] flex-col items-start gap-2 sm:max-w-[70%]">
+          <MessageImages images={message.images} />
+          {(message.body || message.deleted) && (
+            <MessageText message={message} className="rounded-2xl rounded-bl-md border border-brand-100 bg-brand-50 px-4 py-3 text-base leading-relaxed text-ink" />
+          )}
           <p className="px-1 text-xs text-stone-400">
             {siteConfig.name} team · {clock(message.at)}
+            {message.edited && <span className="ml-1">· Edited</span>}
           </p>
         </div>
       </div>
@@ -73,14 +78,19 @@ function Bubble({ message, otherName }) {
   return (
     <div className={`flex items-end gap-2 ${mine ? 'justify-end' : 'justify-start'}`}>
       {!mine && <Initial name={message.senderName || otherName} className="size-8 text-xs" />}
-      <div className={`flex max-w-[85%] flex-col gap-1.5 sm:max-w-[70%] ${mine ? 'items-end' : 'items-start'}`}>
+      <div className={`flex max-w-[85%] flex-col gap-2 sm:max-w-[70%] ${mine ? 'items-end' : 'items-start'}`}>
         {message.product && <ProductChip product={message.product} />}
-        <div className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed ${mine ? 'rounded-br-md bg-ink text-white' : 'rounded-bl-md border border-stone-200 bg-white text-ink'}`}>
-          {message.body}
-        </div>
+        <MessageImages images={message.images} align={mine ? 'end' : 'start'} />
+        {(message.body || message.deleted) && (
+          <MessageText
+            message={message}
+            className={`rounded-2xl px-4 py-3 text-base leading-relaxed ${mine ? 'rounded-br-md bg-ink text-white' : 'rounded-bl-md border border-stone-200 bg-white text-ink'}`}
+          />
+        )}
         <p className="px-1 text-xs text-stone-400">
           {message.auto && <span className="mr-1">Automatic reply ·</span>}
           {clock(message.at)}
+          {message.edited && <span className="ml-1">· Edited</span>}
           {message.pending && <span className="ml-1">· Sending…</span>}
           {message.failed && <span className="ml-1 text-red-600">· Not sent</span>}
         </p>
@@ -98,6 +108,7 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
   const [state, setState] = useState({ loading: true, error: '', conversation: null, messages: [], hasMore: false });
   const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [draft, setDraft] = useState('');
+  const attachments = useImageAttachments();
   const [sendError, setSendError] = useState('');
   const [peerTyping, setPeerTyping] = useState(false);
   const scrollRef = useRef(null);
@@ -141,9 +152,15 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
     stickToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }
 
-  useMessagingEvents(['message:new', 'typing', 'resync', 'poll'], (event, payload) => {
+  useMessagingEvents(['message:new', 'message:update', 'typing', 'resync', 'poll'], (event, payload) => {
     if (event === 'resync' || event === 'poll') return load({ quiet: true });
     if (payload?.conversation?.id !== conversationId && payload?.conversationId !== conversationId) return;
+    if (event === 'message:update') {
+      // The support team edited or deleted one of its messages.
+      const { message } = payload;
+      setState((s) => ({ ...s, messages: s.messages.map((m) => (m.id === message.id ? { ...m, ...message } : m)) }));
+      return;
+    }
     if (event === 'typing') {
       setPeerTyping(payload.typing);
       clearTimeout(typingTimer.current);
@@ -173,15 +190,18 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
   async function send(e) {
     e?.preventDefault();
     const body = draft.trim();
-    if (!body) return;
+    const images = attachments.locations;
+    if ((!body && !images.length) || attachments.uploading) return;
     const tempId = `tmp-${Date.now()}`;
     stickToBottom.current = true;
-    setState((s) => ({ ...s, messages: [...s.messages, { id: tempId, body, at: new Date().toISOString(), fromMe: true, pending: true }] }));
+    const shown = attachments.previews; // local previews until the server's copy arrives
+    setState((s) => ({ ...s, messages: [...s.messages, { id: tempId, body, images: shown, at: new Date().toISOString(), fromMe: true, pending: true }] }));
     setDraft('');
     sendTyping(conversationId, false);
     typingSent.current = false;
 
-    const { ok, data } = await inboxApi(`/api/messages/${conversationId}`, { method: 'POST', body: { body } });
+    const { ok, data } = await inboxApi(`/api/messages/${conversationId}`, { method: 'POST', body: { body, images } });
+    if (ok) attachments.reset();
     setState((s) => {
       if (!ok) return { ...s, messages: s.messages.map((m) => (m.id === tempId ? { ...m, pending: false, failed: true } : m)) };
       const already = s.messages.some((m) => m.id === data.message.id); // the socket may have delivered it first
@@ -231,7 +251,7 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
     <div className="flex h-full min-h-0 flex-col max-lg:h-[calc(100dvh-4rem)] max-lg:min-h-[28rem]">
       {/* Header */}
       <div className="flex min-h-16 flex-wrap items-center gap-2 border-b border-stone-200 px-3 py-2 sm:px-5">
-        <button type="button" onClick={onBack} className="flex items-center gap-2 rounded-full px-3 py-2 text-[15px] font-semibold hover:bg-stone-200/60">
+        <button type="button" onClick={onBack} className="flex items-center gap-2 rounded-full px-3 py-2 text-base font-semibold hover:bg-stone-200/60">
           <ArrowLeft size={18} aria-hidden="true" />
           <span className="hidden sm:inline">{backLabel}</span>
         </button>
@@ -240,7 +260,7 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
             <div className="flex min-w-[11rem] flex-1 items-center gap-3">
               <Initial name={name} className="size-9 text-sm" />
               <div className="min-w-0">
-                <p className="flex min-w-0 items-center gap-1 text-[15px] font-semibold">
+                <p className="flex min-w-0 items-center gap-1 text-base font-semibold">
                   <span className="truncate">{name}</span>
                   {conv?.other?.verified && <VerifiedBadge size={15} />}
                 </p>
@@ -344,7 +364,9 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
                     {sendError}
                   </p>
                 )}
+                <AttachmentTray attachments={attachments} />
                 <div className="flex items-end gap-2">
+                  <AttachButton onFiles={attachments.add} disabled={attachments.items.length >= 4} />
                   <label htmlFor="inbox-reply" className="sr-only">
                     Reply to {name}
                   </label>
@@ -360,13 +382,13 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
                       if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) send(e);
                     }}
                     placeholder={`Message ${name}`}
-                    className="field-sizing-content max-h-40 min-h-12 flex-1 resize-none rounded-3xl border border-stone-300 px-5 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+                    className="field-sizing-content max-h-40 min-h-12 flex-1 resize-none rounded-3xl border border-stone-300 px-5 py-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
                   />
-                  <button type="submit" disabled={!draft.trim()} aria-label="Send" className="grid size-12 shrink-0 place-items-center rounded-full bg-ink text-white transition-colors hover:bg-stone-800 disabled:bg-stone-300">
+                  <button type="submit" disabled={(!draft.trim() && !attachments.locations.length) || attachments.uploading} aria-label="Send" className="grid size-12 shrink-0 place-items-center rounded-full bg-ink text-white transition-colors hover:bg-stone-800 disabled:bg-stone-300">
                     <Send size={18} aria-hidden="true" />
                   </button>
                 </div>
-                <p className="mt-1.5 hidden px-2 text-xs text-stone-400 sm:block">Enter to send · Shift + Enter for a new line</p>
+                <p className="mt-2 hidden px-2 text-xs text-stone-400 sm:block">Enter to send · Shift + Enter for a new line</p>
               </form>
             ) : (
               conv && (
@@ -401,9 +423,9 @@ export default function ThreadView({ conversationId, backLabel, onBack, onAction
               {conv.labels.length > 0 && (
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">Labels</p>
-                  <ul className="flex flex-wrap gap-1.5">
+                  <ul className="flex flex-wrap gap-2">
                     {conv.labels.map((l) => (
-                      <li key={l} className="rounded-full bg-stone-200/70 px-2.5 py-0.5 text-xs font-medium">
+                      <li key={l} className="rounded-full bg-stone-200/70 px-3 py-0.5 text-xs font-medium">
                         {l}
                       </li>
                     ))}

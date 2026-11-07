@@ -36,7 +36,7 @@ export default async function SellerReviewsPage({ searchParams }) {
             key={f.value}
             href={f.value === 'all' ? '/seller/reviews' : `/seller/reviews?filter=${f.value}`}
             aria-current={filter === f.value ? 'page' : undefined}
-            className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${filter === f.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
+            className={`rounded-full border px-4 py-2 text-sm transition-colors ${filter === f.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
           >
             {f.label}
           </Link>

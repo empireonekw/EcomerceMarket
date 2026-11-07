@@ -44,9 +44,9 @@ function SkeletonRows() {
   return (
     <ul aria-hidden="true" className="divide-y divide-stone-100">
       {Array.from({ length: 3 }, (_, i) => (
-        <li key={i} className="flex animate-pulse items-center gap-3 px-3 py-2.5">
+        <li key={i} className="flex animate-pulse items-center gap-3 px-3 py-3">
           <span className="h-9 w-12 shrink-0 rounded-md bg-stone-200" />
-          <span className="flex-1 space-y-1.5">
+          <span className="flex-1 space-y-2">
             <span className="block h-3 w-3/4 rounded bg-stone-200" />
             <span className="block h-2.5 w-1/3 rounded bg-stone-200" />
           </span>
@@ -224,7 +224,7 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
                       href={`/products/${p.slug}`}
                       onClick={() => setOpen(false)}
                       onMouseEnter={() => setActive(i)}
-                      className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${active === i ? 'bg-stone-50' : ''}`}
+                      className={`flex items-center gap-3 px-3 py-3 transition-colors ${active === i ? 'bg-stone-50' : ''}`}
                     >
                       <span className="relative h-9 w-12 shrink-0 overflow-hidden rounded-md bg-stone-100">
                         {p.coverImage && (
@@ -237,7 +237,7 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
                         </span>
                         <span className="mt-0.5 flex items-center gap-2">
                           {p.category?.name && (
-                            <span className="rounded-full bg-stone-100 px-2 py-px text-[11px] font-medium text-stone-600">{p.category.name}</span>
+                            <span className="rounded-full bg-stone-100 px-2 py-px text-xs font-medium text-stone-600">{p.category.name}</span>
                           )}
                           <span className="text-xs font-medium text-stone-900">{p.price === 0 ? 'Free' : formatPrice(p.price, p.currency)}</span>
                         </span>
@@ -254,7 +254,7 @@ export default function NavSearch({ id = 'nav-search', className = '', block = f
                     aria-selected={active === options.length}
                     onClick={() => setOpen(false)}
                     onMouseEnter={() => setActive(options.length)}
-                    className={`block px-4 py-2.5 text-center text-sm font-medium text-stone-900 transition-colors ${
+                    className={`block px-4 py-3 text-center text-sm font-medium text-stone-900 transition-colors ${
                       active === options.length ? 'bg-stone-50' : ''
                     }`}
                   >

@@ -80,7 +80,7 @@ export default async function ShopPage({ params, searchParams }) {
           </span>
         )}
         <div className="min-w-0">
-          <h1 className="flex items-center gap-2 font-serif text-3xl leading-tight tracking-[-0.02em] text-ink sm:text-4xl">
+          <h1 className="flex items-center gap-2 font-serif text-3xl leading-tight tracking-tight text-ink sm:text-4xl">
             <span className="truncate">{shop.name}</span>
             {shop.verified && <VerifiedBadge size={24} />}
           </h1>
@@ -91,7 +91,7 @@ export default async function ShopPage({ params, searchParams }) {
             </p>
           )}
           {stats && (
-            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[15px] text-stone-600">
+            <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base text-stone-600">
               {stats.rating.count > 0 && (
                 <span className="inline-flex items-center gap-1">
                   <Star size={16} aria-hidden="true" className="fill-amber-400 text-amber-400" />
@@ -116,7 +116,7 @@ export default async function ShopPage({ params, searchParams }) {
           {stats && (stats.imported.sales > 0 || stats.imported.reviews > 0) && (
             <p className="mt-1 text-xs text-stone-500">{importedNote(stats.imported)}</p>
           )}
-          {shop.description && <p className="mt-2 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{shop.description}</p>}
+          {shop.description && <p className="mt-2 line-clamp-2 max-w-3xl text-base leading-relaxed text-stone-600">{shop.description}</p>}
         </div>
       </header>
 
@@ -131,7 +131,7 @@ export default async function ShopPage({ params, searchParams }) {
                   <Link
                     href={href({ category: s.id, page: undefined })}
                     aria-current={active ? 'page' : undefined}
-                    className={`flex items-baseline justify-between gap-3 rounded-lg px-3 py-2 text-[15px] transition-colors ${
+                    className={`flex items-baseline justify-between gap-3 rounded-lg px-3 py-2 text-base transition-colors ${
                       active ? 'bg-stone-100 font-semibold text-ink' : 'text-stone-700 hover:bg-stone-50 hover:text-ink'
                     }`}
                   >
@@ -146,7 +146,7 @@ export default async function ShopPage({ params, searchParams }) {
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="mr-auto text-2xl font-semibold tracking-[-0.01em] text-ink">{title}</h2>
+            <h2 className="mr-auto text-2xl font-semibold tracking-tight text-ink">{title}</h2>
             <Form action={base} className="relative w-full sm:w-72">
               {section && <input type="hidden" name="category" value={section.id} />}
               {keep.sort && <input type="hidden" name="sort" value={keep.sort} />}
@@ -204,7 +204,7 @@ export default async function ShopPage({ params, searchParams }) {
               <div className="mt-6">
                 <ProductGrid products={featured} showShop={false} preloadCount={featured.length} />
               </div>
-              <h2 className="mt-14 text-2xl font-semibold tracking-[-0.01em] text-ink">All items</h2>
+              <h2 className="mt-14 text-2xl font-semibold tracking-tight text-ink">All items</h2>
             </>
           )}
 

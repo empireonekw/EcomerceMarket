@@ -73,7 +73,7 @@ export default function ClearPayoutButton({ sellerId, storeName, amount }) {
             onChange={(e) => setReference(e.target.value)}
             maxLength={120}
             placeholder="Bank / wallet transaction ID"
-            className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 px-3.5 text-sm focus:border-black focus:outline-none"
+            className="mt-2 h-11 w-full rounded-xl border border-stone-300 px-4 text-sm focus:border-black focus:outline-none"
           />
           <div className="mt-6 flex justify-end gap-2">
             <button type="button" onClick={() => dialogRef.current?.close()} disabled={saving} className="h-10 rounded-full px-4 text-sm font-medium hover:bg-stone-100">

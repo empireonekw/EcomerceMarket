@@ -43,7 +43,7 @@ export default async function AdminUserPage({ params }) {
 
   return (
     <>
-      <Link href="/admin/users" className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-black">
+      <Link href="/admin/users" className="inline-flex items-center gap-2 text-sm text-stone-500 hover:text-black">
         <ArrowLeft size={15} strokeWidth={1.75} aria-hidden="true" />
         All users
       </Link>
@@ -176,7 +176,7 @@ export default async function AdminUserPage({ params }) {
               ) : (
                 <PagedList pageSize={8} label="Products" className="divide-y divide-stone-100">
                   {u.products.map((p) => (
-                    <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
+                    <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-4 text-sm">
                       <div className="min-w-0">
                         <Link href={`/admin/products/${p._id}/edit`} className="line-clamp-2 font-medium leading-snug hover:underline" title={p.title}>
                           {p.title}

@@ -19,9 +19,9 @@ function Gate({ title, text, children }) {
       <span className="mx-auto grid size-14 place-items-center rounded-full bg-brand-100 text-brand-700">
         <Store size={26} strokeWidth={1.5} aria-hidden="true" />
       </span>
-      <h1 className="mt-6 font-serif text-4xl tracking-[-0.02em] text-ink">{title}</h1>
+      <h1 className="mt-6 font-serif text-4xl tracking-tight text-ink">{title}</h1>
       <p className="mt-3 text-stone-600">{text}</p>
-      <div className="mt-8 space-y-2.5">{children}</div>
+      <div className="mt-8 space-y-3">{children}</div>
     </div>
   );
 }

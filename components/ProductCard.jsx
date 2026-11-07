@@ -77,7 +77,7 @@ export default function ProductCard({ product, preload = false, showShop = true 
           </span>
         )}
         {bestseller && (
-          <span className="absolute right-3 bottom-3 inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-semibold text-amber-950 shadow-[0_6px_16px_-6px_rgba(180,110,0,0.7)] ring-1 ring-amber-500/40 @[17rem]:text-sm">
+          <span className="absolute right-3 bottom-3 inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold text-amber-950 shadow-[0_6px_16px_-6px_rgba(180,110,0,0.7)] ring-1 ring-amber-500/40 @[17rem]:text-sm">
             <Award size={14} strokeWidth={2.25} aria-hidden="true" />
             Best seller
           </span>
@@ -86,12 +86,12 @@ export default function ProductCard({ product, preload = false, showShop = true 
 
       {/* ---------- Details (every row always present: equal heights) ---------- */}
       <div className="flex flex-1 flex-col pt-3">
-        <p className="flex items-center gap-1.5 text-[13px] text-stone-500 @[17rem]:text-sm">
+        <p className="flex items-center gap-2 text-sm text-stone-500 @[17rem]:text-sm">
           {accessLink ? <Link2 size={15} strokeWidth={2} aria-hidden="true" /> : <Download size={15} strokeWidth={2} aria-hidden="true" />}
           {accessLink ? 'Instant access' : 'Digital download'}
         </p>
 
-        <h3 className="mt-0.5 truncate text-[15px] leading-snug text-ink @[17rem]:text-base" title={title}>
+        <h3 className="mt-0.5 truncate text-base leading-snug text-ink @[17rem]:text-base" title={title}>
           <Link
             href={href}
             className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-brand-700"
@@ -101,7 +101,7 @@ export default function ProductCard({ product, preload = false, showShop = true 
         </h3>
 
         {showShop && (
-          <p className="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-stone-600 @[17rem]:text-sm">
+          <p className="mt-1 flex min-w-0 items-center gap-1 text-sm text-stone-600 @[17rem]:text-sm">
             {rating?.count > 0 && (
               <>
                 <span className="font-semibold text-ink tabular-nums">{rating.average.toFixed(1)}</span>
@@ -117,9 +117,9 @@ export default function ProductCard({ product, preload = false, showShop = true 
           </p>
         )}
 
-        <p className="mt-1.5 flex flex-wrap items-baseline gap-x-1.5">
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-2">
           <span
-            className={`text-lg font-semibold tracking-[-0.01em] tabular-nums @[17rem]:text-xl ${discount > 0 ? 'text-emerald-700' : 'text-ink'}`}
+            className={`text-lg font-semibold tracking-tight tabular-nums @[17rem]:text-xl ${discount > 0 ? 'text-emerald-700' : 'text-ink'}`}
           >
             {price === 0 ? 'Free' : formatPrice(price, currency)}
           </span>
@@ -138,7 +138,7 @@ export default function ProductCard({ product, preload = false, showShop = true 
           {category && (
             <Link
               href={categoryHref(category)}
-              className="relative z-10 hidden items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-ink hover:underline @[17rem]:inline-flex"
+              className="relative z-10 hidden items-center gap-2 text-sm font-semibold whitespace-nowrap text-ink hover:underline @[17rem]:inline-flex"
             >
               More like this
               <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />

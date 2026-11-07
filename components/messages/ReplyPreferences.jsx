@@ -45,7 +45,7 @@ export default function ReplyPreferences({ settings, onChange }) {
 
   return (
     <div ref={rootRef} className="relative">
-      <button type="button" onClick={toggle} aria-expanded={open} className="flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-[15px] font-semibold hover:bg-stone-200/60">
+      <button type="button" onClick={toggle} aria-expanded={open} className="flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-base font-semibold hover:bg-stone-200/60">
         Reply preferences
         <ChevronDown size={14} strokeWidth={2.5} aria-hidden="true" />
       </button>
@@ -54,7 +54,7 @@ export default function ReplyPreferences({ settings, onChange }) {
         <div role="dialog" aria-label="Reply preferences" className="absolute right-0 top-full z-40 mt-2 w-[22rem] max-w-[calc(100vw-2rem)] rounded-xl border border-stone-200 bg-white p-5 shadow-lift">
           {settings.isSeller && (
             <form onSubmit={save}>
-              <p className="text-[15px] font-semibold">Away message</p>
+              <p className="text-base font-semibold">Away message</p>
               <p className="mt-1 text-sm text-stone-500">Sent automatically when a buyer writes to your shop (at most once a day per conversation).</p>
               <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 text-sm font-medium">
                 Send an automatic reply
@@ -88,7 +88,7 @@ export default function ReplyPreferences({ settings, onChange }) {
           )}
 
           <div className={settings.isSeller ? 'mt-5 border-t border-stone-200 pt-4' : ''}>
-            <p className="text-[15px] font-semibold">Your labels</p>
+            <p className="text-base font-semibold">Your labels</p>
             {settings.labels.length ? (
               <ul className="mt-2 flex flex-wrap gap-2">
                 {settings.labels.map((l) => (

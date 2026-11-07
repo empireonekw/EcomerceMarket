@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useSta
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ArrowLeft, CheckCircle2, Loader2, PenSquare, RotateCcw, Search, Send, X } from 'lucide-react';
+import { AttachButton, AttachmentTray, MessageImages, MessageText, useImageAttachments } from '@/components/messages/MessageAttachments';
 import { inboxTime } from '@/lib/messaging';
 import { MESSAGE_LIMITS } from '@/lib/validation';
 import { siteConfig } from '@/lib/site';
@@ -27,9 +28,9 @@ function readView(sp) {
 
 function StatusPill({ status }) {
   return status === 'resolved' ? (
-    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">Resolved</span>
+    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Resolved</span>
   ) : (
-    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">Open</span>
+    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Open</span>
   );
 }
 
@@ -148,7 +149,7 @@ function NewMessageDialog({ dialogRef, prefillUser, onSent }) {
             setError('');
           }}
           placeholder="Hi! I’m from the Sellpify team…"
-          className="mt-2 w-full resize-none rounded-xl border border-stone-300 p-4 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+          className="mt-2 w-full resize-none rounded-xl border border-stone-300 p-4 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
         />
         {error && (
           <p role="alert" className="mt-2 text-sm text-red-600">
@@ -166,13 +167,94 @@ function NewMessageDialog({ dialogRef, prefillUser, onSent }) {
 }
 
 /** An open chat: the user's messages on the left, the team's on the right, live. */
-function SupportThread({ threadId, onBack, onChanged }) {
+/**
+ * One of this admin's own replies: "Edit" (inline, the user sees it marked edited) and "Delete" (the user sees that it
+ * was deleted). Other admins' replies and the user's messages have no actions.
+ */
+function OwnMessageActions({ threadId, message, onUpdated }) {
+  const [mode, setMode] = useState(null); // null | 'edit' | 'delete'
+  const [text, setText] = useState(message.body);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function save(e) {
+    e.preventDefault();
+    setBusy(true);
+    const { ok, data } = await inboxApi(`/api/admin/support/${threadId}/messages/${message.id}`, { method: 'PATCH', body: { body: text } });
+    setBusy(false);
+    if (!ok) return setError(data.error || 'Couldn’t save.');
+    onUpdated(data.message);
+    setMode(null);
+  }
+
+  async function remove() {
+    setBusy(true);
+    const { ok, data } = await inboxApi(`/api/admin/support/${threadId}/messages/${message.id}`, { method: 'DELETE' });
+    setBusy(false);
+    if (!ok) return setError(data.error || 'Couldn’t delete.');
+    onUpdated(data.message);
+    setMode(null);
+  }
+
+  const link = 'rounded-md px-2 py-0.5 text-xs font-medium text-stone-500 transition-colors hover:bg-stone-200/70 hover:text-ink';
+  if (mode === 'edit') {
+    return (
+      <form onSubmit={save} className="w-full min-w-64 space-y-2">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={MESSAGE_LIMITS.max}
+          autoFocus
+          aria-label="Edit your message"
+          className="field-sizing-content min-h-12 w-full resize-none rounded-2xl border border-stone-300 bg-white px-4 py-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+        />
+        {error && <p className="text-xs text-red-600">{error}</p>}
+        <div className="flex justify-end gap-1">
+          <button type="button" onClick={() => setMode(null)} className="btn btn-sm text-stone-600 hover:bg-stone-100">
+            Cancel
+          </button>
+          <button type="submit" disabled={busy || (!text.trim() && !message.images?.length)} className="btn btn-sm btn-dark">
+            {busy ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </form>
+    );
+  }
+  if (mode === 'delete') {
+    return (
+      <p className="flex items-center gap-1 text-xs text-stone-600">
+        Delete this message for everyone?
+        <button type="button" onClick={remove} disabled={busy} className={`${link} text-red-600 hover:text-red-700`}>
+          {busy ? 'Deleting…' : 'Delete'}
+        </button>
+        <button type="button" onClick={() => setMode(null)} className={link}>
+          Keep
+        </button>
+        {error && <span className="text-red-600">{error}</span>}
+      </p>
+    );
+  }
+  return (
+    <span className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+      <button type="button" onClick={() => setMode('edit')} className={link}>
+        Edit
+      </button>
+      <button type="button" onClick={() => setMode('delete')} className={link}>
+        Delete
+      </button>
+    </span>
+  );
+}
+
+function SupportThread({ threadId, onBack, onChanged, me }) {
   const [state, setState] = useState({ loading: true, error: '', thread: null, messages: [], hasMore: false });
   const [draft, setDraft] = useState('');
   const [sendError, setSendError] = useState('');
   const [busy, setBusy] = useState(false);
+  const attachments = useImageAttachments();
   const scrollRef = useRef(null);
   const stick = useRef(true);
+  const replaceMessage = (message) => setState((s) => ({ ...s, messages: s.messages.map((m) => (m.id === message.id ? message : m)) }));
 
   const load = useCallback(
     async ({ quiet = false } = {}) => {
@@ -195,20 +277,22 @@ function SupportThread({ threadId, onBack, onChanged }) {
     if (el && stick.current) el.scrollTop = el.scrollHeight;
   }, [state.messages]);
 
-  useMessagingEvents(['support:new', 'resync', 'poll'], (event, payload) => {
-    if (event !== 'support:new' || payload?.threadId === threadId) load({ quiet: true });
+  useMessagingEvents(['support:new', 'support:update', 'resync', 'poll'], (event, payload) => {
+    if (!event.startsWith('support:') || payload?.threadId === threadId) load({ quiet: true });
   });
 
   async function send(e) {
     e?.preventDefault();
     const body = draft.trim();
-    if (!body) return;
+    const images = attachments.locations;
+    if ((!body && !images.length) || attachments.uploading) return;
     setBusy(true);
     stick.current = true;
-    const { ok, data } = await inboxApi(`/api/admin/support/${threadId}`, { method: 'POST', body: { body } });
+    const { ok, data } = await inboxApi(`/api/admin/support/${threadId}`, { method: 'POST', body: { body, images } });
     setBusy(false);
     if (!ok) return setSendError(data.error || 'Not sent. Please try again.');
     setDraft('');
+    attachments.reset();
     setSendError('');
     setState((s) => (s.messages.some((m) => m.id === data.message.id) ? s : { ...s, messages: [...s.messages, data.message] }));
     onChanged();
@@ -237,7 +321,7 @@ function SupportThread({ threadId, onBack, onChanged }) {
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 truncate font-semibold">
                 {user.name}
-                <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">{ROLE[user.role] ?? user.role}</span>
+                <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">{ROLE[user.role] ?? user.role}</span>
                 <StatusPill status={thread.status} />
               </p>
               <p className="truncate text-xs text-stone-500">
@@ -281,20 +365,28 @@ function SupportThread({ threadId, onBack, onChanged }) {
             {state.messages.map((m) =>
               m.notice ? (
                 <div key={m.id} className="mx-auto max-w-lg rounded-xl border border-dashed border-stone-300 bg-white px-4 py-3 text-center text-sm text-stone-600">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-stone-400">Automatic notice · {clock(m.at)}</p>
-                  {m.body}
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-stone-400">Automatic notice · {clock(m.at)}</p>
+                  <MessageText message={m} />
                 </div>
               ) : (
-                <div key={m.id} className={`flex items-end gap-2 ${m.fromTeam ? 'justify-end' : 'justify-start'}`}>
+                <div key={m.id} className={`group flex items-end gap-2 ${m.fromTeam ? 'justify-end' : 'justify-start'}`}>
                   {!m.fromTeam && <Initial name={user?.name} className="size-8 text-xs" />}
                   <div className={`flex max-w-[80%] flex-col gap-1 sm:max-w-[65%] ${m.fromTeam ? 'items-end' : 'items-start'}`}>
-                    <div className={`whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-[15px] leading-relaxed ${m.fromTeam ? 'rounded-br-md bg-brand-500 text-ink' : 'rounded-bl-md border border-stone-200 bg-white'}`}>
-                      {m.body}
+                    <MessageImages images={m.images} align={m.fromTeam ? 'end' : 'start'} />
+                    {(m.body || m.deleted) && (
+                      <MessageText
+                        message={m}
+                        className={`rounded-2xl px-4 py-3 text-base leading-relaxed ${m.fromTeam ? 'rounded-br-md bg-brand-500 text-ink' : 'rounded-bl-md border border-stone-200 bg-white'}`}
+                      />
+                    )}
+                    <div className="flex items-center gap-1 px-1 text-xs text-stone-400">
+                      <span>
+                        {m.fromTeam ? `${m.staffName ?? `${siteConfig.name} team`} · ` : ''}
+                        {clock(m.at)}
+                        {m.edited && ' · Edited'}
+                      </span>
+                      {m.fromTeam && !m.deleted && m.staffId && m.staffId === me && <OwnMessageActions threadId={threadId} message={m} onUpdated={replaceMessage} />}
                     </div>
-                    <p className="px-1 text-xs text-stone-400">
-                      {m.fromTeam ? `${m.staffName ?? `${siteConfig.name} team`} · ` : ''}
-                      {clock(m.at)}
-                    </p>
                   </div>
                 </div>
               ),
@@ -306,7 +398,9 @@ function SupportThread({ threadId, onBack, onChanged }) {
                 {sendError}
               </p>
             )}
+            <AttachmentTray attachments={attachments} />
             <div className="flex items-end gap-2">
+              <AttachButton onFiles={attachments.add} disabled={attachments.items.length >= 4} />
               <label htmlFor="support-reply" className="sr-only">
                 Reply to {user?.name}
               </label>
@@ -318,9 +412,9 @@ function SupportThread({ threadId, onBack, onChanged }) {
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && send(e)}
                 placeholder={`Reply to ${user?.name ?? 'user'} as the ${siteConfig.name} team`}
-                className="field-sizing-content max-h-40 min-h-12 flex-1 resize-none rounded-3xl border border-stone-300 px-5 py-3 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+                className="field-sizing-content max-h-40 min-h-12 flex-1 resize-none rounded-3xl border border-stone-300 px-5 py-3 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
               />
-              <button type="submit" disabled={busy || !draft.trim()} aria-label="Send" className="grid size-12 shrink-0 place-items-center rounded-full bg-ink text-white hover:bg-stone-800 disabled:bg-stone-300">
+              <button type="submit" disabled={busy || attachments.uploading || (!draft.trim() && !attachments.locations.length)} aria-label="Send" className="grid size-12 shrink-0 place-items-center rounded-full bg-ink text-white hover:bg-stone-800 disabled:bg-stone-300">
                 <Send size={18} aria-hidden="true" />
               </button>
             </div>
@@ -335,7 +429,7 @@ function SupportThread({ threadId, onBack, onChanged }) {
  * Admin → Messages → Chats: every user's chat with the Sellpify team, live. Reply, resolve / reopen, or start a
  * chat with any user. Filter, search and the open chat live in the URL (?status=&q=&t=).
  */
-export default function SupportInbox({ initialList, prefillUser = null }) {
+export default function SupportInbox({ initialList, prefillUser = null, me = null }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const view = useMemo(() => readView(searchParams), [searchParams]);
@@ -442,7 +536,7 @@ export default function SupportInbox({ initialList, prefillUser = null }) {
               New
             </button>
           </div>
-          <nav aria-label="Filter chats" className="flex gap-1.5">
+          <nav aria-label="Filter chats" className="flex gap-2">
             {FILTERS.map((f) => (
               <button
                 key={f.key || 'all'}
@@ -471,21 +565,21 @@ export default function SupportInbox({ initialList, prefillUser = null }) {
                     type="button"
                     onClick={() => go({ t: c.id })}
                     aria-current={view.t === c.id ? 'true' : undefined}
-                    className={`flex w-full items-start gap-3 border-b border-stone-100 px-4 py-3.5 text-left transition-colors ${view.t === c.id ? 'bg-stone-100' : 'hover:bg-stone-50'}`}
+                    className={`flex w-full items-start gap-3 border-b border-stone-100 px-4 py-4 text-left transition-colors ${view.t === c.id ? 'bg-stone-100' : 'hover:bg-stone-50'}`}
                   >
                     <Initial name={c.user?.name} />
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
                         {c.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-500" />}
                         <span className={`truncate text-sm ${c.unread ? 'font-bold' : 'font-medium'}`}>{c.user?.name ?? 'Deleted user'}</span>
-                        <span className="shrink-0 text-[11px] text-stone-500">{ROLE[c.user?.role] ?? ''}</span>
+                        <span className="shrink-0 text-xs text-stone-500">{ROLE[c.user?.role] ?? ''}</span>
                         <span className="ml-auto shrink-0 text-xs tabular-nums text-stone-500">{c.lastMessage ? inboxTime(c.lastMessage.at) : ''}</span>
                       </span>
                       <span className={`mt-0.5 block truncate text-sm ${c.unread ? 'text-stone-800' : 'text-stone-500'}`}>
                         {c.lastMessage?.fromTeam ? 'You: ' : ''}
                         {c.lastMessage?.body}
                       </span>
-                      <span className="mt-1.5 block">
+                      <span className="mt-2 block">
                         <StatusPill status={c.status} />
                       </span>
                     </span>
@@ -518,7 +612,7 @@ export default function SupportInbox({ initialList, prefillUser = null }) {
       {/* Open chat */}
       <section aria-label="Chat" className={`min-w-0 flex-1 ${view.t ? '' : 'max-lg:hidden'}`}>
         {view.t ? (
-          <SupportThread key={view.t} threadId={view.t} onBack={() => go({ t: null })} onChanged={onChanged} />
+          <SupportThread key={view.t} threadId={view.t} onBack={() => go({ t: null })} onChanged={onChanged} me={me} />
         ) : (
           <div className="grid h-full place-items-center p-10 text-center">
             <div>

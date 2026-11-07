@@ -49,7 +49,7 @@ export function RoleSelect({ user, locked }) {
 
   if (locked) {
     return (
-      <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${ROLE_STYLES[user.role]}`}>{ROLE_LABELS[user.role]}</span>
+      <span className={`inline-flex rounded-full border px-3 py-0.5 text-xs font-medium ${ROLE_STYLES[user.role]}`}>{ROLE_LABELS[user.role]}</span>
     );
   }
 
@@ -88,7 +88,7 @@ export function RoleSelect({ user, locked }) {
           value={user.role}
           disabled={saving || refreshing}
           onChange={(e) => choose(e.target.value)}
-          className={`h-7 cursor-pointer appearance-none rounded-full border pl-2.5 pr-7 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-60 ${ROLE_STYLES[user.role]}`}
+          className={`h-7 cursor-pointer appearance-none rounded-full border pl-3 pr-7 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:opacity-60 ${ROLE_STYLES[user.role]}`}
         >
           {Object.entries(ROLE_LABELS).map(([value, label]) => (
             <option key={value} value={value} className="bg-white text-ink">
@@ -105,13 +105,13 @@ export function RoleSelect({ user, locked }) {
             <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-brand-50 text-brand-700">
               <ShieldCheck size={20} strokeWidth={1.9} />
             </span>
-            <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
+            <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-tight">
               Make {user.name} {next === 'admin' ? 'an admin' : `a ${ROLE_LABELS[next]?.toLowerCase() ?? ''}`}?
             </h2>
             <p className="mt-1 text-sm text-stone-500">
               {ROLE_LABELS[user.role]} → {ROLE_LABELS[next]}
             </p>
-            <ul className="mt-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
               {next && consequences(user.role, next).map((line) => <li key={line}>{line}</li>)}
             </ul>
             {needsPassword && (
@@ -126,13 +126,13 @@ export function RoleSelect({ user, locked }) {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1.5 h-11 w-full rounded-xl border border-stone-300 px-3.5 text-sm focus:border-black focus:outline-none"
+                  className="mt-2 h-11 w-full rounded-xl border border-stone-300 px-4 text-sm focus:border-black focus:outline-none"
                 />
-                <p className="mt-1.5 text-xs text-stone-500">Required to grant or remove admin access.</p>
+                <p className="mt-2 text-xs text-stone-500">Required to grant or remove admin access.</p>
               </div>
             )}
             {error && (
-              <p role="alert" className="mt-4 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+              <p role="alert" className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </p>
             )}
@@ -187,7 +187,7 @@ export function BlockUserButton({ user, labelClassName = '' }) {
         disabled={busy}
         onClick={() => (blocked ? run(false) : dialogRef.current?.showModal())}
         title={`${blocked ? 'Unblock' : 'Block'} ${user.name}`}
-        className={`relative z-10 inline-flex h-8 items-center justify-center gap-1.5 rounded-full text-sm font-medium transition-colors disabled:opacity-60 ${
+        className={`relative z-10 inline-flex h-8 items-center justify-center gap-2 rounded-full text-sm font-medium transition-colors disabled:opacity-60 ${
           labelClassName ? 'w-8 2xl:w-auto 2xl:px-3' : 'px-3'
         } ${
           blocked ? 'text-emerald-700 hover:bg-emerald-50' : 'text-stone-700 hover:bg-stone-100'
@@ -205,10 +205,10 @@ export function BlockUserButton({ user, labelClassName = '' }) {
           <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-amber-50 text-amber-700">
             <Ban size={20} strokeWidth={1.9} />
           </span>
-          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
+          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-tight">
             Block {user.name}?
           </h2>
-          <ul className="mt-4 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
+          <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
             <li>They’re signed out everywhere and can’t sign in until you unblock them.</li>
             {user.role === 'seller' && <li>Their live listings are hidden from the store.</li>}
             <li>Nothing is deleted — orders, earnings and listings are kept, and Unblock restores everything.</li>

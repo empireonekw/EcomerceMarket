@@ -120,7 +120,7 @@ export default function ProductGallery({ images, videos = [], title, coverBlurDa
             <button type="button" onClick={() => go(1)} aria-label="Next photo" className={`${arrow} right-3`}>
               <ChevronRight size={22} strokeWidth={2} aria-hidden="true" />
             </button>
-            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-2.5 py-0.5 text-xs font-medium text-white tabular-nums lg:hidden">
+            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/55 px-3 py-0.5 text-xs font-medium text-white tabular-nums lg:hidden">
               {index + 1} / {media.length}
             </span>
           </>

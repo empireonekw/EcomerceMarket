@@ -47,7 +47,7 @@ export default function SellerSignupPage() {
       >
         <ul className="mb-6 flex flex-wrap gap-2">
           {PERKS.map(({ icon: Icon, label }) => (
-            <li key={label} className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">
+            <li key={label} className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">
               <Icon size={13} strokeWidth={1.75} aria-hidden="true" />
               {label}
             </li>

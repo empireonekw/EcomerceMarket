@@ -26,7 +26,7 @@ export default function Categories({ categories, productCount }) {
         {/* minmax(0,1fr): a long one-line description must never widen the list and squeeze this column. */}
         <Reveal className="lg:sticky lg:top-28 lg:self-start">
           <Eyebrow>Browse the catalog</Eyebrow>
-          <h2 id="categories-heading" className="mt-4 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink sm:text-[3rem]">
+          <h2 id="categories-heading" className="mt-4 font-serif text-4xl leading-display tracking-tight text-ink sm:text-5xl">
             Shop by category
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-stone-600">Every product is reviewed by our team before it goes live.</p>
@@ -45,7 +45,7 @@ export default function Categories({ categories, productCount }) {
                     <CategoryIcon slug={c.slug} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-serif text-xl tracking-[-0.02em] break-words text-ink first-letter:uppercase sm:text-2xl">{c.name}</span>
+                    <span className="block font-serif text-xl tracking-tight break-words text-ink first-letter:uppercase sm:text-2xl">{c.name}</span>
                     {c.description && <span className="mt-0.5 block truncate text-sm text-stone-500">{c.description}</span>}
                   </span>
                   <span className="shrink-0 text-sm text-stone-500 tabular-nums">
@@ -57,7 +57,7 @@ export default function Categories({ categories, productCount }) {
             ))}
           </ul>
           {more > 0 && (
-            <Link href={ALL_CATEGORIES_HREF} className="group mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
+            <Link href={ALL_CATEGORIES_HREF} className="group mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink hover:underline hover:underline-offset-4">
               See {more} more {more === 1 ? 'category' : 'categories'}
               <ArrowRight size={15} strokeWidth={2} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
             </Link>
@@ -70,7 +70,7 @@ export default function Categories({ categories, productCount }) {
                 <li key={q}>
                   <Link
                     href={`/products?q=${encodeURIComponent(q.toLowerCase())}`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-sm text-stone-700 transition-colors hover:border-ink hover:text-ink"
+                    className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 transition-colors hover:border-ink hover:text-ink"
                   >
                     <Search size={13} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
                     {q}

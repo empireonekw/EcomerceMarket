@@ -34,8 +34,8 @@ export default function LegalCenterPage() {
               className="group flex h-full flex-col rounded-2xl border border-stone-200 bg-white p-6 transition-[box-shadow,border-color] hover:border-transparent hover:shadow-lift"
             >
               <span className="font-serif text-xl tracking-tight text-gray-900">{d.title}</span>
-              <span className="mt-1.5 text-sm leading-relaxed text-stone-500">{d.summary}</span>
-              <span className="mt-auto flex items-center gap-1.5 pt-6 text-sm font-medium text-stone-700">
+              <span className="mt-2 text-sm leading-relaxed text-stone-500">{d.summary}</span>
+              <span className="mt-auto flex items-center gap-2 pt-6 text-sm font-medium text-stone-700">
                 Read
                 <ArrowRight size={15} strokeWidth={1.75} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5" />
               </span>

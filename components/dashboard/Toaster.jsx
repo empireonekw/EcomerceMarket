@@ -52,7 +52,7 @@ export function ToastProvider({ children }) {
             <div
               key={t.id}
               role={t.type === 'error' ? 'alert' : 'status'}
-              className={`pointer-events-auto flex w-full items-start gap-3 rounded-2xl border bg-white p-3.5 shadow-lg transition-all duration-300 starting:translate-y-2 starting:opacity-0 sm:w-96 ${s.ring}`}
+              className={`pointer-events-auto flex w-full items-start gap-3 rounded-2xl border bg-white p-4 shadow-lg transition-all duration-300 starting:translate-y-2 starting:opacity-0 sm:w-96 ${s.ring}`}
             >
               <span className={`grid size-8 shrink-0 place-items-center rounded-full ${s.icon}`}>
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">

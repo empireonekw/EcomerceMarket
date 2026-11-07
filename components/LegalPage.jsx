@@ -44,7 +44,7 @@ export default function LegalPage({ title, updated, intro, sections, eyebrow = '
       <div className="mt-12 space-y-12">
         {sections.map((s, i) => (
           <section key={s.id} id={s.id} aria-labelledby={`${s.id}-heading`} className="scroll-mt-28">
-            <h2 id={`${s.id}-heading`} className="headline text-2xl sm:text-[1.75rem]">
+            <h2 id={`${s.id}-heading`} className="headline text-2xl sm:text-3xl">
               <span className="tabular-nums text-stone-400">{i + 1}.</span> {s.heading}
             </h2>
             <div className="mt-4 space-y-4 leading-relaxed text-stone-600">

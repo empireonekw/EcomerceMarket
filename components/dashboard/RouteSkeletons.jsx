@@ -214,7 +214,7 @@ export function SellerListingsSkeleton() {
             {Array.from({ length: 6 }, (_, i) => (
               <div key={i} className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
                 <div className="aspect-[4/3] bg-stone-200/80" />
-                <div className="space-y-2.5 p-4">
+                <div className="space-y-3 p-4">
                   <div className={`h-4 w-4/5 ${bar}`} />
                   <div className={`h-3.5 w-16 ${bar}`} />
                   <div className={`h-5 w-20 ${bar}`} />

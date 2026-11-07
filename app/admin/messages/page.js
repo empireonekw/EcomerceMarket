@@ -22,10 +22,10 @@ function Tabs({ active, chatsOpen, contactOpen }) {
     <Link
       href={href}
       aria-current={active === key ? 'page' : undefined}
-      className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-[15px] transition-colors ${active === key ? 'border-black font-medium text-black' : 'border-transparent text-stone-500 hover:text-black'}`}
+      className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-base transition-colors ${active === key ? 'border-black font-medium text-black' : 'border-transparent text-stone-500 hover:text-black'}`}
     >
       {label}
-      {count > 0 && <span className="rounded-full bg-brand-500 px-1.5 py-0.5 text-[11px] font-semibold tabular-nums leading-none text-ink">{count}</span>}
+      {count > 0 && <span className="rounded-full bg-brand-500 px-2 py-0.5 text-xs font-semibold tabular-nums leading-none text-ink">{count}</span>}
     </Link>
   );
   return (
@@ -43,7 +43,7 @@ function Tabs({ active, chatsOpen, contactOpen }) {
  *  - Contact form: messages from /contact. Signed-in senders can be answered in a chat; guests by email.
  */
 export default async function AdminMessagesPage({ searchParams }) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const sp = await searchParams;
 
   if (sp.view === 'contact') {
@@ -80,7 +80,7 @@ export default async function AdminMessagesPage({ searchParams }) {
                       <p className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{m.name}</span>
                         <StatusBadge status={m.status === 'new' ? 'pending' : 'completed'} label={m.status === 'new' ? 'Open' : 'Resolved'} />
-                        {m.user && <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-500">Signed in</span>}
+                        {m.user && <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500">Signed in</span>}
                       </p>
                       <a href={`mailto:${m.email}?subject=${encodeURIComponent('Re: your message')}`} className="mt-0.5 block truncate text-sm text-brand-700 hover:underline">
                         {m.email}
@@ -130,7 +130,7 @@ export default async function AdminMessagesPage({ searchParams }) {
         description={`Live chats with buyers and sellers, ${initialList.counts.open} open. Replies arrive in their Messages as the Sellpify team. Conversations between buyers and sellers stay private to them.`}
       />
       <Tabs active="chats" chatsOpen={initialList.counts.unread} contactOpen={contactOpen} />
-      <SupportInbox initialList={initialList} prefillUser={prefillUser} />
+      <SupportInbox initialList={initialList} prefillUser={prefillUser} me={admin.id} />
     </>
   );
 }

@@ -74,7 +74,7 @@ function validate(v, categories) {
 // Field primitives
 // ---------------------------------------------------------------------------
 
-const inputBase = 'mt-1.5 w-full rounded-xl border bg-white px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20';
+const inputBase = 'mt-2 w-full rounded-xl border bg-white px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 const inputCls = (err) => `${inputBase} h-11 ${err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 focus:border-ink'}`;
 
 function Field({ id, label, hint, error, optional, children }) {
@@ -86,11 +86,11 @@ function Field({ id, label, hint, error, optional, children }) {
       </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} className="mt-1.5 text-xs font-medium text-red-600">
+        <p id={`${id}-error`} className="mt-2 text-xs font-medium text-red-600">
           {error}
         </p>
       ) : (
-        hint && <p className="mt-1.5 text-xs text-stone-500">{hint}</p>
+        hint && <p className="mt-2 text-xs text-stone-500">{hint}</p>
       )}
     </div>
   );
@@ -266,7 +266,7 @@ export default function ProductForm({ mode, categories, product, uploads }) {
             error={show('slug')}
             hint={isEdit ? 'Changing the slug changes the product URL. Old links will stop working.' : 'Generated from the title. Edit it if you like; duplicates get a -2 suffix.'}
           >
-            <div className="mt-1.5 flex items-stretch overflow-hidden rounded-xl border border-stone-300 bg-stone-50 focus-within:border-ink">
+            <div className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-stone-300 bg-stone-50 focus-within:border-ink">
               <span className="hidden items-center px-3 text-sm text-stone-500 sm:flex">/products/</span>
               <input
                 {...bind('slug')}
@@ -275,7 +275,7 @@ export default function ProductForm({ mode, categories, product, uploads }) {
                   update('slug', e.target.value.toLowerCase().replace(/\s+/g, '-'));
                 }}
                 placeholder="ultimate-notion-budget-planner"
-                className="h-11 min-w-0 flex-1 bg-white px-3.5 text-sm focus:outline-none"
+                className="h-11 min-w-0 flex-1 bg-white px-4 text-sm focus:outline-none"
               />
               {!isEdit && slugTouched && (
                 <button
@@ -371,7 +371,7 @@ export default function ProductForm({ mode, categories, product, uploads }) {
               ].map((opt) => (
                 <label
                   key={opt.value}
-                  className={`flex cursor-pointer gap-3 rounded-xl border p-3.5 transition-colors ${
+                  className={`flex cursor-pointer gap-3 rounded-xl border p-4 transition-colors ${
                     values.deliveryType === opt.value ? 'border-ink bg-stone-50' : 'border-stone-200 hover:border-stone-300'
                   }`}
                 >
@@ -422,7 +422,7 @@ export default function ProductForm({ mode, categories, product, uploads }) {
             </div>
           )}
           {values.deliveryType === 'external' && hint && !show('downloadUrl') && (
-            <div className="-mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-sky-50 px-3.5 py-2.5 text-xs text-sky-800">
+            <div className="-mt-2 flex flex-wrap items-center gap-2 rounded-xl bg-sky-50 px-4 py-3 text-xs text-sky-800">
               {hint.text}
               {hint.fix && (
                 <button type="button" onClick={() => update('downloadUrl', hint.fix())} className="font-medium underline underline-offset-2">
@@ -449,9 +449,9 @@ export default function ProductForm({ mode, categories, product, uploads }) {
             <input {...bind('tags')} placeholder="notion, budget, finance" className={inputCls(show('tags'))} />
           </Field>
           {tags.length > 0 && (
-            <ul className="-mt-2 flex flex-wrap gap-1.5" aria-label="Tag preview">
+            <ul className="-mt-2 flex flex-wrap gap-2" aria-label="Tag preview">
               {tags.map((t) => (
-                <li key={t} className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-600">
+                <li key={t} className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600">
                   #{t}
                 </li>
               ))}
@@ -491,7 +491,7 @@ export default function ProductForm({ mode, categories, product, uploads }) {
               <img src={values.coverImage} alt="" className="size-full object-cover" />
             )}
             {categoryName && (
-              <span className="absolute left-2.5 top-2.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-stone-700 shadow-sm">{categoryName}</span>
+              <span className="absolute left-2.5 top-2.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-stone-700 shadow-sm">{categoryName}</span>
             )}
           </div>
           <div className="px-1 pt-3">

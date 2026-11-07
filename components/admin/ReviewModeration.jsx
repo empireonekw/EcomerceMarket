@@ -12,7 +12,7 @@ import { reportReasonLabel, reviewProblems } from '@/lib/reviews';
 import { REVIEW_LIMITS } from '@/lib/validation';
 
 const fmt = (d) => new Date(d).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-const area = 'w-full rounded-xl border border-stone-300 px-3.5 py-2.5 text-sm leading-relaxed focus:border-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20';
+const area = 'w-full rounded-xl border border-stone-300 px-4 py-3 text-sm leading-relaxed focus:border-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20';
 const OUTCOME = {
   kept: { label: 'Kept', cls: 'bg-stone-100 text-stone-700' },
   edited: { label: 'Corrected', cls: 'bg-sky-50 text-sky-800' },
@@ -82,7 +82,7 @@ export default function ReviewModeration({ review: r }) {
             <p className="mt-1 text-xs text-stone-500">{fmt(r.report.reportedAt)}</p>
             {r.report.note && <p className="mt-2 text-xs text-stone-600">Our reply: {r.report.note}</p>}
           </div>
-          {!open && OUTCOME[r.report.status] && <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${OUTCOME[r.report.status].cls}`}>{OUTCOME[r.report.status].label}</span>}
+          {!open && OUTCOME[r.report.status] && <span className={`rounded-full px-3 py-1 text-xs font-medium ${OUTCOME[r.report.status].cls}`}>{OUTCOME[r.report.status].label}</span>}
         </div>
       )}
 
@@ -93,7 +93,7 @@ export default function ReviewModeration({ review: r }) {
             <Link href={`/products/${r.productSlug}#reviews`} target="_blank" className="line-clamp-1 font-medium text-ink hover:underline">
               {r.productTitle}
             </Link>
-            <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-stone-500">
+            <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-stone-500">
               {r.shop ? (
                 <>
                   Shop:{' '}
@@ -123,12 +123,12 @@ export default function ReviewModeration({ review: r }) {
             {r.editCount > 0 && <p>Edited by the buyer {r.editCount}×</p>}
           </div>
         </div>
-        <p className={`mt-3 whitespace-pre-line text-[15px] leading-relaxed ${r.hidden ? 'text-stone-400 line-through' : 'text-stone-800'}`}>{r.body}</p>
-        {r.hidden && <p className="mt-2 rounded-xl bg-red-50 px-3.5 py-2 text-sm text-red-800">Removed: {r.hiddenReason}</p>}
+        <p className={`mt-3 whitespace-pre-line text-base leading-relaxed ${r.hidden ? 'text-stone-400 line-through' : 'text-stone-800'}`}>{r.body}</p>
+        {r.hidden && <p className="mt-2 rounded-xl bg-red-50 px-4 py-2 text-sm text-red-800">Removed: {r.hiddenReason}</p>}
 
         {r.history.length > 0 && (
           <div className="mt-3">
-            <button type="button" onClick={() => setShowHistory((v) => !v)} aria-expanded={showHistory} className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-600 hover:text-ink">
+            <button type="button" onClick={() => setShowHistory((v) => !v)} aria-expanded={showHistory} className="inline-flex items-center gap-2 text-xs font-medium text-stone-600 hover:text-ink">
               <History size={13} strokeWidth={1.75} aria-hidden="true" />
               {r.history.length} earlier version{r.history.length === 1 ? '' : 's'}
               <ChevronDown size={13} aria-hidden="true" className={`transition-transform ${showHistory ? 'rotate-180' : ''}`} />
@@ -161,7 +161,7 @@ export default function ReviewModeration({ review: r }) {
               <label htmlFor={`${id}-body`} className="text-sm font-medium">
                 Review text
               </label>
-              <textarea id={`${id}-body`} rows={4} maxLength={REVIEW_LIMITS.max} value={body} onChange={(e) => setBody(e.target.value)} className={`${area} mt-1.5`} />
+              <textarea id={`${id}-body`} rows={4} maxLength={REVIEW_LIMITS.max} value={body} onChange={(e) => setBody(e.target.value)} className={`${area} mt-2`} />
               {errors.body && <p className="mt-1 text-sm text-red-600">{errors.body}</p>}
               <p className="mt-1 text-xs text-stone-500">The buyer is told it was corrected. This doesn’t use any of their own edits.</p>
             </div>
@@ -179,7 +179,7 @@ export default function ReviewModeration({ review: r }) {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. It’s about a different product and breaks our review rules."
-              className={`${area} mt-1.5`}
+              className={`${area} mt-2`}
             />
             {errors.reason && <p className="mt-1 text-sm text-red-600">{errors.reason}</p>}
           </div>
@@ -189,7 +189,7 @@ export default function ReviewModeration({ review: r }) {
             <label htmlFor={`${id}-note`} className="text-sm font-medium">
               Note to the seller <span className="font-normal text-stone-500">(optional)</span>
             </label>
-            <input id={`${id}-note`} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Added to the message we send them" className={`${area} mt-1.5 h-11 py-0`} />
+            <input id={`${id}-note`} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Added to the message we send them" className={`${area} mt-2 h-11 py-0`} />
           </div>
         )}
 

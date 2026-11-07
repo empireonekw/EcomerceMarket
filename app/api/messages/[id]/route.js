@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
   }
 }
 
-/** POST /api/messages/:id — { body }: reply in a thread. */
+/** POST /api/messages/:id — { body, images? }: reply in a thread (images from PUT /api/messages/attachments). */
 export async function POST(request, { params }) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
@@ -25,7 +25,7 @@ export async function POST(request, { params }) {
   try {
     const { id } = await params;
     const body = await readJson(request);
-    return json(await sendMessage(user.id, id, body.body), 201);
+    return json(await sendMessage(user.id, id, body.body, body.images), 201);
   } catch (err) {
     return errorResponse(err, 'POST /api/messages/:id');
   }

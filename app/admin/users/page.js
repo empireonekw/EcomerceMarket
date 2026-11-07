@@ -117,14 +117,14 @@ export default async function AdminUsersPage({ searchParams }) {
               key={t.value}
               href={tabHref(params.role, params.q, { ...dates, verification: t.value })}
               aria-current={params.verification === t.value ? 'page' : undefined}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${
                 params.verification === t.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'
               }`}
             >
               {t.value === 'verified' && <VerifiedBadge size={14} decorative />}
               {t.label}
               {t.value === 'pending' && summary.idsToReview > 0 && (
-                <span className="rounded-full bg-amber-400 px-1.5 text-[11px] font-medium leading-4 text-ink">{summary.idsToReview}</span>
+                <span className="rounded-full bg-amber-400 px-2 text-xs font-medium leading-4 text-ink">{summary.idsToReview}</span>
               )}
             </Link>
           ))}

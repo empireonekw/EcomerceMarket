@@ -26,7 +26,7 @@ function AnnouncementBar() {
   return (
     <div className="bg-black text-white">
       {/* truncate: always a single compact line, even on the narrowest phones. */}
-      <p className="container-page truncate py-1.5 text-center text-xs leading-5">
+      <p className="container-page truncate py-2 text-center text-xs leading-5">
         <span className="hidden sm:inline">
           {siteConfig.name}
           <span aria-hidden="true" className="mx-2 text-white/40">

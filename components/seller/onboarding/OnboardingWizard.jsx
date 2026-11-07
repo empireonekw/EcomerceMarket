@@ -18,7 +18,7 @@ const WALLET_TILE = {
 };
 
 const inputCls = (err) =>
-  `mt-1.5 h-11 w-full rounded-xl border bg-white px-3.5 text-[15px] placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 ${
+  `mt-2 h-11 w-full rounded-xl border bg-white px-4 text-base placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:cursor-not-allowed disabled:bg-stone-100 disabled:text-stone-400 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
   }`;
 
@@ -30,11 +30,11 @@ function Field({ id, label, optional, error, hint, children }) {
       </label>
       {children}
       {error ? (
-        <p id={`${id}-error`} className="mt-1.5 text-sm font-medium text-red-600">
+        <p id={`${id}-error`} className="mt-2 text-sm font-medium text-red-600">
           {error}
         </p>
       ) : (
-        hint && <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{hint}</p>
+        hint && <p className="mt-2 text-xs leading-relaxed text-stone-500">{hint}</p>
       )}
     </div>
   );
@@ -117,7 +117,7 @@ function PrefRow({ id, label, value, onChange, options, help, error }) {
 function SectionTitle({ title, subtitle }) {
   return (
     <div className="text-center">
-      <h1 className="font-serif text-3xl tracking-[-0.02em] text-ink sm:text-4xl">{title}</h1>
+      <h1 className="font-serif text-3xl tracking-tight text-ink sm:text-4xl">{title}</h1>
       {subtitle && <p className="mx-auto mt-2 max-w-xl text-stone-600">{subtitle}</p>}
     </div>
   );
@@ -249,7 +249,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
         <span className="mx-auto grid size-16 place-items-center rounded-full bg-brand-100 text-brand-700">
           <PartyPopper size={30} strokeWidth={1.5} aria-hidden="true" />
         </span>
-        <h1 className="mt-6 font-serif text-4xl tracking-[-0.02em] text-ink">{done.storeName} is open!</h1>
+        <h1 className="mt-6 font-serif text-4xl tracking-tight text-ink">{done.storeName} is open!</h1>
         <p className="mt-3 text-stone-600">
           Add your first listing now. After your first sale we’ll ask you to verify your identity so we can pay you.
         </p>
@@ -353,7 +353,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                 </p>
                 {nameIdeas.length > 0 && (
                   <div className="mt-4">
-                    <p className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
+                    <p className="flex items-center gap-2 text-sm font-medium text-stone-700">
                       <Sparkles size={15} strokeWidth={1.75} aria-hidden="true" className="text-brand-600" />
                       {name.state === 'taken' ? 'Try one of these instead' : 'Ideas that are free'}
                     </p>
@@ -363,7 +363,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                           <button
                             type="button"
                             onClick={() => set('identity', { storeName: idea })}
-                            className="rounded-full border border-stone-300 bg-white px-3.5 py-1.5 text-sm text-stone-700 transition-colors hover:border-ink hover:text-ink"
+                            className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 transition-colors hover:border-ink hover:text-ink"
                           >
                             {idea}
                           </button>
@@ -388,7 +388,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                   value={id.storeDescription}
                   onChange={(e) => set('identity', { storeDescription: e.target.value })}
                   placeholder="Hand-drawn planners and printable wall art, made in Lahore."
-                  className={`${inputCls(errors.storeDescription)} h-auto resize-y py-2.5 leading-relaxed`}
+                  className={`${inputCls(errors.storeDescription)} h-auto resize-y py-3 leading-relaxed`}
                 />
               </Field>
 
@@ -490,7 +490,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                     />
                   </Field>
                   <Field id="phone.number" label="Phone number" error={errors['phone.number'] ?? errors['phone.dial']}>
-                    <div className="mt-1.5 flex">
+                    <div className="mt-2 flex">
                       <label htmlFor="phone.dial" className="sr-only">
                         Country code
                       </label>
@@ -498,7 +498,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                         id="phone.dial"
                         value={b.phone.dial}
                         onChange={(e) => setNested('billing', 'phone', { dial: e.target.value })}
-                        className="h-11 rounded-l-xl border border-r-0 border-stone-300 bg-stone-50 px-2.5 text-[15px] focus:border-ink focus:outline-none"
+                        className="h-11 rounded-l-xl border border-r-0 border-stone-300 bg-stone-50 px-3 text-base focus:border-ink focus:outline-none"
                       >
                         {DIAL_CODES.map((d) => (
                           <option key={d} value={d}>
@@ -533,7 +533,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                     <CreditCard size={18} strokeWidth={1.75} aria-hidden="true" />
                     Credit card
                   </h2>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-600">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
                     <Lock size={12} strokeWidth={2} aria-hidden="true" />
                     Not needed
                   </span>
@@ -594,9 +594,9 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                         </span>
                         <span className="mt-4 text-lg font-medium text-ink">{label}</span>
                         <span className="mt-1 text-sm text-stone-500">{text}</span>
-                        <span className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                        <span className="mt-auto flex flex-wrap gap-2 pt-4">
                           {tags.map((t) => (
-                            <span key={t} className="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-600">
+                            <span key={t} className="rounded-full bg-stone-100 px-3 py-0.5 text-xs font-medium text-stone-600">
                               {t}
                             </span>
                           ))}
@@ -650,7 +650,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                 <div className="space-y-5 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6">
                   <fieldset id="walletProvider" aria-invalid={Boolean(errors.walletProvider) || undefined} aria-describedby={errors.walletProvider ? 'walletProvider-error' : undefined} tabIndex={-1} className="focus:outline-none">
                     <legend className="font-medium text-ink">Choose your provider</legend>
-                    <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                    <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       {WALLET_OPTIONS.map((w) => {
                         const on = pay.walletProvider === w.value;
                         return (

@@ -33,21 +33,21 @@ export function EarningsPanel({ months, title = 'Monthly earnings' }) {
           <table className="w-full min-w-[480px] text-left text-sm">
             <thead className="border-y border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
               <tr>
-                <th scope="col" className="px-5 py-2.5">Month</th>
-                <th scope="col" className="px-5 py-2.5 text-right">Sales</th>
-                <th scope="col" className="px-5 py-2.5 text-right">Gross</th>
-                {showFees && <th scope="col" className="px-5 py-2.5 text-right">Platform fee</th>}
-                <th scope="col" className="px-5 py-2.5 text-right">Earnings</th>
+                <th scope="col" className="px-5 py-3">Month</th>
+                <th scope="col" className="px-5 py-3 text-right">Sales</th>
+                <th scope="col" className="px-5 py-3 text-right">Gross</th>
+                {showFees && <th scope="col" className="px-5 py-3 text-right">Platform fee</th>}
+                <th scope="col" className="px-5 py-3 text-right">Earnings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 tabular-nums">
               {[...months].reverse().map((m) => (
                 <tr key={m.month}>
-                  <th scope="row" className="px-5 py-2.5 font-normal text-stone-700">{m.label}</th>
-                  <td className="px-5 py-2.5 text-right">{m.sales || <span className="text-stone-300">–</span>}</td>
-                  <td className="px-5 py-2.5 text-right">{cell(m.gross)}</td>
-                  {showFees && <td className="px-5 py-2.5 text-right text-stone-500">{cell(m.commission)}</td>}
-                  <td className="px-5 py-2.5 text-right font-medium">{cell(m.earnings)}</td>
+                  <th scope="row" className="px-5 py-3 font-normal text-stone-700">{m.label}</th>
+                  <td className="px-5 py-3 text-right">{m.sales || <span className="text-stone-300">–</span>}</td>
+                  <td className="px-5 py-3 text-right">{cell(m.gross)}</td>
+                  {showFees && <td className="px-5 py-3 text-right text-stone-500">{cell(m.commission)}</td>}
+                  <td className="px-5 py-3 text-right font-medium">{cell(m.earnings)}</td>
                 </tr>
               ))}
             </tbody>
@@ -69,30 +69,30 @@ export function ProductMonthlyPanel({ data }) {
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
               <tr>
-                <th scope="col" className="px-5 py-2.5">Product</th>
+                <th scope="col" className="px-5 py-3">Product</th>
                 {data.months.map((m) => (
-                  <th key={m.month} scope="col" className="whitespace-nowrap px-3 py-2.5 text-right">
+                  <th key={m.month} scope="col" className="whitespace-nowrap px-3 py-3 text-right">
                     {m.label}
                   </th>
                 ))}
-                <th scope="col" className="px-5 py-2.5 text-right">Total</th>
+                <th scope="col" className="px-5 py-3 text-right">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-100 tabular-nums">
               {data.rows.map((r) => (
                 <tr key={r.productId}>
-                  <th scope="row" className="max-w-[16rem] px-5 py-2.5 font-normal">
+                  <th scope="row" className="max-w-[16rem] px-5 py-3 font-normal">
                     <span className="block truncate font-medium text-black">{r.title}</span>
                     <span className="text-xs text-stone-500">
                       {r.sales} sale{r.sales === 1 ? '' : 's'}
                     </span>
                   </th>
                   {data.months.map((m) => (
-                    <td key={m.month} className="whitespace-nowrap px-3 py-2.5 text-right">
+                    <td key={m.month} className="whitespace-nowrap px-3 py-3 text-right">
                       {cell(r.cells[m.month])}
                     </td>
                   ))}
-                  <td className="whitespace-nowrap px-5 py-2.5 text-right font-medium">{usd(r.total)}</td>
+                  <td className="whitespace-nowrap px-5 py-3 text-right font-medium">{usd(r.total)}</td>
                 </tr>
               ))}
             </tbody>

@@ -151,7 +151,7 @@ export default function ReviewDialog({ productId, productTitle, authorName, revi
             />
             <FieldError id={`${id}-body-error`}>{errors.body}</FieldError>
             {!errors.body && (
-              <p id={`${id}-body-hint`} className="mt-1.5 text-xs text-stone-500">
+              <p id={`${id}-body-hint`} className="mt-2 text-xs text-stone-500">
                 At least {REVIEW_LIMITS.min} characters.
               </p>
             )}

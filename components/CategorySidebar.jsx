@@ -30,7 +30,7 @@ function NavList({ nav, onNavigate }) {
               <Link
                 href={u.href}
                 onClick={onNavigate}
-                className="group flex items-center gap-1.5 py-1 text-stone-500 transition-colors hover:text-ink"
+                className="group flex items-center gap-2 py-1 text-stone-500 transition-colors hover:text-ink"
               >
                 <ChevronLeft size={15} strokeWidth={2} aria-hidden="true" className="shrink-0 transition-transform group-hover:-translate-x-0.5" />
                 <span className="truncate">{u.name}</span>
@@ -43,7 +43,7 @@ function NavList({ nav, onNavigate }) {
         <Link
           href={nav.current.href}
           onClick={onNavigate}
-          className="flex items-baseline justify-between gap-3 py-1.5 text-[15px] font-semibold text-ink hover:underline"
+          className="flex items-baseline justify-between gap-3 py-2 text-base font-semibold text-ink hover:underline"
         >
           <span className="min-w-0 break-words">{nav.current.name}</span>
           {count(nav.current.count)}
@@ -57,7 +57,7 @@ function NavList({ nav, onNavigate }) {
                 href={l.href}
                 onClick={onNavigate}
                 aria-current={l.active ? 'page' : undefined}
-                className={`relative flex items-baseline justify-between gap-3 rounded-md py-1.5 pr-1 pl-3.5 transition-colors before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full ${
+                className={`relative flex items-baseline justify-between gap-3 rounded-md py-2 pr-1 pl-4 transition-colors before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full ${
                   l.active ? 'font-semibold text-ink before:bg-ink' : 'text-stone-600 before:bg-transparent hover:text-ink hover:before:bg-stone-300'
                 }`}
               >
@@ -73,7 +73,7 @@ function NavList({ nav, onNavigate }) {
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-2 inline-flex items-center gap-1 rounded-full py-1 pl-3.5 text-sm font-semibold text-ink underline-offset-4 hover:underline"
+          className="mt-2 inline-flex items-center gap-1 rounded-full py-1 pl-4 text-sm font-semibold text-ink underline-offset-4 hover:underline"
         >
           {expanded ? 'Show fewer' : `Show all ${nav.links.length}`}
           <ChevronDown size={15} strokeWidth={2} aria-hidden="true" className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -122,7 +122,7 @@ export function CategoryColumn({ nav }) {
         style={fade}
         className="sticky top-24 max-h-[calc(100dvh-7rem)] overflow-y-auto overscroll-contain pr-3 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-stone-400">Categories</h2>
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-caps text-stone-400">Categories</h2>
         <NavList nav={nav} />
       </div>
     </aside>

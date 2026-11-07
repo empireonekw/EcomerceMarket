@@ -96,7 +96,7 @@ export default async function Reviews() {
           </>
         }
       >
-        <p className="flex items-center gap-2.5 text-sm text-stone-600">
+        <p className="flex items-center gap-3 text-sm text-stone-600">
           <Stars rating={reviews.average} size={18} />
           <span>
             <span className="font-medium text-black tabular-nums">{reviews.average.toFixed(1)}</span> average · {reviews.count} review

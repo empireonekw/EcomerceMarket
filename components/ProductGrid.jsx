@@ -48,7 +48,7 @@ export function ProductGridSkeleton({ count = 8 }) {
             <div className="h-4 w-1/3 rounded-full bg-stone-100" />
             <div className="mt-2 h-5 w-5/6 rounded-full bg-stone-100" />
             <div className="mt-2 h-4 w-1/2 rounded-full bg-stone-100" />
-            <div className="mt-2.5 h-6 w-1/4 rounded-full bg-stone-100" />
+            <div className="mt-3 h-6 w-1/4 rounded-full bg-stone-100" />
             <div className="mt-3 h-10 w-32 rounded-full bg-stone-100" />
           </div>
         </li>

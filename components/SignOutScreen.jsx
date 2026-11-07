@@ -14,7 +14,7 @@ export default function SignOutScreen() {
       <div className="flex flex-col items-center text-center">
         <span aria-hidden="true" className="size-9 animate-spin rounded-full border-2 border-stone-200 border-t-brand-600" />
         <p className="headline mt-6 text-2xl">Signing you out…</p>
-        <p className="mt-1.5 text-sm text-stone-500">Thanks for visiting {siteConfig.name}.</p>
+        <p className="mt-2 text-sm text-stone-500">Thanks for visiting {siteConfig.name}.</p>
       </div>
     </div>
   );

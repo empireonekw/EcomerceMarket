@@ -119,9 +119,9 @@ export default function ImageUpload({ id, label, hint, kind, shape, value, onCha
           </span>
         </div>
       </div>
-      {!driver && <p className="mt-1.5 text-xs text-amber-700">File uploads aren’t set up on this site yet.</p>}
+      {!driver && <p className="mt-2 text-xs text-amber-700">File uploads aren’t set up on this site yet.</p>}
       {message && (
-        <p id={`${id}-error`} role="alert" className="mt-1.5 text-sm font-medium text-red-600">
+        <p id={`${id}-error`} role="alert" className="mt-2 text-sm font-medium text-red-600">
           {message}
         </p>
       )}

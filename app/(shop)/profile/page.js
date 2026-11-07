@@ -147,7 +147,7 @@ function ReviewsTab({ reviews, authorName }) {
           </div>
           <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-stone-700">{r.body}</p>
           {r.hidden ? (
-            <p className="mt-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-800">
+            <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
               <span className="font-medium">Removed by Sellpify.</span> {r.hiddenReason}
             </p>
           ) : (
@@ -231,7 +231,7 @@ export default async function ProfilePage({ searchParams }) {
   const [purchases, myReviews] = isCustomer ? await Promise.all([getUserPurchases(user.id), getUserReviews(user.id)]) : [[], []];
   const reviews = Object.fromEntries(myReviews.map((r) => [String(r.productId), r]));
   const downloads = purchases.reduce((n, p) => n + (p.downloadCount ?? 0), 0);
-  const item = (active) => `flex items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] transition ${active ? ACTIVE : IDLE}`;
+  const item = (active) => `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${active ? ACTIVE : IDLE}`;
 
   return (
     <div className="bg-canvas">
@@ -246,7 +246,7 @@ export default async function ProfilePage({ searchParams }) {
             </div>
           </div>
           <nav aria-label="Account sections" className="mt-5">
-            <p className="mb-1.5 px-3 text-[11px] font-semibold tracking-wider text-stone-400 uppercase">Account</p>
+            <p className="mb-2 px-3 text-xs font-semibold tracking-wider text-stone-400 uppercase">Account</p>
             {/* Sections are links (URL state): shareable, back-button friendly, no client JS. */}
             <ul className="flex gap-1 overflow-x-auto lg:flex-col lg:gap-0.5">
               {(isCustomer ? TABS : TABS.slice(0, 1)).map(({ id, label, icon: Icon }) => (
@@ -255,7 +255,7 @@ export default async function ProfilePage({ searchParams }) {
                     <Icon size={18} strokeWidth={1.75} aria-hidden="true" className={tab === id ? 'text-brand-700' : ''} />
                     <span className="flex-1">{label}</span>
                     {id === 'downloads' && purchases.length > 0 && (
-                      <span className="rounded-full bg-brand-500 px-1.5 py-0.5 text-[11px] leading-none font-semibold text-ink tabular-nums">{purchases.length}</span>
+                      <span className="rounded-full bg-brand-500 px-2 py-0.5 text-xs leading-none font-semibold text-ink tabular-nums">{purchases.length}</span>
                     )}
                   </Link>
                 </li>
@@ -283,15 +283,15 @@ export default async function ProfilePage({ searchParams }) {
             <Link href="/products" className="group block rounded-2xl bg-ink p-4 text-white">
               <p className="text-xs text-stone-400">Find something new</p>
               <p className="mt-0.5 text-sm font-medium">Browse the marketplace</p>
-              <span className="mt-3 inline-flex rounded-full bg-brand-500 px-3 py-1.5 text-xs font-medium text-ink transition-colors group-hover:bg-brand-600">Shop now</span>
+              <span className="mt-3 inline-flex rounded-full bg-brand-500 px-3 py-2 text-xs font-medium text-ink transition-colors group-hover:bg-brand-600">Shop now</span>
             </Link>
-            <SignOutButton className="w-full rounded-xl px-3 py-2 text-left text-[13.5px] text-stone-600 transition hover:bg-black/[0.04] hover:text-ink" />
+            <SignOutButton className="w-full rounded-xl px-3 py-2 text-left text-sm text-stone-600 transition hover:bg-black/[0.04] hover:text-ink" />
           </div>
         </aside>
 
         <div className="min-w-0">
           <header>
-            <h1 className="truncate font-serif text-3xl font-[420] tracking-[-0.02em] text-ink sm:text-[2.5rem] sm:leading-[1.1]">Hi, {user.name.split(' ')[0]}</h1>
+            <h1 className="truncate font-serif text-3xl font-[420] tracking-tight text-ink sm:text-4xl sm:leading-display">Hi, {user.name.split(' ')[0]}</h1>
             <p className="mt-1 truncate text-sm text-stone-500">
               {user.email} · Member since {fmtDate(user.createdAt, { month: 'long', year: 'numeric' })}
             </p>

@@ -73,7 +73,7 @@ function Switch({ checked, onChange, label }) {
   );
 }
 
-const menuItem = 'flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 disabled:pointer-events-none disabled:opacity-40';
+const menuItem = 'flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-stone-700 transition-colors hover:bg-stone-100 disabled:pointer-events-none disabled:opacity-40';
 
 /**
  * The ☰ menu on each listing card (like Etsy's): View in store, View stats, Edit, Copy, Activate/Deactivate,
@@ -118,7 +118,7 @@ function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
         <div
           id={menuId}
           role="menu"
-          className="absolute bottom-full right-0 z-30 mb-2 w-56 overflow-hidden rounded-2xl border border-stone-200 bg-white py-1.5 shadow-[0_18px_48px_-12px_rgba(20,20,20,0.3)]"
+          className="absolute bottom-full right-0 z-30 mb-2 w-56 overflow-hidden rounded-2xl border border-stone-200 bg-white py-2 shadow-[0_18px_48px_-12px_rgba(20,20,20,0.3)]"
         >
           {live ? (
             <a role="menuitem" href={`/products/${p.slug}`} target="_blank" rel="noopener" onClick={() => setOpen(false)} className={`${menuItem} bg-stone-50 font-medium text-ink`}>
@@ -126,13 +126,13 @@ function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
               <ExternalLink size={15} strokeWidth={1.9} aria-hidden="true" className="ml-auto" />
             </a>
           ) : (
-            <p className="px-4 py-2.5 text-xs text-stone-500">Not in the store yet — it shows here once it’s active.</p>
+            <p className="px-4 py-3 text-xs text-stone-500">Not in the store yet — it shows here once it’s active.</p>
           )}
           <Link role="menuitem" href={`${BASE}/${p._id}/stats`} onClick={() => setOpen(false)} className={menuItem}>
             <BarChart3 size={15} strokeWidth={1.9} aria-hidden="true" />
             View stats
           </Link>
-          <hr className="my-1.5 border-stone-100" />
+          <hr className="my-2 border-stone-100" />
           <Link role="menuitem" href={`${BASE}/${p._id}/edit`} onClick={() => setOpen(false)} className={menuItem}>
             <Pencil size={15} strokeWidth={1.9} aria-hidden="true" />
             Edit
@@ -147,12 +147,12 @@ function ListingMenu({ p, live, busy, onCopy, onVisible, onShare, onDelete }) {
               {live ? 'Deactivate' : 'Activate'}
             </button>
           )}
-          <hr className="my-1.5 border-stone-100" />
+          <hr className="my-2 border-stone-100" />
           <button type="button" role="menuitem" disabled={!live} onClick={run(onShare)} className={menuItem} title={live ? undefined : 'Only active listings can be shared'}>
             <Share2 size={15} strokeWidth={1.9} aria-hidden="true" />
             Share
           </button>
-          <hr className="my-1.5 border-stone-100" />
+          <hr className="my-2 border-stone-100" />
           <button type="button" role="menuitem" disabled={busy} onClick={run(onDelete)} className={`${menuItem} text-red-600 hover:bg-red-50`}>
             <Trash2 size={15} strokeWidth={1.9} aria-hidden="true" />
             Delete
@@ -339,7 +339,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
       <div className={`flex items-center ${className}`}>
         <Link
           href={`${BASE}/${p._id}/edit`}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-stone-700 hover:bg-stone-100"
+          className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm font-medium text-stone-700 hover:bg-stone-100"
         >
           <Pencil size={14} strokeWidth={1.75} aria-hidden="true" />
           Edit<span className="sr-only"> {p.title}</span>
@@ -349,7 +349,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
             type="button"
             onClick={() => setVisible(p, s.key !== 'active')}
             disabled={Boolean(busy)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-stone-700 hover:bg-stone-100 disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm font-medium text-stone-700 hover:bg-stone-100 disabled:opacity-50"
           >
             {s.key === 'active' ? (
               <EyeOff size={14} strokeWidth={1.75} aria-hidden="true" />
@@ -455,7 +455,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
                   go({ q: '' });
                 }}
                 aria-label={`Clear search “${params.q}”`}
-                className="ml-auto inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-200"
+                className="ml-auto inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-2 text-sm text-stone-700 hover:bg-stone-200"
               >
                 “{params.q}”
                 <X size={14} strokeWidth={2} aria-hidden="true" />
@@ -500,33 +500,33 @@ export default function ListingsManager({ items, counts, total, pagination, para
                           <StatusBadge status={s.tone} label={s.label} />
                         </span>
                         {p.shopFeatured && (
-                          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-[11px] font-medium shadow-sm">
+                          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-medium shadow-sm">
                             <Pin size={11} strokeWidth={2} aria-hidden="true" className="text-brand-700" />
                             Featured
                           </span>
                         )}
                       </Link>
-                      <div className="flex flex-1 flex-col px-3 pb-2.5 pt-2.5">
+                      <div className="flex flex-1 flex-col px-3 pb-3 pt-3">
                         <Link href={`${BASE}/${p._id}/edit`} className="truncate text-sm font-semibold hover:underline" title={p.title}>
                           {p.title}
                         </Link>
                         <p className="mt-1 text-sm tabular-nums text-stone-700">{usd(p.price)}</p>
                         <p className="mt-0.5 text-xs text-stone-500">Updated {formatDateTime(p.updatedAt).date}</p>
                         {p.needs?.length > 0 && (
-                          <Link href={`${BASE}/${p._id}/edit`} className="mt-1.5 block rounded-lg bg-amber-50 px-2 py-1 text-[11px] leading-snug text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100">
+                          <Link href={`${BASE}/${p._id}/edit`} className="mt-2 block rounded-lg bg-amber-50 px-2 py-1 text-xs leading-snug text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100">
                             <span className="font-semibold">To publish, add:</span> {p.needs.join(', ')}
                           </Link>
                         )}
                         {p.needs?.length === 0 && (
-                          <p className="mt-1.5 rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-800 ring-1 ring-emerald-200">Ready: select it and press Activate</p>
+                          <p className="mt-2 rounded-lg bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-800 ring-1 ring-emerald-200">Ready: select it and press Activate</p>
                         )}
                         {showStats && (
-                          <p className="mt-1.5 w-fit rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium tabular-nums text-stone-600">
+                          <p className="mt-2 w-fit rounded-full bg-stone-100 px-3 py-0.5 text-xs font-medium tabular-nums text-stone-600">
                             {p.salesCount.toLocaleString('en-US')} sold · {formatPrice(p.earnings, 'USD')}
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center justify-between border-t border-stone-100 px-2 py-1.5">
+                      <div className="flex items-center justify-between border-t border-stone-100 px-2 py-2">
                         <label className="grid size-8 cursor-pointer place-items-center rounded-full hover:bg-stone-100">
                           <input
                             type="checkbox"
@@ -620,7 +620,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
                                   <Link href={`${BASE}/${p._id}/edit`} className="line-clamp-1 font-medium hover:underline">
                                     {p.title}
                                   </Link>
-                                  <p className="flex items-center gap-1.5 text-xs text-stone-500">
+                                  <p className="flex items-center gap-2 text-xs text-stone-500">
                                     {p.shopFeatured && <Pin size={11} strokeWidth={2} aria-label="Featured" className="text-brand-700" />}
                                     Updated {formatDateTime(p.updatedAt).date}
                                   </p>
@@ -699,7 +699,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
             <legend className="text-sm font-medium">Listing status</legend>
             <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 lg:grid-cols-1">
               {STATUS_OPTIONS.map((o) => (
-                <label key={o.key} className="flex cursor-pointer items-center gap-2.5 rounded-lg py-1 text-sm text-stone-700 hover:text-black">
+                <label key={o.key} className="flex cursor-pointer items-center gap-3 rounded-lg py-1 text-sm text-stone-700 hover:text-black">
                   <input
                     type="radio"
                     name="listing-status"
@@ -714,7 +714,7 @@ export default function ListingsManager({ items, counts, total, pagination, para
             </div>
           </fieldset>
 
-          <label className="flex cursor-pointer items-center gap-2.5 border-t border-stone-200 pt-5 text-sm text-stone-700">
+          <label className="flex cursor-pointer items-center gap-3 border-t border-stone-200 pt-5 text-sm text-stone-700">
             <input
               type="checkbox"
               checked={Boolean(params.featured)}

@@ -25,12 +25,14 @@ const initials = (name = '') =>
 function accountLinks(user) {
   const settings = { href: '/profile', label: 'Account settings' };
   const purchases = { href: '/profile?tab=downloads', label: 'Purchases' };
+  const support = { href: '/support', label: 'Help & support' }; // opens the chat with the Sellpify team
   if (user.role === 'seller') {
     if (!user.storeName) {
       return [
         { href: ONBOARDING_PATH, label: 'Finish opening your shop', promo: true },
         { href: '/messages', label: 'Messages', inbox: true },
         purchases,
+        support,
         settings,
       ];
     }
@@ -42,6 +44,7 @@ function accountLinks(user) {
       { href: '/seller/payouts', label: 'Payouts' },
       { href: '/seller/dashboard#shop', label: 'Shop settings' },
       purchases,
+      support,
       settings,
     ];
   }
@@ -54,14 +57,14 @@ function accountLinks(user) {
       settings,
     ];
   }
-  return [settings, purchases, { href: '/messages', label: 'Messages', inbox: true }, { href: ONBOARDING_PATH, label: 'Sell on Sellpify', promo: true }];
+  return [settings, purchases, { href: '/messages', label: 'Messages', inbox: true }, support, { href: ONBOARDING_PATH, label: 'Sell on Sellpify', promo: true }];
 }
 
 /** "3" (or "99+") unread messages, next to the Messages entry. */
 function UnreadCount({ count }) {
   if (!count) return null;
   return (
-    <span className="ml-auto rounded-full bg-brand-500 px-1.5 py-0.5 text-[11px] font-medium leading-none text-ink tabular-nums">
+    <span className="ml-auto rounded-full bg-brand-500 px-2 py-0.5 text-xs font-medium leading-none text-ink tabular-nums">
       {count > 99 ? '99+' : count}
       <span className="sr-only"> unread</span>
     </span>
@@ -72,7 +75,7 @@ const ROLE_BADGES = { seller: 'Seller', admin: 'Admin' };
 
 function RoleBadge({ role }) {
   if (!ROLE_BADGES[role]) return null;
-  return <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">{ROLE_BADGES[role]}</span>;
+  return <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">{ROLE_BADGES[role]}</span>;
 }
 
 const iconBtn = 'grid size-10 place-items-center rounded-full text-stone-700 transition-colors hover:bg-white hover:text-black';
@@ -213,7 +216,7 @@ export default function UserMenu() {
           <span
             key={unread}
             aria-hidden="true"
-            className="absolute right-0.5 top-0.5 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-500 px-1 text-[10px] font-medium leading-none text-ink ring-2 ring-white"
+            className="absolute right-0.5 top-0.5 grid h-4 min-w-4 animate-[badge-pop_250ms_ease-out] place-items-center rounded-full bg-brand-500 px-1 text-xs font-medium leading-none text-ink ring-2 ring-white"
           >
             {unread > 99 ? '99+' : unread}
           </span>
@@ -226,7 +229,7 @@ export default function UserMenu() {
         <div id={panelId} role="dialog" aria-label="Account" className={`${panelClass} p-6`}>
           <p className="headline text-3xl text-ink">Welcome</p>
           <p className="mt-2 text-sm leading-relaxed text-stone-600">Log in to check out, download your files and sell your work.</p>
-          <div className="mt-5 space-y-2.5">
+          <div className="mt-5 space-y-3">
             <Link href={withNext('/login')} prefetch className="btn btn-lg btn-dark w-full">
               Log in
             </Link>
@@ -260,7 +263,7 @@ export default function UserMenu() {
                   role="menuitem"
                   href={l.href}
                   onClick={close}
-                  className="my-1 flex items-center gap-3 rounded-xl bg-brand-50 px-3 py-2.5 text-sm font-medium text-ink hover:bg-brand-100"
+                  className="my-1 flex items-center gap-3 rounded-xl bg-brand-50 px-3 py-3 text-sm font-medium text-ink hover:bg-brand-100"
                 >
                   <Store size={17} strokeWidth={1.75} aria-hidden="true" />
                   {l.label}

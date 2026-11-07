@@ -14,7 +14,7 @@ export default function AddToCartButton({ product, compact = false, outlined = f
   if (outlined) return <OutlinedButton product={product} className={className} />;
   const { isInCart, addToCart, openCart } = useCart();
   const inCart = isInCart(product._id);
-  const base = `btn ${compact ? 'btn-sm px-3.5' : 'btn-lg w-full'} ${className}`;
+  const base = `btn ${compact ? 'btn-sm px-4' : 'btn-lg w-full'} ${className}`;
   const icon = { size: compact ? 15 : 17, strokeWidth: 2, 'aria-hidden': true };
 
   if (inCart) {
@@ -48,7 +48,7 @@ export default function AddToCartButton({ product, compact = false, outlined = f
 /** Product card: "+ Add to cart" outline pill ("+ Add" when the card is narrow, via its @container). */
 function OutlinedButton({ product, className }) {
   const { isInCart, addToCart, openCart } = useCart();
-  const base = `inline-flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-colors ${className}`;
+  const base = `inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${className}`;
   if (isInCart(product._id)) {
     return (
       <button type="button" onClick={openCart} aria-label={`${product.title} is in your cart. View cart`} className={`${base} border-stone-200 bg-stone-100 text-ink`}>

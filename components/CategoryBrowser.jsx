@@ -73,7 +73,7 @@ export default function CategoryBrowser({ mains, categories }) {
             autoComplete="off"
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search categories, e.g. rings, planners"
-            className="h-12 w-full rounded-full border border-stone-300 bg-white pl-11 pr-11 text-[15px] placeholder:text-stone-400 hover:border-stone-400 focus:border-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20 [&::-webkit-search-cancel-button]:hidden"
+            className="h-12 w-full rounded-full border border-stone-300 bg-white pl-11 pr-11 text-base placeholder:text-stone-400 hover:border-stone-400 focus:border-ink focus:outline-none focus:ring-2 focus:ring-brand-500/20 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button
@@ -150,7 +150,7 @@ export default function CategoryBrowser({ mains, categories }) {
                 </Link>
                 {c.description && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-600">{c.description}</p>}
                 {chips.length > 0 && (
-                  <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={`${c.name} sub-categories`}>
+                  <ul className="mt-4 flex flex-wrap gap-2" aria-label={`${c.name} sub-categories`}>
                     {chips.slice(0, Math.max(SUBS_SHOWN, matches.length)).map((s) => (
                       <li key={s._id}>
                         <Link

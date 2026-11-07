@@ -38,7 +38,7 @@ export default function ExpandableText({ children, collapsedHeight = 220, moreLa
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={id}
-          className="mx-auto mt-3 flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-stone-100"
+          className="mx-auto mt-3 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-ink transition-colors hover:bg-stone-100"
         >
           {open ? lessLabel : moreLabel}
           <ChevronDown size={16} strokeWidth={2} aria-hidden="true" className={`transition-transform ${open ? 'rotate-180' : ''}`} />

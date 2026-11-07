@@ -62,7 +62,7 @@ export default function Faq() {
       <div className="grid gap-10 lg:grid-cols-[minmax(0,22rem)_1fr] lg:gap-20">
         <Reveal className="lg:sticky lg:top-28 lg:self-start">
           <Eyebrow>FAQ</Eyebrow>
-          <h2 id="faq-heading" className="mt-4 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink sm:text-[3rem]">
+          <h2 id="faq-heading" className="mt-4 font-serif text-4xl leading-display tracking-tight text-ink sm:text-5xl">
             Questions, answered
           </h2>
           <p className="mt-4 text-stone-600">

@@ -7,7 +7,7 @@ export default function SectionHeading({ id, eyebrow, title, description, childr
     <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
         {eyebrow && <Eyebrow className="mb-4">{eyebrow}</Eyebrow>}
-        <h2 id={id} className="font-serif text-[2.25rem] leading-[1.05] font-normal tracking-[-0.025em] text-ink text-balance sm:text-[3rem]">
+        <h2 id={id} className="font-serif text-4xl leading-display font-normal tracking-tight text-ink text-balance sm:text-5xl">
           {title}
         </h2>
         {description && <p className="mt-3 max-w-xl text-lg text-stone-600">{description}</p>}

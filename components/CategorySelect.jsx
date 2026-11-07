@@ -14,9 +14,9 @@ function levelsOf(id, categories) {
 
 const SIZES = {
   // Seller listing form
-  lg: { select: 'h-12 rounded-xl px-4 text-[15px]', label: 'text-sm', error: 'mt-2 text-sm', gap: 'gap-4' },
+  lg: { select: 'h-12 rounded-xl px-4 text-base', label: 'text-sm', error: 'mt-2 text-sm', gap: 'gap-4' },
   // Admin product form
-  md: { select: 'h-11 rounded-xl px-3.5 text-sm', label: 'text-sm', error: 'mt-1.5 text-xs', gap: 'gap-3' },
+  md: { select: 'h-11 rounded-xl px-4 text-sm', label: 'text-sm', error: 'mt-2 text-xs', gap: 'gap-3' },
 };
 
 /** One category as a main › sub › inner chip (the last name bold). */
@@ -27,7 +27,7 @@ function PickChip({ pick, on, onPick }) {
         type="button"
         onClick={() => onPick(pick.id)}
         aria-pressed={on}
-        className={`flex max-w-full items-center gap-1 rounded-full border px-3.5 py-2 text-left text-sm transition-colors ${
+        className={`flex max-w-full items-center gap-1 rounded-full border px-4 py-2 text-left text-sm transition-colors ${
           on ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink hover:text-ink'
         }`}
       >
@@ -122,7 +122,7 @@ export default function CategorySelect({ categories, value, onChange, error, rec
         <label htmlFor="category-search" className={`${s.label} font-medium text-stone-700`}>
           Search categories
         </label>
-        <div className="relative mt-1.5">
+        <div className="relative mt-2">
           <Search
             size={17}
             strokeWidth={1.75}
@@ -160,7 +160,7 @@ export default function CategorySelect({ categories, value, onChange, error, rec
       </div>
       {recentPicks.length > 0 && (
         <div className="mb-4">
-          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
             <History size={14} strokeWidth={2} aria-hidden="true" />
             Recently used
           </p>
@@ -183,7 +183,7 @@ export default function CategorySelect({ categories, value, onChange, error, rec
               <label htmlFor={f.id} className={`${s.label} font-medium text-stone-700`}>
                 {f.label} {f.required ? <span className="text-red-600">*</span> : <span className="font-normal text-stone-400">(optional)</span>}
               </label>
-              <div className="relative mt-1.5">
+              <div className="relative mt-2">
                 <select
                   id={f.id}
                   value={levels[level]}
@@ -216,13 +216,13 @@ export default function CategorySelect({ categories, value, onChange, error, rec
         {error && errorAt === -1 && <div className="lg:col-span-3">{errorText}</div>}
       </div>
       {basicPicks.length > 0 && (
-        <div className="mt-4 rounded-xl bg-stone-50 p-3.5">
-          <p className="flex items-center gap-1.5 text-sm font-medium text-stone-700">
+        <div className="mt-4 rounded-xl bg-stone-50 p-4">
+          <p className="flex items-center gap-2 text-sm font-medium text-stone-700">
             <SearchX size={15} strokeWidth={1.75} aria-hidden="true" />
             Can’t find your category?
           </p>
           <p className="mt-0.5 text-xs text-stone-500">Pick a general one. It fills in all three fields in one click.</p>
-          <ul className="mt-2.5 flex flex-wrap gap-2">
+          <ul className="mt-3 flex flex-wrap gap-2">
             {basicPicks.map((p) => (
               <PickChip key={p.id} pick={p} on={p.id === value} onPick={usePick} />
             ))}

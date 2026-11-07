@@ -86,10 +86,10 @@ export default async function SellerDashboardPage() {
       />
 
       <section aria-label="Earnings" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={NO_PLATFORM_FEE ? 'Everything you’ve earned, all time' : `Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} featured />
-        <StatCard label="Pending Payout" value={usd(data.balances.pendingPayout)} sub="Earned, not yet paid out" icon={Clock} tone="warning" />
-        <StatCard label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
-        <StatCard label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
+        <StatCard href="/seller/sales" label="Total Earnings" value={usd(data.balances.totalEarnings)} sub={NO_PLATFORM_FEE ? 'Everything you’ve earned, all time' : `Your ${commissionPercent(1 - COMMISSION_RATE)} share, all time`} icon={DollarSign} featured />
+        <StatCard href="/seller/payouts" label="Pending Payout" value={usd(data.balances.pendingPayout)} sub="Earned, not yet paid out" icon={Clock} tone="warning" />
+        <StatCard href="/seller/payouts" label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
+        <StatCard href="/seller/sales" label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
       </section>
 
       {/* ---------- Earnings by month ---------- */}

@@ -81,7 +81,7 @@ export default function PayoutDetailsForm({ initial = {} }) {
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       <FormAlert>{formError}</FormAlert>
       {success && (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <CheckCircle2 size={16} strokeWidth={1.75} aria-hidden="true" />
           {success}
         </p>

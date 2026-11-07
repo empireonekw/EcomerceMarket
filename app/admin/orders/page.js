@@ -76,7 +76,7 @@ export default async function AdminOrdersPage({ searchParams }) {
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm text-stone-600">{o.items.map((i) => i.title).join(', ')}</p>
                 <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-2">
                     <OrderStatusSelect order={o} />
                     <ProviderBadge provider={o.paymentProvider} />
                   </span>
@@ -111,13 +111,13 @@ export default async function AdminOrdersPage({ searchParams }) {
                   const [first, ...rest] = o.items;
                   return (
                     <tr key={o._id} className="align-top transition-colors hover:bg-stone-50/60">
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-4">
                         <p className="font-mono text-xs font-medium text-stone-500" title={o._id}>
                           #{o._id.slice(-8).toUpperCase()}
                         </p>
                         <p className="mt-0.5 max-w-[16rem] truncate font-medium">{o.buyerEmail}</p>
                       </td>
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-4">
                         <p className="max-w-[18rem] truncate">{first?.title}</p>
                         {rest.length > 0 && (
                           <p className="text-xs text-stone-500" title={rest.map((i) => i.title).join(', ')}>
@@ -125,19 +125,19 @@ export default async function AdminOrdersPage({ searchParams }) {
                           </p>
                         )}
                       </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="px-4 py-4 text-right">
                         <p className="font-medium tabular-nums">{formatPrice(o.totalAmount, o.currency)}</p>
                         {(o.taxAmount > 0 || o.feeAmount > 0) && (
                           <p className="text-xs text-stone-500 tabular-nums">incl. {formatPrice(o.taxAmount + o.feeAmount, o.currency)} tax/fees</p>
                         )}
                       </td>
-                      <td className="px-4 py-3.5">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap items-center gap-2">
                           <OrderStatusSelect order={o} />
                           <ProviderBadge provider={o.paymentProvider} />
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-stone-600">
+                      <td className="whitespace-nowrap px-4 py-4 text-stone-600">
                         {date}
                         <span className="block text-xs text-stone-400">{time}</span>
                       </td>

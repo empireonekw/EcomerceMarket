@@ -32,7 +32,7 @@ export default function Logo({ height = 40, className = '', eager = false, tagli
   return (
     <Link href="/" className="inline-flex shrink-0 flex-col items-start" aria-label={`${siteConfig.name} home`}>
       <LogoImage height={height} className={className} eager={eager} />
-      {tagline && <span className="mt-2 text-[11px] font-medium tracking-[0.28em] text-stone-600 uppercase">Shop independent creators</span>}
+      {tagline && <span className="mt-2 text-xs font-medium tracking-caps text-stone-600 uppercase">Shop independent creators</span>}
     </Link>
   );
 }

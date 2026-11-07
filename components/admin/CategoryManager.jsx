@@ -33,18 +33,18 @@ const splitNames = (text) =>
 /** A sub's inner categories, including what's still typed in its box (not yet turned into a chip). */
 const innersOf = (sub) => [...sub.inners, ...splitNames(sub.draft)];
 const inputCls = (err) =>
-  `mt-1.5 w-full rounded-xl border bg-white px-3.5 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
+  `mt-2 w-full rounded-xl border bg-white px-4 text-sm placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     err ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-ink'
   }`;
 
 function FieldHelp({ id, error, children }) {
   if (error)
     return (
-      <p id={id} className="mt-1.5 text-xs font-medium text-red-600">
+      <p id={id} className="mt-2 text-xs font-medium text-red-600">
         {error}
       </p>
     );
-  return children ? <p className="mt-1.5 text-xs leading-relaxed text-stone-500">{children}</p> : null;
+  return children ? <p className="mt-2 text-xs leading-relaxed text-stone-500">{children}</p> : null;
 }
 
 /**
@@ -67,14 +67,14 @@ function InnerCategories({ index, sub, options, existing, error, onChange }) {
       </label>
       <div
         onClick={() => document.getElementById(id)?.focus()}
-        className={`mt-1.5 flex min-h-11 cursor-text flex-wrap items-center gap-1.5 rounded-xl border bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-brand-500/20 ${
+        className={`mt-2 flex min-h-11 cursor-text flex-wrap items-center gap-2 rounded-xl border bg-white px-2 py-2 focus-within:ring-2 focus-within:ring-brand-500/20 ${
           error ? 'border-red-400' : 'border-stone-300 hover:border-stone-400 focus-within:border-ink'
         }`}
       >
         {sub.inners.map((name, k) => (
           <span
             key={`${name}-${k}`}
-            className={`inline-flex max-w-full items-center gap-1 rounded-full py-1 pl-2.5 pr-1 text-xs font-medium ${
+            className={`inline-flex max-w-full items-center gap-1 rounded-full py-1 pl-3 pr-1 text-xs font-medium ${
               exists(name) ? 'bg-stone-100 text-stone-500' : 'bg-brand-50 text-brand-800'
             }`}
             title={exists(name) ? 'Already exists, kept as it is' : undefined}
@@ -112,7 +112,7 @@ function InnerCategories({ index, sub, options, existing, error, onChange }) {
           onBlur={() => sub.draft.trim() && add(sub.draft)}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={`${id}-help`}
-          className="h-8 min-w-[8rem] flex-1 bg-transparent px-1.5 text-sm placeholder:text-stone-400 focus:outline-none"
+          className="h-8 min-w-[8rem] flex-1 bg-transparent px-2 text-sm placeholder:text-stone-400 focus:outline-none"
         />
         <datalist id={`${id}-options`}>
           {options.map((c) => (
@@ -454,7 +454,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                   Sub categories <span className="text-red-600">*</span> <span className="font-normal text-stone-400">(at least one)</span>
                 </legend>
                 {plan.existingSubs.length > 0 && (
-                  <p className="mt-1.5 text-xs leading-relaxed text-stone-500">
+                  <p className="mt-2 text-xs leading-relaxed text-stone-500">
                     Already under {plan.main.name}: {plan.existingSubs.map((c) => c.name).join(', ')}.
                   </p>
                 )}
@@ -467,7 +467,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                   {subs.map((sub, i) => {
                     const row = plan.rows[i];
                     return (
-                      <li key={sub.key} className="rounded-xl border border-stone-200 bg-stone-50/60 p-3.5">
+                      <li key={sub.key} className="rounded-xl border border-stone-200 bg-stone-50/60 p-4">
                         <div className="flex items-center justify-between gap-2">
                           <label htmlFor={`cat-sub-${i}`} className="text-sm font-medium">
                             Sub category {i + 1}
@@ -535,7 +535,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                 onBlur={() => setValues((v) => ({ ...v, slug: categorySlug(v.slug) }))}
                 aria-invalid={Boolean(errors.slug) || undefined}
                 aria-describedby="cat-slug-help"
-                className={`${inputCls(errors.slug)} h-11 font-mono text-[13px]`}
+                className={`${inputCls(errors.slug)} h-11 font-mono text-sm`}
               />
               <FieldHelp id="cat-slug-help" error={errors.slug}>
                 The URL-friendly version of the name: lowercase letters, numbers and hyphens. Changing it changes the category’s link.
@@ -589,7 +589,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                   onChange={(e) => update('description', e.target.value)}
                   aria-invalid={Boolean(errors.description) || undefined}
                   aria-describedby="cat-description-help"
-                  className={`${inputCls(errors.description)} resize-y py-2.5 leading-relaxed`}
+                  className={`${inputCls(errors.description)} resize-y py-3 leading-relaxed`}
                 />
                 <FieldHelp id="cat-description-help" error={errors.description}>
                   {values.description.length}/300 · Shown on the category page and in the Shop menu.
@@ -653,7 +653,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                     placeholder={values.description || 'Defaults to the description'}
                     onChange={(e) => update('metaDescription', e.target.value)}
                     aria-invalid={Boolean(errors.metaDescription) || undefined}
-                    className={`${inputCls(errors.metaDescription)} resize-y py-2.5 leading-relaxed`}
+                    className={`${inputCls(errors.metaDescription)} resize-y py-3 leading-relaxed`}
                   />
                   <FieldHelp error={errors.metaDescription}>
                     {values.metaDescription.length}/160 · The snippet under the title in Google results.
@@ -799,20 +799,20 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                                 {query && c.depth > 0 ? c.path : c.name}
                               </button>
                               {c.depth > 0 && !query && (
-                                <span className="ml-2 rounded-full bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-stone-500">
+                                <span className="ml-2 rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-stone-500">
                                   {c.depth === 1 ? 'Sub' : 'Inner'}
                                 </span>
                               )}
                               {c.depth === 0 && !hasChildren.has(c._id) && (
                                 <span
                                   title="Every main category needs at least one sub category"
-                                  className="ml-2 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-700"
+                                  className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-amber-700"
                                 >
                                   No subs
                                 </span>
                               )}
                               {/* Row actions: shown on hover / keyboard focus (always on touch screens). */}
-                              <div className="mt-1 flex items-center gap-1.5 text-xs opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
+                              <div className="mt-1 flex items-center gap-2 text-xs opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
                                 <button type="button" onClick={() => startEdit(c)} className="font-medium text-brand-700 hover:underline">
                                   Edit
                                 </button>
@@ -852,7 +852,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                         </td>
                         <td className="px-4 py-3">
                           <span className="block font-mono text-xs text-stone-600">{categoryHref(c)}</span>
-                          <span className="mt-1 inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">
+                          <span className="mt-1 inline-flex rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
                             {categoryTypeLabel(c.type)}
                           </span>
                         </td>
@@ -897,7 +897,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
           <p className="mt-1 text-sm font-medium text-stone-800">
             {pendingDelete.length === 1 ? pendingDelete[0].path : `${pendingDelete.length} categories`}
           </p>
-          <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
+          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-stone-600 marker:text-stone-400">
             {pendingDelete.map((c) => {
               const kids = childrenOf(c._id).length;
               const parent = c.parent ? byId.get(c.parent)?.name : null;
@@ -949,7 +949,7 @@ function pageList(page, pages) {
 
 /** "Showing 31–60 of 176" with Previous / page numbers / Next, under the categories table. */
 function TablePagination({ pagination: { page, limit, total, pages }, onPage }) {
-  const btn = 'grid h-9 min-w-9 place-items-center rounded-lg px-2.5 text-sm transition-colors disabled:pointer-events-none disabled:opacity-40';
+  const btn = 'grid h-9 min-w-9 place-items-center rounded-lg px-3 text-sm transition-colors disabled:pointer-events-none disabled:opacity-40';
   return (
     <nav aria-label="Categories pages" className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
       <p className="text-sm text-stone-500">

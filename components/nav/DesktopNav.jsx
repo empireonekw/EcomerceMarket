@@ -19,7 +19,7 @@ function NavLink({ href, active, children, className = '' }) {
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      className={`rounded-full px-3.5 py-2 text-sm transition-colors ${active ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(20,20,20,0.06)] ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white/80 hover:text-black'} ${className}`}
+      className={`rounded-full px-4 py-2 text-sm transition-colors ${active ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(20,20,20,0.06)] ring-1 ring-stone-200' : 'text-stone-600 hover:bg-white/80 hover:text-black'} ${className}`}
     >
       {children}
     </Link>
@@ -78,7 +78,7 @@ function ShopMenu({ categories, active }) {
       <Link
         href="/products"
         aria-current={active ? 'page' : undefined}
-        className={`rounded-full py-2 pr-1 pl-3.5 text-sm transition-colors ${active || open ? 'text-gray-900' : 'text-stone-600 group-hover/shop:text-black'}`}
+        className={`rounded-full py-2 pr-1 pl-4 text-sm transition-colors ${active || open ? 'text-gray-900' : 'text-stone-600 group-hover/shop:text-black'}`}
       >
         Shop
       </Link>

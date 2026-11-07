@@ -7,7 +7,7 @@ import { PHONE_COUNTRIES, normalizeCountryCode } from '@/lib/validation';
 /** Small country badge ("PK"); used instead of flag emoji, which Windows shows as plain letters anyway. */
 function IsoBadge({ iso }) {
   return (
-    <span className="grid h-5 min-w-7 place-items-center rounded-md bg-stone-100 px-1 text-[10px] font-semibold tracking-wide text-stone-600 ring-1 ring-inset ring-stone-200">
+    <span className="grid h-5 min-w-7 place-items-center rounded-md bg-stone-100 px-1 text-xs font-semibold tracking-wide text-stone-600 ring-1 ring-inset ring-stone-200">
       {iso ?? '—'}
     </span>
   );
@@ -74,7 +74,7 @@ export default function CountryCodePicker({ id, value, onChange, onBlur }) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Country code: ${current ? `${current.name} ${current.code}` : value}`}
-        className={`mt-1.5 flex h-11 w-full items-center gap-2 rounded-xl border bg-white pl-3 pr-2.5 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
+        className={`mt-2 flex h-11 w-full items-center gap-2 rounded-xl border bg-white pl-3 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
           open ? 'border-brand-600' : 'border-stone-300 hover:border-stone-400 focus:border-brand-600'
         }`}
       >
@@ -84,7 +84,7 @@ export default function CountryCodePicker({ id, value, onChange, onBlur }) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-1.5 w-72 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_18px_48px_-12px_rgba(20,20,20,0.25)]">
+        <div className="absolute left-0 top-full z-40 mt-2 w-72 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-[0_18px_48px_-12px_rgba(20,20,20,0.25)]">
           <div className="border-b border-stone-100 p-2">
             <div className="relative">
               <Search size={15} strokeWidth={1.75} aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
@@ -105,7 +105,7 @@ export default function CountryCodePicker({ id, value, onChange, onBlur }) {
               />
             </div>
           </div>
-          <ul id={listId} role="listbox" aria-label="Country codes" className="max-h-64 overflow-y-auto p-1.5 [scrollbar-width:thin]">
+          <ul id={listId} role="listbox" aria-label="Country codes" className="max-h-64 overflow-y-auto p-2 [scrollbar-width:thin]">
             {options.length === 0 ? (
               <li className="px-3 py-6 text-center text-sm text-stone-500">No match. Type a code like +57 to use it.</li>
             ) : (
@@ -117,10 +117,10 @@ export default function CountryCodePicker({ id, value, onChange, onBlur }) {
                   aria-selected={o.code === value}
                   onPointerDown={(e) => (e.preventDefault(), pick(o))}
                   onPointerEnter={() => setActive(i)}
-                  className={`flex cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-sm ${i === active ? 'bg-stone-100' : ''}`}
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm ${i === active ? 'bg-stone-100' : ''}`}
                 >
                   {o.custom ? (
-                    <span className="grid h-5 min-w-7 place-items-center rounded-md bg-brand-50 px-1 text-[10px] font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">+</span>
+                    <span className="grid h-5 min-w-7 place-items-center rounded-md bg-brand-50 px-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-100">+</span>
                   ) : (
                     <IsoBadge iso={o.iso} />
                   )}

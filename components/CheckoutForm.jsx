@@ -160,7 +160,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
           <EmailVerification email={user.email} title="Verify your email to buy" text="Your receipts and downloads are sent here." className="mt-3" />
         )}
         {user ? (
-          <p className="mt-2 flex items-center gap-2 rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+          <p className="mt-2 flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="m5 12 4.5 4.5L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -191,7 +191,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
           inputMode="email"
           placeholder="you@example.com"
           aria-describedby={error ? 'checkout-error' : undefined}
-          className="mt-1.5 h-12 w-full rounded-xl border border-stone-300 px-4 focus:border-black focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+          className="mt-2 h-12 w-full rounded-xl border border-stone-300 px-4 focus:border-black focus:outline-none focus:ring-2 focus:ring-brand-500/20"
         />
 
         {viaPayFast && (
@@ -211,9 +211,9 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
               aria-invalid={Boolean(phoneError) || undefined}
               aria-describedby="phone-hint"
               onChange={() => setPhoneError(null)}
-              className={`mt-1.5 h-12 w-full rounded-xl border px-4 focus:border-black focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${phoneError ? 'border-red-400' : 'border-stone-300'}`}
+              className={`mt-2 h-12 w-full rounded-xl border px-4 focus:border-black focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${phoneError ? 'border-red-400' : 'border-stone-300'}`}
             />
-            <p id="phone-hint" className={`mt-1.5 text-xs ${phoneError ? 'text-red-600' : 'text-stone-500'}`}>
+            <p id="phone-hint" className={`mt-2 text-xs ${phoneError ? 'text-red-600' : 'text-stone-500'}`}>
               {phoneError || 'For your JazzCash / Easypaisa wallet or the bank’s one-time code.'}
             </p>
           </>
@@ -232,7 +232,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
             </p>
             <ul className="mt-3 flex flex-wrap gap-2">
               {METHODS.map(({ icon: Icon, label }) => (
-                <li key={label} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-700 ring-1 ring-stone-200">
+                <li key={label} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-medium text-stone-700 ring-1 ring-stone-200">
                   <Icon size={14} strokeWidth={1.75} aria-hidden="true" className="text-stone-500" />
                   {label}
                 </li>
@@ -318,7 +318,7 @@ export default function CheckoutForm({ demoMode = false, paymentsEnabled = false
             <dd>{money(totals.total)}</dd>
           </div>
           {viaPayFast && charge.rate !== 1 && (
-            <div className="rounded-xl bg-brand-50 px-3.5 py-3">
+            <div className="rounded-xl bg-brand-50 px-4 py-3">
               <div className="flex justify-between text-base font-semibold text-ink">
                 <dt>You pay</dt>
                 <dd>{formatPkr(charge.paisa)}</dd>

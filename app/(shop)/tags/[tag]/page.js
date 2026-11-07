@@ -97,19 +97,19 @@ export default async function TagPage({ params, searchParams }) {
       <div className="flex items-center gap-3">
         <BackLink fallback={'/products'} />
         <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+          <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
             <li>
               <Link href="/" className="hover:text-ink">
                 Home
               </Link>
             </li>
-            <li className="flex items-center gap-1.5">
+            <li className="flex items-center gap-2">
               <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
               <Link href="/products" className="hover:text-ink">
                 Products
               </Link>
             </li>
-            <li className="flex items-center gap-1.5">
+            <li className="flex items-center gap-2">
               <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
               <span aria-current="page" className="text-ink">
                 {name}

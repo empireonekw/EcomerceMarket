@@ -34,7 +34,7 @@ export default async function ContactPage() {
               <Mail size={20} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <h2 className="headline mt-5 text-2xl">Email support</h2>
-            <p className="mt-1.5 text-sm text-stone-600">Prefer email? Write to us directly.</p>
+            <p className="mt-2 text-sm text-stone-600">Prefer email? Write to us directly.</p>
             <a {...gmailCompose(siteConfig.supportEmail)} className="mt-4 inline-block break-all text-lg font-medium text-brand-700 hover:underline hover:underline-offset-4">
               {siteConfig.supportEmail}
             </a>
@@ -67,7 +67,7 @@ export default async function ContactPage() {
           <h2 id="contact-form-heading" className="headline text-3xl">
             Send a message
           </h2>
-          <p className="mt-1.5 text-sm text-stone-500">
+          <p className="mt-2 text-sm text-stone-500">
             All fields are required. See our{' '}
             <Link href="/privacy" className="underline underline-offset-2 hover:text-black">
               Privacy Policy

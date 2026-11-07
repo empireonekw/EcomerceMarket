@@ -49,20 +49,20 @@ function ConversationRow({ conv, checked, onCheck, onOpen, onStar }) {
       <button type="button" onClick={onStar} aria-pressed={conv.starred} aria-label={conv.starred ? `Unstar ${name}` : `Star ${name}`} className="grid size-9 shrink-0 place-items-center rounded-full text-stone-400 hover:bg-stone-200/70 hover:text-stone-700">
         <Star size={18} aria-hidden="true" className={conv.starred ? 'fill-amber-400 text-amber-500' : ''} />
       </button>
-      <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-1 text-left">
+      <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 py-4 pl-1 text-left">
         <Initial name={name} />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2">
             {conv.unread && <span aria-label="Unread" className="size-2 shrink-0 rounded-full bg-brand-500" />}
-            <span className={`truncate text-[15px] ${conv.unread ? 'font-bold text-ink' : 'font-medium text-stone-800'}`}>{name}</span>
+            <span className={`truncate text-base ${conv.unread ? 'font-bold text-ink' : 'font-medium text-stone-800'}`}>{name}</span>
             {conv.other?.verified && <VerifiedBadge size={14} className="-ml-1" />}
             {conv.side === 'seller' && conv.kind === 'direct' && (
-              <span className={`hidden shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium sm:inline ${conv.buyerIsCustomer ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-200/70 text-stone-600'}`}>
+              <span className={`hidden shrink-0 rounded-full px-2 py-0.5 text-xs font-medium sm:inline ${conv.buyerIsCustomer ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-200/70 text-stone-600'}`}>
                 {conv.buyerIsCustomer ? 'Customer' : 'Potential buyer'}
               </span>
             )}
             {conv.labels.map((l) => (
-              <span key={l} className="hidden shrink-0 items-center gap-1 rounded-full border border-stone-300 px-2 py-0.5 text-[11px] font-medium text-stone-600 md:inline-flex">
+              <span key={l} className="hidden shrink-0 items-center gap-1 rounded-full border border-stone-300 px-2 py-0.5 text-xs font-medium text-stone-600 md:inline-flex">
                 <Tag size={10} aria-hidden="true" />
                 {l}
               </span>
@@ -276,7 +276,7 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
     <div className={`flex flex-col bg-[#faf9f7] ${fullBleed ? '-mx-4 -my-6 min-h-dvh sm:-mx-6 lg:-mx-10 lg:-my-10 lg:h-dvh' : 'min-h-[42rem] overflow-hidden rounded-2xl border border-stone-200 lg:h-[calc(100dvh-10rem)]'}`}>
       {/* Header */}
       <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-stone-200 px-4 py-4 sm:px-8">
-        <h1 className="mr-auto text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Messages</h1>
+        <h1 className="mr-auto text-2xl font-semibold tracking-tight sm:text-3xl">Messages</h1>
         <form onSubmit={onSearch} role="search" className="order-last w-full sm:order-none sm:w-auto sm:flex-1 sm:max-w-xl">
           <label htmlFor={searchId} className="sr-only">
             Search your messages
@@ -314,7 +314,7 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
             })}
           </ul>
           <div className="px-3 pb-2 md:mt-4 md:px-0">
-            <button type="button" onClick={openSupport} className="flex w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium hover:border-black">
+            <button type="button" onClick={openSupport} className="flex w-full items-center justify-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-3 text-sm font-medium hover:border-black">
               <Headset size={16} aria-hidden="true" />
               Chat with {siteConfig.name} support
             </button>
@@ -364,7 +364,7 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
                       key={action}
                       type="button"
                       onClick={() => runAction(action, [...selected])}
-                      className="whitespace-nowrap rounded-full px-3 py-2 text-[15px] font-semibold text-ink transition-colors hover:bg-stone-200/60"
+                      className="whitespace-nowrap rounded-full px-3 py-2 text-base font-semibold text-ink transition-colors hover:bg-stone-200/60"
                     >
                       {label}
                     </button>
@@ -429,7 +429,7 @@ export default function Inbox({ initialList, initialSettings, fullBleed = false 
           )}
 
           {notice && (
-            <div role="status" className={`pointer-events-none absolute inset-x-0 bottom-5 z-20 mx-auto w-fit max-w-[90%] rounded-full px-5 py-2.5 text-sm font-medium shadow-lift ${notice.type === 'error' ? 'bg-red-600 text-white' : 'bg-ink text-white'}`}>
+            <div role="status" className={`pointer-events-none absolute inset-x-0 bottom-5 z-20 mx-auto w-fit max-w-[90%] rounded-full px-5 py-3 text-sm font-medium shadow-lift ${notice.type === 'error' ? 'bg-red-600 text-white' : 'bg-ink text-white'}`}>
               {notice.text}
             </div>
           )}

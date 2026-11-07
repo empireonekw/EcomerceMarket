@@ -177,10 +177,10 @@ export default function UsersTable({ items, currentAdminId }) {
             <tbody className="divide-y divide-stone-100">
               {items.map((u) => (
                 <tr key={u.id} className={`relative transition-colors ${selected.has(u.id) ? 'bg-brand-50/60' : 'hover:bg-stone-50/70'}`}>
-                  <td className="py-3.5 pl-4">
+                  <td className="py-4 pl-4">
                     <RowCheckbox u={u} selectable={canSelect(u)} checked={selected.has(u.id)} onToggle={toggle} />
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
                       <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-stone-100 text-sm font-medium text-stone-700">
                         {u.name.charAt(0).toUpperCase()}
@@ -196,26 +196,26 @@ export default function UsersTable({ items, currentAdminId }) {
                             <span className="truncate">{u.selling.storeName}</span>
                             {u.selling.verification === 'verified' && <VerifiedBadge size={13} />}
                             {u.selling.verification === 'pending' && (
-                              <span className="shrink-0 rounded-full bg-amber-50 px-1.5 text-[10px] font-medium text-amber-800">ID to review</span>
+                              <span className="shrink-0 rounded-full bg-amber-50 px-2 text-xs font-medium text-amber-800">ID to review</span>
                             )}
                           </p>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
                   </td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-4 py-4">
                     <StatusBadge status={u.status.tone} label={u.status.label} />
                   </td>
                   {/* Sellers: what they sold; everyone else: what they bought. */}
-                  <td className="whitespace-nowrap px-4 py-3.5 text-right">{u.selling ? <Selling s={u.selling} /> : <Purchases p={u.purchases} />}</td>
-                  <td className="whitespace-nowrap px-4 py-3.5 text-stone-600">
+                  <td className="whitespace-nowrap px-4 py-4 text-right">{u.selling ? <Selling s={u.selling} /> : <Purchases p={u.purchases} />}</td>
+                  <td className="whitespace-nowrap px-4 py-4 text-stone-600">
                     {formatDateTime(u.createdAt).date}
                     <span className="block text-xs text-stone-400">Active {lastActive(u)}</span>
                   </td>
-                  <td className="whitespace-nowrap py-3.5 pl-2 pr-3 text-right">
+                  <td className="whitespace-nowrap py-4 pl-2 pr-3 text-right">
                     <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
                   </td>
                 </tr>

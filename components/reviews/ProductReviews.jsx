@@ -34,7 +34,7 @@ export function ReviewCard({ review, mine = false }) {
         </div>
         <Stars rating={review.rating} size={15} />
       </header>
-      <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-stone-700">{review.body}</p>
+      <p className="mt-3 whitespace-pre-line text-base leading-relaxed text-stone-700">{review.body}</p>
     </article>
   );
 }
@@ -100,7 +100,7 @@ export default function ProductReviews({ productId, productTitle, summary, initi
 
   return (
     <section id="reviews" className="@container scroll-mt-24" aria-labelledby="reviews-heading">
-      <h2 id="reviews-heading" className="text-2xl font-semibold tracking-[-0.01em] text-ink">
+      <h2 id="reviews-heading" className="text-2xl font-semibold tracking-tight text-ink">
         Reviews
       </h2>
 
@@ -118,7 +118,7 @@ export default function ProductReviews({ productId, productTitle, summary, initi
                   </span>
                 </span>
               </p>
-              <ul className="mt-5 space-y-1.5" aria-label="Filter by rating">
+              <ul className="mt-5 space-y-2" aria-label="Filter by rating">
                 {summary.stars.map((n, i) => {
                   const rating = 5 - i;
                   const pct = summary.count ? Math.round((n / summary.count) * 100) : 0;

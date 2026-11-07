@@ -78,7 +78,7 @@ export default function LabelMenu({ labels, selected, onApply, compact = false }
         onClick={toggleOpen}
         aria-expanded={open}
         aria-haspopup="dialog"
-        className={`flex items-center gap-1 rounded-full px-3 py-2 text-[15px] font-semibold text-ink transition-colors hover:bg-stone-200/60 ${compact ? 'px-2' : ''}`}
+        className={`flex items-center gap-1 rounded-full px-3 py-2 text-base font-semibold text-ink transition-colors hover:bg-stone-200/60 ${compact ? 'px-2' : ''}`}
       >
         Label
         <ChevronDown size={14} strokeWidth={2.5} aria-hidden="true" />
@@ -86,7 +86,7 @@ export default function LabelMenu({ labels, selected, onApply, compact = false }
 
       {open && (
         <div role="dialog" aria-label="Label conversations" className="absolute right-0 top-0 z-30 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-stone-200 bg-white p-5 shadow-lift sm:-right-3 sm:-top-3 2xl:-left-6 2xl:right-auto">
-          <p className="flex items-center gap-1 text-[15px] font-semibold">
+          <p className="flex items-center gap-1 text-base font-semibold">
             Label <ChevronDown size={14} strokeWidth={2.5} aria-hidden="true" />
           </p>
 
@@ -94,7 +94,7 @@ export default function LabelMenu({ labels, selected, onApply, compact = false }
             <ul className="mt-4 max-h-56 space-y-1 overflow-y-auto">
               {labels.map((l) => (
                 <li key={l}>
-                  <label className={`flex cursor-pointer items-center gap-3 rounded-lg px-1 py-1.5 text-[15px] hover:bg-stone-50 ${selected.length ? '' : 'cursor-not-allowed opacity-50'}`}>
+                  <label className={`flex cursor-pointer items-center gap-3 rounded-lg px-1 py-2 text-base hover:bg-stone-50 ${selected.length ? '' : 'cursor-not-allowed opacity-50'}`}>
                     <input
                       type="checkbox"
                       disabled={!selected.length}
@@ -122,7 +122,7 @@ export default function LabelMenu({ labels, selected, onApply, compact = false }
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), done())}
             placeholder="Create new label"
-            className="mt-4 h-12 w-full rounded-lg border border-stone-400 px-4 text-[15px] outline-none placeholder:text-stone-500 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+            className="mt-4 h-12 w-full rounded-lg border border-stone-400 px-4 text-base outline-none placeholder:text-stone-500 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
           />
           {!selected.length && newLabel && <p className="mt-2 text-xs text-stone-500">The label is created; select conversations to apply it.</p>}
           {error && (

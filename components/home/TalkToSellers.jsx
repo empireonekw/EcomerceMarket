@@ -17,14 +17,14 @@ const CHAT = [
  */
 export default function TalkToSellers() {
   return (
-    <section className="relative isolate mt-24 overflow-x-clip bg-peach-50/70 py-20 sm:mt-32 sm:py-28" aria-labelledby="talk-heading">
+    <section className="texture-grain relative isolate mt-24 overflow-x-clip bg-peach-50/70 py-20 sm:mt-32 sm:py-28" aria-labelledby="talk-heading">
       <Glow className="top-10 right-[10%] size-72 bg-berry-100/70" />
       <Glow className="bottom-0 left-[6%] size-64 bg-brand-100/70" />
       <Sparkle className="top-20 left-[46%] hidden size-5 text-peach-500 lg:block" />
       <div className="container-page">        <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <Reveal>
             <Eyebrow>Direct messages</Eyebrow>
-            <h2 id="talk-heading" className="mt-4 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink text-balance sm:text-[3rem]">
+            <h2 id="talk-heading" className="mt-4 font-serif text-4xl leading-display tracking-tight text-ink text-balance sm:text-5xl">
               Questions? Ask the creator.
             </h2>
             <p className="mt-4 max-w-md text-lg leading-relaxed text-stone-600">
@@ -68,7 +68,7 @@ export default function TalkToSellers() {
               <ul className="space-y-3 px-5 py-5">
                 {CHAT.map(({ from, text }, i) => (
                   <Reveal as="li" key={text} delay={300 + i * 450} className={`flex ${from === 'buyer' ? 'justify-end' : 'justify-start'}`}>
-                    <p className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-snug ${from === 'buyer' ? 'rounded-br-md bg-brand-100 text-ink' : 'rounded-bl-md bg-stone-100 text-ink'}`}>{text}</p>
+                    <p className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-snug ${from === 'buyer' ? 'rounded-br-md bg-brand-100 text-ink' : 'rounded-bl-md bg-stone-100 text-ink'}`}>{text}</p>
                   </Reveal>
                 ))}
                 <Reveal as="li" delay={300 + CHAT.length * 450} className="flex">

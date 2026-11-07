@@ -63,10 +63,10 @@ export default function DeleteOrderButton({ order }) {
           <span aria-hidden="true" className="grid size-11 place-items-center rounded-full bg-red-50 text-red-600 ring-8 ring-red-50/50">
             <Trash2 size={20} strokeWidth={1.9} />
           </span>
-          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-[-0.01em]">
+          <h2 id={titleId} className="mt-5 text-lg font-semibold tracking-tight">
             Delete order {ref} permanently?
           </h2>
-          <p className="mt-3 rounded-xl bg-stone-50 px-3.5 py-2.5 text-sm text-stone-800 ring-1 ring-stone-200/70">
+          <p className="mt-3 rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-800 ring-1 ring-stone-200/70">
             <span className="block truncate font-medium">{order.buyerEmail}</span>
             <span className="block truncate text-stone-600">
               {order.items.map((i) => i.title).join(', ')} · {formatPrice(order.totalAmount, order.currency)}

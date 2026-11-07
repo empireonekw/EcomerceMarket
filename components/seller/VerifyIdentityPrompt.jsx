@@ -43,7 +43,7 @@ export default function VerifyIdentityPrompt() {
         <span aria-hidden="true" className="grid size-12 place-items-center rounded-full bg-brand-50 text-brand-700">
           <PartyPopper size={22} strokeWidth={1.75} />
         </span>
-        <h2 id="verify-prompt-title" className="mt-5 text-xl font-semibold tracking-[-0.01em]">
+        <h2 id="verify-prompt-title" className="mt-5 text-xl font-semibold tracking-tight">
           You made your first sale!
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-stone-600">

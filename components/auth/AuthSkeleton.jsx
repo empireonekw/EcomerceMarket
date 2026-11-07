@@ -9,7 +9,7 @@ export default function AuthSkeleton() {
         </div>
         <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="h-7 w-44 rounded-lg bg-stone-200" />
-          <div className="mt-2.5 h-4 w-64 rounded bg-stone-100" />
+          <div className="mt-3 h-4 w-64 rounded bg-stone-100" />
           <div className="mt-8 space-y-5">
             {[0, 1].map((i) => (
               <div key={i}>

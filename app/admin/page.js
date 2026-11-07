@@ -25,6 +25,7 @@ export default async function AdminDashboardPage() {
       <section aria-label="Platform overview" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Platform Revenue"
+          href="/admin/orders"
           value={usd(stats.revenue.total)}
           sub={`${usd(stats.revenue.last30d)} in the last 30 days`}
           icon={DollarSign}
@@ -32,6 +33,7 @@ export default async function AdminDashboardPage() {
         />
         <StatCard
           label="Total Users"
+          href="/admin/users"
           value={stats.users.total.toLocaleString('en-US')}
           sub={`${stats.users.customers.toLocaleString('en-US')} customers`}
           icon={Users}
@@ -39,6 +41,7 @@ export default async function AdminDashboardPage() {
         />
         <StatCard
           label="Total Sellers"
+          href="/admin/users?role=seller"
           value={stats.users.sellers.toLocaleString('en-US')}
           sub={stats.users.sellersWithoutShop ? `${stats.users.sellersWithoutShop} haven’t set up a shop` : 'All shops set up'}
           icon={Store}
@@ -46,6 +49,7 @@ export default async function AdminDashboardPage() {
         />
         <StatCard
           label="Total Products"
+          href={stats.products.pendingReview ? '/admin/products?status=pending' : '/admin/products'}
           value={stats.products.total.toLocaleString('en-US')}
           sub={
             stats.products.pendingReview
@@ -60,12 +64,14 @@ export default async function AdminDashboardPage() {
       <section aria-label="Orders and earnings" className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="Total Orders"
+          href="/admin/orders"
           value={stats.orders.total.toLocaleString('en-US')}
           sub={`${stats.orders.last30d} in the last 30 days`}
           icon={Receipt}
         />
         <StatCard
           label="Your Earnings"
+          href="/admin/payouts"
           value={usd(stats.platform.commission)}
           sub={`Commission + platform-owned sales, from ${usd(stats.platform.salesGross)} in product sales`}
           icon={Landmark}
@@ -108,9 +114,11 @@ export default async function AdminDashboardPage() {
               {stats.recentOrders.map((o) => {
                 const { date, time } = formatDateTime(o.createdAt);
                 return (
-                  <li key={o._id} className="flex items-center gap-4 px-5 py-3.5">
+                  <li key={o._id} className="relative flex items-center gap-4 px-5 py-4 transition-colors hover:bg-stone-50">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{o.buyerEmail}</p>
+                      <Link href={`/admin/orders?q=${o._id}`} prefetch={false} className="block truncate text-sm font-medium after:absolute after:inset-0">
+                        {o.buyerEmail}
+                      </Link>
                       <p className="truncate text-xs text-stone-500">
                         {o.items.map((i) => i.title).join(', ')}
                       </p>
@@ -151,7 +159,7 @@ export default async function AdminDashboardPage() {
           ) : (
             <ol className="divide-y divide-stone-100">
               {stats.topProducts.map((p, i) => (
-                <li key={p._id} className="flex items-center gap-3 px-5 py-3.5">
+                <li key={p._id} className="relative flex items-center gap-3 px-5 py-4 transition-colors hover:bg-stone-50">
                   <span className="w-4 shrink-0 text-sm font-medium text-stone-400 tabular-nums">{i + 1}</span>
                   <div className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-stone-100">
                     {p.coverImage && (
@@ -159,12 +167,12 @@ export default async function AdminDashboardPage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <Link href={`/admin/products/${p._id}/edit`} className="block truncate text-sm font-medium hover:underline" title={p.title}>
+                    <Link href={`/admin/products/${p._id}/edit`} prefetch={false} className="block truncate text-sm font-medium after:absolute after:inset-0" title={p.title}>
                       {p.title}
                     </Link>
                     <p className="text-xs text-stone-500 tabular-nums">{usd(p.gross)} in sales</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-700 tabular-nums">
+                  <span className="shrink-0 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 tabular-nums">
                     {p.sold.toLocaleString('en-US')} sold
                   </span>
                 </li>

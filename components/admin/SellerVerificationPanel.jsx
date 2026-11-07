@@ -60,7 +60,7 @@ export default function SellerVerificationPanel({ userId, shop }) {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 px-5 py-4">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${status.cls}`}>{status.label}</span>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium ${status.cls}`}>{status.label}</span>
         <span className="text-xs text-stone-500">
           Submitted {day(v?.submittedAt)}
           {v?.reviewedAt && ` · reviewed ${day(v.reviewedAt)}`}
@@ -121,7 +121,7 @@ export default function SellerVerificationPanel({ userId, shop }) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="e.g. The photo of the back is blurry. Please upload a clearer one."
-                className="mt-1.5 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:border-ink focus:outline-none"
+                className="mt-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm focus:border-ink focus:outline-none"
               />
               <div className="mt-2 flex gap-2">
                 <button

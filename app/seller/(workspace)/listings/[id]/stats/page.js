@@ -90,7 +90,7 @@ export default async function ListingStatsPage({ params, searchParams }) {
         <Link href="/seller/listings" className="text-sm text-stone-500 hover:text-ink">
           ← Listings
         </Link>
-        <h1 className="mt-2 text-3xl font-semibold tracking-[-0.01em] text-ink">Listing stats</h1>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-ink">Listing stats</h1>
         <nav aria-label="Date range" className="mt-4 flex flex-wrap items-center gap-2">
           {STATS_RANGES.map((r) => (
             <Link
@@ -123,7 +123,7 @@ export default async function ListingStatsPage({ params, searchParams }) {
               </a>
             )}
           </div>
-          <dl className="mt-4 grid gap-2 border-b border-stone-100 pb-4 text-[15px] text-stone-700 sm:grid-cols-2">
+          <dl className="mt-4 grid gap-2 border-b border-stone-100 pb-4 text-base text-stone-700 sm:grid-cols-2">
             <div>
               <dt className="inline text-stone-500">Price: </dt>
               <dd className="inline tabular-nums">{money(product.price)}</dd>
@@ -197,7 +197,7 @@ export default async function ListingStatsPage({ params, searchParams }) {
         {data.searchTerms.length ? (
           <ul className="divide-y divide-stone-100">
             {data.searchTerms.map((t) => (
-              <li key={t.term} className="flex items-center justify-between px-3 py-2.5 text-sm">
+              <li key={t.term} className="flex items-center justify-between px-3 py-3 text-sm">
                 <span className="text-ink">{t.term}</span>
                 <span className="tabular-nums text-stone-500">
                   {t.count} visit{t.count === 1 ? '' : 's'}
@@ -219,7 +219,7 @@ export default async function ListingStatsPage({ params, searchParams }) {
               const total = SOCIAL.reduce((a, x) => a + (data.sources[x.key] ?? 0), 0);
               const v = data.sources[s.key] ?? 0;
               return (
-                <li key={s.key} className="flex items-center justify-between py-3 text-[15px]">
+                <li key={s.key} className="flex items-center justify-between py-3 text-base">
                   <span className="flex items-center gap-3 text-ink">
                     <span aria-hidden="true" className="size-3 rounded-full" style={{ backgroundColor: s.color }} />
                     {s.label}

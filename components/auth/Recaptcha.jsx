@@ -74,7 +74,7 @@ export default function Recaptcha({ onChange, error, ref }) {
       {/* 78px = the widget's height (144px compact), reserved so the form doesn't jump when it appears. */}
       <div ref={boxRef} className="min-h-[78px]" aria-describedby={error ? 'captcha-error' : undefined} />
       {error && (
-        <p id="captcha-error" role="alert" className="mt-1.5 text-sm text-red-600">
+        <p id="captcha-error" role="alert" className="mt-2 text-sm text-red-600">
           {error}
         </p>
       )}

@@ -43,7 +43,7 @@ export default function RichText({ text, className = '' }) {
         }
         const List = block.type;
         return (
-          <List key={i} className={`space-y-1.5 pl-5 ${List === 'ul' ? 'list-disc' : 'list-decimal'} marker:text-stone-400`}>
+          <List key={i} className={`space-y-2 pl-5 ${List === 'ul' ? 'list-disc' : 'list-decimal'} marker:text-stone-400`}>
             {block.items.map((item, j) => (
               <li key={j}>
                 <Inline nodes={item} />

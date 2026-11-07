@@ -87,7 +87,7 @@ export default function CartToast() {
               </button>
             </div>
             <p className="truncate text-sm text-stone-600">{item.title}</p>
-            <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+            <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
               <span className="rounded-full bg-emerald-100 px-2 py-0.5 font-medium text-emerald-800">
                 {item.price === 0 ? 'Free' : formatPrice(item.price, item.currency)}
               </span>

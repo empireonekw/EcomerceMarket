@@ -58,7 +58,7 @@ export default function RichTextEditor({ id, value, onChange, onBlur, invalid, d
         role="toolbar"
         aria-label="Formatting"
         aria-controls={id}
-        className="flex flex-wrap items-center gap-0.5 border-b border-stone-200 bg-stone-50 px-2 py-1.5"
+        className="flex flex-wrap items-center gap-0.5 border-b border-stone-200 bg-stone-50 px-2 py-2"
       >
         {TOOLS.map(({ command, label, shortcut, icon: Icon }, i) => (
           <span key={command} className="contents">
@@ -99,7 +99,7 @@ export default function RichTextEditor({ id, value, onChange, onBlur, invalid, d
           emit();
         }}
         style={{ minHeight }}
-        className="max-h-[32rem] overflow-y-auto px-4 py-3 text-[15px] leading-relaxed focus:outline-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
+        className="max-h-[32rem] overflow-y-auto px-4 py-3 text-base leading-relaxed focus:outline-none [&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6"
       />
     </div>
   );

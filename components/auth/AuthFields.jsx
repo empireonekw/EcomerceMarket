@@ -6,7 +6,7 @@ import { PASSWORD_RULES } from '@/lib/validation';
 
 // Shared form primitives (auth pages, account settings, seller forms).
 export const inputClass = (error) =>
-  `mt-1.5 h-11 w-full rounded-xl border bg-white px-3.5 text-sm placeholder:text-stone-400 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
+  `mt-2 h-11 w-full rounded-xl border bg-white px-4 text-sm placeholder:text-stone-400 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500/20 ${
     error ? 'border-red-400 focus:border-red-500' : 'border-stone-300 hover:border-stone-400 focus:border-brand-600'
   }`;
 
@@ -21,7 +21,7 @@ export function AuthLabel({ htmlFor, children }) {
 export function FieldError({ id, children }) {
   if (!children) return null;
   return (
-    <p id={id} className="mt-1.5 text-xs font-medium text-red-600">
+    <p id={id} className="mt-2 text-xs font-medium text-red-600">
       {children}
     </p>
   );
@@ -58,7 +58,7 @@ export function PasswordInput({ id, error, ...props }) {
 /** Live checklist of PASSWORD_RULES (the same rules the server enforces). */
 export function PasswordChecklist({ password }) {
   return (
-    <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs" aria-label="Password requirements">
+    <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs" aria-label="Password requirements">
       {PASSWORD_RULES.map((rule) => {
         const met = rule.test(password);
         return (
@@ -90,7 +90,7 @@ export function SubmitButton({ pending, children, pendingLabel }) {
 export function FormAlert({ children }) {
   if (!children) return null;
   return (
-    <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+    <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
       {children}
     </p>
   );

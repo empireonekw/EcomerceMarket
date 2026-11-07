@@ -20,7 +20,7 @@ export default function EarningsChart({ months, title = 'Monthly earnings' }) {
     <figure aria-label={`${title}, last ${months.length} months`} className="px-5 pb-5 pt-6">
       <div className="flex gap-3">
         {/* Y axis labels (recessive) */}
-        <div aria-hidden="true" className="flex h-48 w-10 shrink-0 flex-col justify-between text-right text-[11px] tabular-nums text-stone-400">
+        <div aria-hidden="true" className="flex h-48 w-10 shrink-0 flex-col justify-between text-right text-xs tabular-nums text-stone-400">
           {max > 0 ? ticks.map((t) => <span key={t}>{compact(t)}</span>) : <span className="mt-auto">$0</span>}
         </div>
 
@@ -46,7 +46,7 @@ export default function EarningsChart({ months, title = 'Monthly earnings' }) {
                   {/* Tooltip */}
                   <span
                     role="tooltip"
-                    className={`pointer-events-none absolute bottom-full z-10 mb-2 hidden w-max rounded-lg bg-black px-2.5 py-1.5 text-xs text-white shadow-lg group-hover:block group-focus-visible:block ${
+                    className={`pointer-events-none absolute bottom-full z-10 mb-2 hidden w-max rounded-lg bg-black px-3 py-2 text-xs text-white shadow-lg group-hover:block group-focus-visible:block ${
                       i < 2 ? 'left-0' : i > months.length - 3 ? 'right-0' : 'left-1/2 -translate-x-1/2'
                     }`}
                   >
@@ -61,7 +61,7 @@ export default function EarningsChart({ months, title = 'Monthly earnings' }) {
           </ol>
 
           {/* X axis labels — every other month on phones */}
-          <ol aria-hidden="true" className="mt-2 flex text-[11px] text-stone-500">
+          <ol aria-hidden="true" className="mt-2 flex text-xs text-stone-500">
             {months.map((m, i) => (
               <li key={m.month} className={`flex-1 text-center ${i % 2 === 1 ? 'max-sm:invisible' : ''}`}>
                 {m.label.split(' ')[0]}

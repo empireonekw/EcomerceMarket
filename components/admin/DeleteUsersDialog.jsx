@@ -130,7 +130,7 @@ export default function DeleteUsersDialog({ users, open, onClose, onDeleted, red
         <p className="mt-2 text-sm font-medium text-red-700">This can’t be undone.</p>
 
         <div className="mt-5">
-          <label htmlFor={`${id}-password`} className="flex items-center gap-1.5 text-sm font-medium text-stone-800">
+          <label htmlFor={`${id}-password`} className="flex items-center gap-2 text-sm font-medium text-stone-800">
             <Lock size={14} strokeWidth={1.75} aria-hidden="true" />
             Enter your admin password to confirm
           </label>

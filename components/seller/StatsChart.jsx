@@ -84,7 +84,7 @@ export function Donut({ items, label = 'Total visits' }) {
           })}
       </svg>
       <div className="absolute inset-0 grid place-content-center text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-500">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-stone-500">{label}</p>
         <p className="mt-1 text-3xl font-semibold tabular-nums text-ink">{total}</p>
       </div>
     </div>

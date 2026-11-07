@@ -104,7 +104,7 @@ export default function EmailVerification({ email, title = 'Verify your email', 
       </div>
 
       {notice && (
-        <p role="status" className="mt-4 rounded-xl bg-white px-3.5 py-2.5 text-sm text-stone-700 ring-1 ring-brand-200">
+        <p role="status" className="mt-4 rounded-xl bg-white px-4 py-3 text-sm text-stone-700 ring-1 ring-brand-200">
           {notice}
         </p>
       )}
@@ -121,7 +121,7 @@ export default function EmailVerification({ email, title = 'Verify your email', 
           <label htmlFor="verify-email-code" className="text-sm font-medium">
             6-digit code
           </label>
-          <div className="mt-1.5 flex flex-wrap items-start gap-2">
+          <div className="mt-2 flex flex-wrap items-start gap-2">
             <input
               id="verify-email-code"
               value={code}

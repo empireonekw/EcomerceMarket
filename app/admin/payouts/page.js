@@ -17,7 +17,7 @@ function Destination({ details }) {
   const hasWallet = details.walletNumber;
   if (!hasBank && !hasWallet) return <span className="text-xs font-medium text-red-600">No payout details on file</span>;
   return (
-    <dl className="space-y-1.5 text-xs">
+    <dl className="space-y-2 text-xs">
       {hasBank && (
         <div>
           <dt className="font-medium text-stone-700">{details.bankName}</dt>
@@ -85,7 +85,7 @@ export default async function AdminPayoutsPage() {
                           {s.name} · {s.email}
                         </p>
                         {s.requestedAt && (
-                          <div className="mt-1.5">
+                          <div className="mt-2">
                             <StatusBadge status="requested" label={`Requested ${formatDateTime(s.requestedAt).date}`} />
                           </div>
                         )}

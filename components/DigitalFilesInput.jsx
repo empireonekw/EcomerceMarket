@@ -160,12 +160,12 @@ export default function DigitalFilesInput({ files, onChange, onBusy, driver, err
         photos, videos and files
       </p>
       {problems.map((p) => (
-        <p key={p} role="alert" className="mt-1.5 text-sm font-medium text-red-600">
+        <p key={p} role="alert" className="mt-2 text-sm font-medium text-red-600">
           {p}
         </p>
       ))}
       {error && (
-        <p id={`${inputId}-error`} className="mt-1.5 text-sm font-medium text-red-600">
+        <p id={`${inputId}-error`} className="mt-2 text-sm font-medium text-red-600">
           {error}
         </p>
       )}

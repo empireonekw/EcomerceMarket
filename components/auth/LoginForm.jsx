@@ -78,7 +78,7 @@ export default function LoginForm({ next, registered = false, oauthError = null 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       {registered && !formError && (
-        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />
           {registered === 'seller' ? 'Seller account created. Log in to set up your shop.' : 'Your account is ready. Enter your password to log in.'}
         </p>

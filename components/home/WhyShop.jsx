@@ -12,7 +12,7 @@ const ITEMS = [
 
 function Row({ children, done = true }) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/70 px-3.5 py-2.5 text-sm">
+    <li className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/70 px-4 py-3 text-sm">
       <span className={`grid size-5 shrink-0 place-items-center rounded-full ${done ? 'bg-brand-500 text-ink' : 'border border-stone-300'}`}>
         {done && <Check size={12} strokeWidth={3} aria-hidden="true" />}
       </span>
@@ -28,7 +28,7 @@ function Mockup({ id }) {
       <>
         <div className="flex items-center justify-between">
           <p className="font-medium">Listing review</p>
-          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Approved · Live</span>
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">Approved · Live</span>
         </div>
         <ul className="mt-5 space-y-2">
           <Row>Files open and download correctly</Row>
@@ -43,17 +43,17 @@ function Mockup({ id }) {
       <>
         <div className="flex items-center justify-between">
           <p className="font-medium">Checkout</p>
-          <span className="inline-flex items-center gap-1.5 text-xs text-stone-500">
+          <span className="inline-flex items-center gap-2 text-xs text-stone-500">
             <ShieldCheck size={14} strokeWidth={1.75} aria-hidden="true" className="text-emerald-600" />
             Encrypted
           </span>
         </div>
         <div className="mt-5 space-y-2 text-sm">
-          <div className="flex justify-between rounded-xl bg-stone-50/70 px-3.5 py-2.5">
+          <div className="flex justify-between rounded-xl bg-stone-50/70 px-4 py-3">
             <span>Notion Budget Planner</span>
             <span className="tabular-nums">$9.00</span>
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-stone-200 px-3.5 py-2.5 text-stone-500">
+          <div className="flex items-center gap-2 rounded-xl border border-stone-200 px-4 py-3 text-stone-500">
             <Lock size={14} strokeWidth={1.75} aria-hidden="true" />
             Card details go straight to the payment provider
           </div>
@@ -62,13 +62,13 @@ function Mockup({ id }) {
           <span className="text-sm text-stone-500">Total</span>
           <span className="font-serif text-2xl tabular-nums">$9.00</span>
         </div>
-        <div className="mt-4 rounded-full bg-brand-500 py-2.5 text-center text-sm font-medium text-ink">Pay securely</div>
+        <div className="mt-4 rounded-full bg-brand-500 py-3 text-center text-sm font-medium text-ink">Pay securely</div>
       </>
     );
   if (id === 'once')
     return (
       <>
-        <p className="text-xs font-semibold tracking-[0.12em] text-stone-500 uppercase">Receipt</p>
+        <p className="text-xs font-semibold tracking-caps text-stone-500 uppercase">Receipt</p>
         <p className="mt-2 font-serif text-2xl">Line Icons Pro</p>
         <dl className="mt-5 space-y-2 text-sm">
           {[
@@ -94,12 +94,12 @@ function Mockup({ id }) {
       </div>
       <ul className="mt-5 space-y-2">
         {['Notion Budget Planner', 'Line Icons Pro', 'Abstract Shapes Pack'].map((t) => (
-          <li key={t} className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/70 px-3 py-2.5 text-sm">
+          <li key={t} className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/70 px-3 py-3 text-sm">
             <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-white text-stone-500 ring-1 ring-stone-200">
               <FileText size={15} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1 truncate">{t}</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-brand-500 px-2.5 py-1 text-xs font-medium text-ink">
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-500 px-3 py-1 text-xs font-medium text-ink">
               <Download size={12} strokeWidth={2.25} aria-hidden="true" />
               Download
             </span>
@@ -127,7 +127,7 @@ export default function WhyShop() {
       <Sparkle delay={2000} className="top-36 right-[17%] hidden size-4 text-peach-500 md:block" />
       <div className="container-page">        <Reveal className="mx-auto max-w-2xl text-center">
           <Eyebrow className="justify-center">Why shop with us</Eyebrow>
-          <h2 id="why-heading" className="mt-4 font-serif text-[2.25rem] leading-[1.05] tracking-[-0.025em] text-ink text-balance sm:text-[3rem]">
+          <h2 id="why-heading" className="mt-4 font-serif text-4xl leading-display tracking-tight text-ink text-balance sm:text-5xl">
             Buying digital goods, without the guesswork
           </h2>
         </Reveal>
@@ -146,7 +146,7 @@ export default function WhyShop() {
                       {String(i + 1).padStart(2, '0')} / {String(ITEMS.length).padStart(2, '0')}
                     </span>
                   </span>
-                  <h3 className="mt-10 font-serif text-[1.9rem] leading-[1.1] tracking-[-0.02em] text-ink sm:text-[2.4rem] lg:mt-auto">{title}</h3>
+                  <h3 className="mt-10 font-serif text-3xl leading-display tracking-tight text-ink sm:text-4xl lg:mt-auto">{title}</h3>
                   <p className="mt-3 max-w-md text-lg leading-relaxed text-stone-600">{text}</p>
                 </div>
                 <div aria-hidden="true" className={`flex items-center justify-center p-6 sm:p-10 ${tint}`}>

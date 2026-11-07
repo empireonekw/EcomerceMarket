@@ -104,7 +104,7 @@ export function FilterTabs({ label, items, activeKey }) {
               }`}
             >
               {item.label}
-              {item.count != null && <span className={`ml-1.5 tabular-nums transition-colors duration-300 ${active ? 'text-white/60' : 'text-stone-400'}`}>{item.count}</span>}
+              {item.count != null && <span className={`ml-2 tabular-nums transition-colors duration-300 ${active ? 'text-white/60' : 'text-stone-400'}`}>{item.count}</span>}
             </Link>
           );
         })}

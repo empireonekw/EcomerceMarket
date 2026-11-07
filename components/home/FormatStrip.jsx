@@ -38,7 +38,7 @@ export default function FormatStrip() {
                 className={`flex shrink-0 items-center motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-4 ${copy === 1 ? 'motion-reduce:hidden' : ''}`}
               >
                 {FORMATS.map(({ label, icon: Icon, className }) => (
-                  <li key={label} className={`flex shrink-0 items-center gap-2.5 px-6 sm:px-8 ${className}`}>
+                  <li key={label} className={`flex shrink-0 items-center gap-3 px-6 sm:px-8 ${className}`}>
                     <Icon size={22} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
                     {label}
                   </li>

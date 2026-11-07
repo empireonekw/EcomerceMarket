@@ -3,7 +3,7 @@
 /** Small letter-spaced caps label with a honey square, above section titles. */
 export function Eyebrow({ children, className = '', tone = 'text-stone-500' }) {
   return (
-    <p className={`flex items-center gap-2 text-xs font-semibold tracking-[0.12em] uppercase ${tone} ${className}`}>
+    <p className={`flex items-center gap-2 text-xs font-semibold tracking-caps uppercase ${tone} ${className}`}>
       <span aria-hidden="true" className="size-1.5 bg-brand-500" />
       {children}
     </p>

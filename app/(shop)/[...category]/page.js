@@ -81,14 +81,14 @@ export default async function CategoryPage({ params, searchParams }) {
       <div className="flex items-center gap-3">
         <BackLink fallback={parent ? categoryHref(parent) : '/categories'} />
         <nav aria-label="Breadcrumb">
-          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+          <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
             <li>
               <Link href="/" className="hover:text-ink">
                 Home
               </Link>
             </li>
             {trail.map((c, i) => (
-              <li key={c._id} className="flex items-center gap-1.5">
+              <li key={c._id} className="flex items-center gap-2">
                 <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
                 {i === trail.length - 1 ? (
                   <span aria-current="page" className="text-ink">
@@ -112,7 +112,7 @@ export default async function CategoryPage({ params, searchParams }) {
           {/* Title, count and the controls in one compact row, so the products start high on the page. */}
           <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
             <div className="min-w-0">
-              <h1 className="font-serif text-3xl leading-tight tracking-[-0.02em] text-ink sm:text-4xl">{category.name}</h1>
+              <h1 className="font-serif text-3xl leading-tight tracking-tight text-ink sm:text-4xl">{category.name}</h1>
               <p className="mt-1 text-sm text-stone-500">
                 {pagination.total.toLocaleString('en-US')} {pagination.total === 1 ? 'item' : 'items'}
                 {query.tag && (
@@ -138,7 +138,7 @@ export default async function CategoryPage({ params, searchParams }) {
               />
             </div>
           </header>
-          {category.description && <p className="mt-3 line-clamp-2 max-w-3xl text-[15px] leading-relaxed text-stone-600">{category.description}</p>}
+          {category.description && <p className="mt-3 line-clamp-2 max-w-3xl text-base leading-relaxed text-stone-600">{category.description}</p>}
 
           <div className="mt-6">
             <ProductGrid products={items} preloadCount={pagination.page === 1 ? 4 : 0} />

@@ -13,14 +13,14 @@ export async function GET(request, { params }) {
   }
 }
 
-/** POST /api/admin/support/:id — { body }: reply as the Sellpify team. */
+/** POST /api/admin/support/:id — { body, images? }: reply as the Sellpify team. */
 export async function POST(request, { params }) {
   const auth = await authorizeAdminRequest(request);
   if (!auth) return unauthorized('Admin access required.');
   try {
     const { id } = await params;
-    const { body } = await readJson(request);
-    return json(await replyAsTeam(auth.admin?.id, id, body), 201);
+    const { body, images } = await readJson(request);
+    return json(await replyAsTeam(auth.admin?.id, id, body, images), 201);
   } catch (err) {
     return errorResponse(err, 'POST /api/admin/support/:id');
   }

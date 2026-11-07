@@ -12,7 +12,7 @@ export default function AuthCard({ title, subtitle, eyebrow, children, footer, w
       <div className={`w-full ${wide ? 'max-w-[38rem]' : 'max-w-md'}`}>
         <div className="mb-6 flex items-center justify-between">
           <Logo eager height={44} />
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-stone-500 transition-colors hover:text-black">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-stone-500 transition-colors hover:text-black">
             <ArrowLeft size={15} strokeWidth={1.75} aria-hidden="true" />
             Back to store
           </Link>
@@ -20,8 +20,8 @@ export default function AuthCard({ title, subtitle, eyebrow, children, footer, w
 
         <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8">
           {eyebrow && <div className="mb-6">{eyebrow}</div>}
-          <h1 className="headline text-[1.75rem] leading-tight text-ink">{title}</h1>
-          {subtitle && <p className="mt-1.5 text-sm text-stone-500">{subtitle}</p>}
+          <h1 className="headline text-3xl leading-tight text-ink">{title}</h1>
+          {subtitle && <p className="mt-2 text-sm text-stone-500">{subtitle}</p>}
           <div className="mt-6">{children}</div>
         </div>
 

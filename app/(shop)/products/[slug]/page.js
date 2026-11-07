@@ -87,7 +87,7 @@ function Fact({ icon: Icon, children }) {
   return (
     <li className="flex gap-3">
       <Icon size={20} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-ink" />
-      <span className="min-w-0 text-[15px] leading-relaxed text-stone-700">{children}</span>
+      <span className="min-w-0 text-base leading-relaxed text-stone-700">{children}</span>
     </li>
   );
 }
@@ -141,14 +141,14 @@ export default async function ProductPage({ params }) {
       <div className="relative flex items-center gap-3 lg:justify-center">
         <BackLink fallback={leaf ? categoryHref(leaf) : '/products'} className="lg:absolute lg:left-0" />
         <nav aria-label="Breadcrumb" className="min-w-0">
-          <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
             <li>
               <Link href="/" className="font-medium text-ink underline-offset-4 hover:underline">
                 Home
               </Link>
             </li>
             {(trail.length ? trail : [{ _id: 'all', name: 'All products', href: '/products' }]).map((c) => (
-              <li key={c._id} className="flex items-center gap-1.5">
+              <li key={c._id} className="flex items-center gap-2">
                 <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
                 <Link href={c.href ?? categoryHref(c)} className="font-medium text-ink underline-offset-4 hover:underline">
                   {c.name}
@@ -167,10 +167,10 @@ export default async function ProductPage({ params }) {
 
         {/* ---------- Right column: buy box, highlights, description, delivery ---------- */}
         <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <h1 className="font-serif text-[1.75rem] leading-[1.15] tracking-[-0.015em] text-ink text-balance sm:text-[2rem]">{product.title}</h1>
+          <h1 className="font-serif text-3xl leading-heading tracking-[-0.015em] text-ink text-balance sm:text-3xl">{product.title}</h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-            <span className="text-[1.75rem] font-semibold tracking-[-0.02em] text-ink tabular-nums">
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="text-3xl font-semibold tracking-tight text-ink tabular-nums">
               {product.price === 0
                 ? 'Free'
                 : discount > 0
@@ -180,14 +180,14 @@ export default async function ProductPage({ params }) {
             {discount > 0 && (
               <>
                 <span className="text-lg text-stone-500 line-through tabular-nums">{formatPrice(product.compareAtPrice, product.currency)}</span>
-                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-semibold text-emerald-800">{discount}% off</span>
+                <span className="rounded-full bg-emerald-100 px-3 py-0.5 text-sm font-semibold text-emerald-800">{discount}% off</span>
               </>
             )}
           </div>
           {product.price > 0 && <p className="mt-1 text-sm text-stone-500">Taxes, if any, are shown at checkout.</p>}
 
           {/* Shop and rating */}
-          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+          <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-base">
             {shop ? (
               <Link href={`/shop/${shop.id}`} className="flex items-center gap-1 font-semibold text-ink underline-offset-4 hover:underline">
                 {shop.name}
@@ -197,7 +197,7 @@ export default async function ProductPage({ params }) {
               <span className="font-semibold text-ink">{siteConfig.name}</span>
             )}
             {reviewSummary.count > 0 ? (
-              <a href="#reviews" className="inline-flex items-center gap-1.5 text-stone-600 hover:text-ink">
+              <a href="#reviews" className="inline-flex items-center gap-2 text-stone-600 hover:text-ink">
                 <Stars rating={reviewSummary.average} size={14} />
                 <span className="underline underline-offset-2">({reviewSummary.count})</span>
               </a>
@@ -206,16 +206,16 @@ export default async function ProductPage({ params }) {
             )}
           </p>
 
-          <ul className="mt-4 space-y-2 text-[15px] text-stone-700">
-            <li className="flex items-center gap-2.5">
+          <ul className="mt-4 space-y-2 text-base text-stone-700">
+            <li className="flex items-center gap-3">
               <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
               {accessLink ? 'Instant access: your link is ready the moment you pay' : 'Instant download: your files are ready the moment you pay'}
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-3">
               <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
               Yours to keep: download again any time from Purchases
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-3">
               <Check size={18} strokeWidth={2.25} aria-hidden="true" className="shrink-0 text-sky-700" />
               Secure checkout
             </li>
@@ -224,13 +224,13 @@ export default async function ProductPage({ params }) {
           {/* A taste of the description right above the buttons: the seller's summary, or the description's first
               paragraph with its formatting (bold etc.), cut to three lines. The full text is further down. */}
           {(product.shortDescription || intro) && (
-            <div className="mt-6 rounded-2xl bg-stone-50 px-4 py-3.5">
+            <div className="mt-6 rounded-2xl bg-stone-50 px-4 py-4">
               {product.shortDescription ? (
-                <p className="line-clamp-3 text-[15px] leading-relaxed text-stone-700">{product.shortDescription}</p>
+                <p className="line-clamp-3 text-base leading-relaxed text-stone-700">{product.shortDescription}</p>
               ) : (
-                <RichText text={intro} className="line-clamp-3 text-[15px] leading-relaxed text-stone-700" />
+                <RichText text={intro} className="line-clamp-3 text-base leading-relaxed text-stone-700" />
               )}
-              <a href="#about" className="mt-1.5 inline-block text-sm font-semibold text-ink underline-offset-4 hover:underline">
+              <a href="#about" className="mt-2 inline-block text-sm font-semibold text-ink underline-offset-4 hover:underline">
                 Read the full description
               </a>
             </div>
@@ -246,7 +246,7 @@ export default async function ProductPage({ params }) {
             <h2 id="highlights-heading" className="text-lg font-semibold text-ink">
               Highlights
             </h2>
-            <ul className="mt-4 space-y-3.5">
+            <ul className="mt-4 space-y-4">
               <Fact icon={Download}>{deliveryLabel(product)}</Fact>
               {product.fileFormat && <Fact icon={FileText}>Format: {product.fileFormat}</Fact>}
               {fileSize && <Fact icon={Layers}>Size: {fileSize}</Fact>}
@@ -274,7 +274,7 @@ export default async function ProductPage({ params }) {
             </h2>
             <div className="mt-3">
               <ExpandableText>
-                <RichText text={product.description} className="text-[15px] leading-relaxed text-stone-700" />
+                <RichText text={product.description} className="text-base leading-relaxed text-stone-700" />
                 {product.tags?.length > 0 && (
                   <ul className="mt-5 flex flex-wrap gap-2" aria-label="Tags">
                     {product.tags.map((tag) => (
@@ -298,7 +298,7 @@ export default async function ProductPage({ params }) {
             <h2 id="delivery-heading" className="text-lg font-semibold text-ink">
               Delivery
             </h2>
-            <ul className="mt-4 space-y-3.5">
+            <ul className="mt-4 space-y-4">
               <Fact icon={Download}>
                 {accessLink ? 'Access link delivered instantly after payment' : 'Digital files delivered instantly after payment'}
               </Fact>
@@ -329,7 +329,7 @@ export default async function ProductPage({ params }) {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium uppercase tracking-wide text-stone-500">Meet the seller</p>
-                  <h2 id="seller-heading" className="mt-0.5 flex items-center gap-1.5 font-serif text-2xl text-ink">
+                  <h2 id="seller-heading" className="mt-0.5 flex items-center gap-2 font-serif text-2xl text-ink">
                     <Link href={`/shop/${shop.id}`} className="truncate underline-offset-4 hover:underline">
                       {shop.name}
                     </Link>
@@ -361,10 +361,10 @@ export default async function ProductPage({ params }) {
                     )}
                   </p>
                   {(shop.imported.sales > 0 || shop.imported.reviews > 0) && (
-                    <p className="mt-1.5 text-xs text-stone-500">{importedNote(shop.imported)}</p>
+                    <p className="mt-2 text-xs text-stone-500">{importedNote(shop.imported)}</p>
                   )}
                   {shop.verified && (
-                    <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-sky-800">
+                    <p className="mt-2 inline-flex items-center gap-2 text-sm text-sky-800">
                       <BadgeCheck size={15} strokeWidth={2} aria-hidden="true" />
                       Identity verified by {siteConfig.name}
                     </p>
@@ -395,7 +395,7 @@ export default async function ProductPage({ params }) {
                           <span className="font-medium text-stone-700">{r.authorName}</span> · {fmtDate(r.createdAt)}
                         </p>
                         {r.imported ? (
-                          <p className="mt-1.5">
+                          <p className="mt-2">
                             <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">From the seller’s other shop</span>
                           </p>
                         ) : (

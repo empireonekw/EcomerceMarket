@@ -180,7 +180,7 @@ const clock = (t) => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', 
 
 function LevelChip({ level }) {
   const l = LEVEL[level] ?? LEVEL.idle;
-  return <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${l.chip}`}>{l.label}</span>;
+  return <span className={`inline-flex items-center gap-2 rounded-full px-3 py-0.5 text-xs font-medium ring-1 ring-inset ${l.chip}`}>{l.label}</span>;
 }
 
 function Summary({ snap }) {
@@ -429,8 +429,8 @@ function Diagram({ nodes, totals, selected, onSelect, children }) {
           <StatusDot level={n.level} />
         </span>
         <span className="min-w-0 flex-1 pr-1">
-          <span className="block truncate text-[13px] leading-tight font-semibold text-ink">{n.label}</span>
-          <span className="mt-0.5 block truncate text-[11px] leading-tight text-stone-500">{n.detail || n.sub}</span>
+          <span className="block truncate text-sm leading-tight font-semibold text-ink">{n.label}</span>
+          <span className="mt-0.5 block truncate text-xs leading-tight text-stone-500">{n.detail || n.sub}</span>
         </span>
       </button>
     );
@@ -460,7 +460,7 @@ function Diagram({ nodes, totals, selected, onSelect, children }) {
           style={{ width: canvas, height, transform: view ? `translate(${view.x}px, ${view.y}px) scale(${view.k})` : undefined }}
         >
           {COL_TITLES.map((title, c) => (
-            <p key={title} className="absolute top-3 text-center text-[11px] font-semibold tracking-wider text-stone-400 uppercase" style={{ left: colX[c], width: widths[c] }}>
+            <p key={title} className="absolute top-3 text-center text-xs font-semibold tracking-wider text-stone-400 uppercase" style={{ left: colX[c], width: widths[c] }}>
               {title}
             </p>
           ))}
@@ -553,7 +553,7 @@ function Diagram({ nodes, totals, selected, onSelect, children }) {
               {full ? <Minimize size={16} aria-hidden="true" /> : <Maximize size={16} aria-hidden="true" />}
             </ToolButton>
           </div>
-          <p className="hidden rounded-lg bg-white/80 px-2 py-1 text-[11px] text-stone-500 backdrop-blur sm:block">Hover a box to see its connections · Drag to move · Ctrl + scroll to zoom</p>
+          <p className="hidden rounded-lg bg-white/80 px-2 py-1 text-xs text-stone-500 backdrop-blur sm:block">Hover a box to see its connections · Drag to move · Ctrl + scroll to zoom</p>
         </div>
       </div>
       {children}
@@ -626,7 +626,7 @@ function Details({ node, now, onClose }) {
       {rows.length > 0 && (
         <dl className="divide-y divide-stone-100 text-sm">
           {rows.map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-4 py-1.5">
+            <div key={k} className="flex justify-between gap-4 py-2">
               <dt className="text-stone-500">{k}</dt>
               <dd className="font-medium tabular-nums">{v}</dd>
             </div>
@@ -641,10 +641,10 @@ function Details({ node, now, onClose }) {
       )}
       {node.recentErrors.length > 0 && (
         <div>
-          <p className="mb-1.5 text-xs font-semibold tracking-wide text-stone-500 uppercase">Recent errors</p>
-          <ul className="space-y-1.5">
+          <p className="mb-2 text-xs font-semibold tracking-wide text-stone-500 uppercase">Recent errors</p>
+          <ul className="space-y-2">
             {node.recentErrors.map((e) => (
-              <li key={`${e.at}-${e.message}`} className="rounded-lg bg-stone-50 px-3 py-2 font-mono text-[11px] leading-relaxed text-stone-700">
+              <li key={`${e.at}-${e.message}`} className="rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs leading-relaxed text-stone-700">
                 <span className="text-stone-400">{ago(new Date(e.at).toISOString(), now)} · </span>
                 {e.message}
               </li>
@@ -666,16 +666,16 @@ function ErrorLog({ errors }) {
   return (
     <div className="rounded-2xl border border-stone-200 bg-white p-5">
       <p className="text-sm font-semibold">
-        Server error log{errors.length > 0 && <span className="ml-1.5 font-normal text-stone-400">({errors.length})</span>}
+        Server error log{errors.length > 0 && <span className="ml-2 font-normal text-stone-400">({errors.length})</span>}
       </p>
       <p className="text-xs text-stone-500">Errors the server logged since it started (newest first, last 20). Cleared on restart.</p>
       {errors.length ? (
         <>
-          <ul id="server-error-log" className="mt-3 space-y-1.5">
+          <ul id="server-error-log" className="mt-3 space-y-2">
             {shown.map((e) => (
               <li
                 key={`${e.at}-${e.message}`}
-                className={`rounded-lg bg-stone-50 px-3 py-2 font-mono text-[11px] leading-relaxed break-words text-stone-700 ${open ? '' : 'line-clamp-2'}`}
+                className={`rounded-lg bg-stone-50 px-3 py-2 font-mono text-xs leading-relaxed break-words text-stone-700 ${open ? '' : 'line-clamp-2'}`}
                 title={open ? undefined : e.message}
               >
                 <span className="text-stone-400">{clock(e.at)} · </span>
@@ -756,12 +756,12 @@ export default function LiveFlow({ initial }) {
         </p>
         <ul className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-stone-600" aria-label="Legend">
           {['ok', 'warning', 'error', 'idle'].map((k) => (
-            <li key={k} className="flex items-center gap-1.5">
+            <li key={k} className="flex items-center gap-2">
               <span className="size-2.5 rounded-full" style={{ background: LEVEL[k].stroke }} aria-hidden="true" />
               {k === 'warning' ? 'Warning (too fast / slow)' : k === 'error' ? 'Error (failing)' : k === 'idle' ? 'Idle (no traffic)' : LEVEL[k].label}
             </li>
           ))}
-          <li className="flex items-center gap-1.5">
+          <li className="flex items-center gap-2">
             <svg width="30" height="10" aria-hidden="true">
               <path d="M1 5 H29" stroke="#059669" strokeOpacity="0.4" strokeWidth="1.75" />
               <circle cx="15" cy="5" r="3" fill="#059669" />

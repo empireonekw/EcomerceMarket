@@ -30,7 +30,7 @@ export default function ReviewCard({ review }) {
             <Stars rating={rating} size={16} />
             <RotateCw size={15} strokeWidth={1.75} aria-hidden="true" className="text-stone-300" />
           </div>
-          <blockquote className="mt-6 line-clamp-6 text-[15px] leading-relaxed text-stone-700">“{body}”</blockquote>
+          <blockquote className="mt-6 line-clamp-6 text-base leading-relaxed text-stone-700">“{body}”</blockquote>
           <figcaption className="mt-auto border-t border-stone-100 pt-4 text-sm text-stone-500">
             On <span className="font-medium text-black">{productTitle}</span>
           </figcaption>
@@ -42,7 +42,7 @@ export default function ReviewCard({ review }) {
             {initials(authorName)}
           </span>
           <p className="headline mt-5 text-2xl leading-tight">{authorName}</p>
-          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
+          <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/90">
             <BadgeCheck size={14} strokeWidth={1.75} aria-hidden="true" className="text-emerald-400" />
             Verified buyer
           </p>

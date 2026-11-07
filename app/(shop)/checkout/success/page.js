@@ -227,10 +227,10 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           <tbody className="divide-y divide-stone-100 border-y border-stone-200">
             {order.items.map((item) => (
               <tr key={item.product}>
-                <th scope="row" className="py-2.5 pr-4 text-left font-normal break-words">
+                <th scope="row" className="py-3 pr-4 text-left font-normal break-words">
                   {item.title}
                 </th>
-                <td className="py-2.5 text-right font-medium">{item.price === 0 ? 'Free' : money(item.price)}</td>
+                <td className="py-3 text-right font-medium">{item.price === 0 ? 'Free' : money(item.price)}</td>
               </tr>
             ))}
           </tbody>

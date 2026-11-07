@@ -85,11 +85,11 @@ function ReportDialog({ review, onReported }) {
 
           <fieldset>
             <legend className="text-sm font-medium text-stone-800">Why are you reporting it?</legend>
-            <div className="mt-2 space-y-1.5">
+            <div className="mt-2 space-y-2">
               {REPORT_REASONS.map((r) => (
                 <label
                   key={r.value}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition-colors ${reason === r.value ? 'border-ink bg-stone-50' : 'border-stone-200 hover:border-stone-400'}`}
+                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors ${reason === r.value ? 'border-ink bg-stone-50' : 'border-stone-200 hover:border-stone-400'}`}
                 >
                   <input type="radio" name={`${id}-reason`} value={r.value} checked={reason === r.value} onChange={() => (setReason(r.value), setErrors(({ reason: _, ...rest }) => rest))} className="accent-ink" />
                   {r.label}
@@ -163,7 +163,7 @@ export default function SellerReviewList({ items }) {
                 </p>
               </div>
               {state ? (
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${state.cls}`}>{state.label}</span>
+                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${state.cls}`}>{state.label}</span>
               ) : (
                 <ReportDialog review={r} onReported={() => router.refresh()} />
               )}

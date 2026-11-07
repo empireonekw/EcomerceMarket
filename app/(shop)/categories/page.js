@@ -32,13 +32,13 @@ export default async function CategoriesPage() {
   return (
     <div className="container-page py-12 sm:py-16">
       <nav aria-label="Breadcrumb">
-        <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500">
+        <ol className="flex flex-wrap items-center gap-2 text-sm text-stone-500">
           <li>
             <Link href="/" className="hover:text-ink">
               Home
             </Link>
           </li>
-          <li className="flex items-center gap-1.5">
+          <li className="flex items-center gap-2">
             <ChevronRight size={14} strokeWidth={2} aria-hidden="true" className="text-stone-400" />
             <span aria-current="page" className="text-ink">
               All categories

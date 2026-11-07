@@ -13,7 +13,11 @@ const messageSchema = new Schema(
     sender: { type: Schema.Types.ObjectId, ref: 'User' },
     team: { type: Boolean }, // a support reply from the admin team (vs. an automatic notice)
     staff: { type: Schema.Types.ObjectId, ref: 'User' }, // which admin wrote it, when known (not for API-key replies)
-    body: { type: String, required: true, trim: true, maxlength: MESSAGE_LIMITS.max },
+    // Text, images or both (a deleted message keeps neither).
+    body: { type: String, trim: true, maxlength: MESSAGE_LIMITS.max, default: '' },
+    images: { type: [String], default: undefined }, // uploads/messages/<file>, up to MESSAGE_IMAGE_LIMIT
+    editedAt: { type: Date },
+    deletedAt: { type: Date },
     product: { type: Schema.Types.ObjectId, ref: 'Product' }, // listing the buyer was looking at when they wrote
     auto: { type: Boolean, default: false }, // seller's automatic away reply
   },

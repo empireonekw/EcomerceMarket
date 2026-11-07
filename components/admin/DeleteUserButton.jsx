@@ -13,7 +13,7 @@ export default function DeleteUserButton({ id, name, role, redirectTo, size = 's
         type="button"
         onClick={() => setOpen(true)}
         title={`Delete ${name}`}
-        className={`relative z-10 inline-flex items-center justify-center gap-1.5 rounded-full font-medium text-red-600 transition-colors hover:bg-red-50 ${
+        className={`relative z-10 inline-flex items-center justify-center gap-2 rounded-full font-medium text-red-600 transition-colors hover:bg-red-50 ${
           size === 'md' ? 'h-10 border border-red-200 px-4 text-sm' : `h-8 text-sm ${labelClassName ? 'w-8 2xl:w-auto 2xl:px-3' : 'px-3'}`
         }`}
       >

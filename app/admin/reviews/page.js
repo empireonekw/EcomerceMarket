@@ -38,11 +38,11 @@ export default async function AdminReviewsPage({ searchParams }) {
               key={v.value}
               href={href(v.value)}
               aria-current={view === v.value ? 'page' : undefined}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-colors ${view === v.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${view === v.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
             >
               {v.label}
               <span
-                className={`rounded-full px-1.5 text-[11px] font-medium leading-4 tabular-nums ${
+                className={`rounded-full px-2 text-xs font-medium leading-4 tabular-nums ${
                   v.value === 'reported' && counts.reported ? 'bg-amber-400 text-ink' : view === v.value ? 'bg-white/20' : 'bg-stone-100 text-stone-600'
                 }`}
               >

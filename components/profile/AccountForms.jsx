@@ -32,7 +32,7 @@ function SaveButton({ pending, children, disabled }) {
 function Success({ children }) {
   if (!children) return null;
   return (
-    <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
+    <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
       {children}
     </p>
   );
@@ -304,7 +304,7 @@ export function DeleteAccount({ role }) {
               <p className="mt-1 text-sm text-stone-600">This is permanent and can’t be undone.</p>
             </div>
           </div>
-          <ul className="list-disc space-y-1.5 rounded-xl bg-stone-50 py-3 pl-8 pr-4 text-sm text-stone-600 marker:text-stone-400">
+          <ul className="list-disc space-y-2 rounded-xl bg-stone-50 py-3 pl-8 pr-4 text-sm text-stone-600 marker:text-stone-400">
             {effects.map((t) => (
               <li key={t}>{t}</li>
             ))}

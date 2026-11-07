@@ -104,7 +104,7 @@ export default function ImportedRecordsPanel({ sellerId, records }) {
             role="tab"
             aria-selected={tab === key}
             onClick={() => (setTab(key), setErrors({}))}
-            className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${tab === key ? 'bg-ink text-white' : 'text-stone-600 hover:bg-stone-100'}`}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${tab === key ? 'bg-ink text-white' : 'text-stone-600 hover:bg-stone-100'}`}
           >
             {label}
           </button>

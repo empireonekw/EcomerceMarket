@@ -185,7 +185,7 @@ export default function SignupForm({ next, accountType = 'customer' }) {
       </div>
 
       <div>
-        <label className="flex cursor-pointer items-start gap-2.5 text-sm text-stone-600">
+        <label className="flex cursor-pointer items-start gap-3 text-sm text-stone-600">
           <input
             id="acceptTerms"
             type="checkbox"

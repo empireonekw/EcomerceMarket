@@ -74,7 +74,7 @@ export default function MessageSellerButton({ product, shop, className = 'btn bt
         <div className="p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 id={`${textId}-title`} className="flex items-center gap-1.5 text-xl font-semibold">
+              <h2 id={`${textId}-title`} className="flex items-center gap-2 text-xl font-semibold">
                 Message {shop.name}
                 {shop.verified && <VerifiedBadge size={18} />}
               </h2>
@@ -110,7 +110,7 @@ export default function MessageSellerButton({ product, shop, className = 'btn bt
             <form onSubmit={send} className="mt-5">
               <div className="flex flex-wrap gap-2">
                 {STARTERS.map((s) => (
-                  <button key={s} type="button" onClick={() => setBody((b) => (b.trim() ? `${b.trim()} ${s}` : s))} className="rounded-full border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 hover:border-black hover:text-black">
+                  <button key={s} type="button" onClick={() => setBody((b) => (b.trim() ? `${b.trim()} ${s}` : s))} className="rounded-full border border-stone-300 px-3 py-2 text-xs font-medium text-stone-700 hover:border-black hover:text-black">
                     {s}
                   </button>
                 ))}
@@ -128,7 +128,7 @@ export default function MessageSellerButton({ product, shop, className = 'btn bt
                   setError('');
                 }}
                 placeholder={`Hi ${shop.name}, I have a question about this item…`}
-                className="mt-3 w-full resize-none rounded-xl border border-stone-300 p-4 text-[15px] outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
+                className="mt-3 w-full resize-none rounded-xl border border-stone-300 p-4 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-500/40"
               />
               {error && (
                 <p role="alert" className="mt-2 text-sm text-red-600">

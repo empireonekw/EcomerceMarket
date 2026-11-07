@@ -14,7 +14,7 @@ export default function HowItWorks() {
   return (
     <section className="container-page pt-24 sm:pt-32" aria-labelledby="how-heading">
       <SectionHeading id="how-heading" eyebrow="How it works" title="From browsing to downloading in three steps">
-        <Link href="/how-it-works" className="inline-flex items-center gap-1.5 text-sm font-medium text-stone-600 hover:text-ink">
+        <Link href="/how-it-works" className="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-ink">
           Read the full guide
           <ArrowRight size={15} strokeWidth={1.75} aria-hidden="true" />
         </Link>
@@ -23,8 +23,8 @@ export default function HowItWorks() {
         {STEPS.map(({ title, text }, i) => (
           <Reveal as="li" key={title} delay={i * 120} className="relative border-t border-stone-300 pt-6 before:absolute before:-top-[5px] before:left-0 before:size-2.5 before:rounded-full before:bg-brand-500">
             <span className="font-serif text-5xl leading-none tracking-[-0.03em] text-brand-600 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-            <p className="mt-6 font-serif text-[1.6rem] leading-tight tracking-[-0.02em] text-ink">{title}</p>
-            <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-stone-600">{text}</p>
+            <p className="mt-6 font-serif text-2xl leading-heading tracking-tight text-ink">{title}</p>
+            <p className="mt-2 max-w-sm text-base leading-relaxed text-stone-600">{text}</p>
           </Reveal>
         ))}
       </ol>
