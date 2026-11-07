@@ -9,7 +9,7 @@ import Pagination from '@/components/Pagination';
 import ProductGrid from '@/components/ProductGrid';
 import SortMenu from '@/components/SortMenu';
 import VerifiedBadge from '@/components/VerifiedBadge';
-import { getProducts, getPublicShop, getShopSummary } from '@/lib/data/products';
+import { getProducts, getPublicShop, getShopFeaturedProducts, getShopSummary } from '@/lib/data/products';
 import { countryOf } from '@/lib/seller-onboarding';
 import { importedNote, timeOn } from '@/lib/shop-stats';
 import { siteConfig } from '@/lib/site';
@@ -37,8 +37,14 @@ export default async function ShopPage({ params, searchParams }) {
 
   const query = parseProductQuery(await searchParams);
   const section = shop.categories.find((c) => c.id === query.category) ?? null;
-  // Featured listings come first in "All items" (lib/data/products.js getProducts with sellerId).
-  const { items, pagination } = await getProducts({ ...query, category: section?.id, sellerId: shop.id });
+  // Like Etsy: "Featured items" (up to 4 the seller starred) above "All items", on the shop's main view only (not while
+  // searching, browsing a section or on later pages).
+  const browsing = Boolean(query.q || section || Number(query.page) > 1);
+  const [{ items, pagination }, featured] = await Promise.all([
+    getProducts({ ...query, category: section?.id, sellerId: shop.id }),
+    browsing ? [] : getShopFeaturedProducts(shop.id),
+  ]);
+  const title = featured.length ? 'Featured items' : section ? section.name : 'All items';
 
   const base = `/shop/${shop.id}`;
   const keep = { q: query.q, category: section?.id, sort: query.sort === 'newest' ? undefined : query.sort };
@@ -140,7 +146,7 @@ export default async function ShopPage({ params, searchParams }) {
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="mr-auto text-2xl font-semibold tracking-[-0.01em] text-ink">{section ? section.name : 'All items'}</h2>
+            <h2 className="mr-auto text-2xl font-semibold tracking-[-0.01em] text-ink">{title}</h2>
             <Form action={base} className="relative w-full sm:w-72">
               {section && <input type="hidden" name="category" value={section.id} />}
               {keep.sort && <input type="hidden" name="sort" value={keep.sort} />}
@@ -193,11 +199,20 @@ export default async function ShopPage({ params, searchParams }) {
             </p>
           )}
 
+          {featured.length > 0 && (
+            <>
+              <div className="mt-6">
+                <ProductGrid products={featured} showShop={false} preloadCount={featured.length} />
+              </div>
+              <h2 className="mt-14 text-2xl font-semibold tracking-[-0.01em] text-ink">All items</h2>
+            </>
+          )}
+
           <div className="mt-6">
             <ProductGrid
               products={items}
               showShop={false}
-              preloadCount={pagination.page === 1 ? 4 : 0}
+              preloadCount={pagination.page === 1 && !featured.length ? 4 : 0}
               emptyMessage={query.q ? 'Nothing in this shop matches your search.' : 'This shop has no listings yet.'}
               emptyHint={query.q ? 'Try another word, or clear the search.' : 'Check back soon.'}
             />
