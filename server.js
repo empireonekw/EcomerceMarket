@@ -6,7 +6,7 @@
  *
  * PORT (default 3000) and HOST (default all interfaces) come from the environment.
  *
- * Production runs WEB_WORKERS processes (default 3) on the one port, like rankkw's PM2 cluster: a slow page or a
+ * Production runs WEB_WORKERS processes (default: half the CPU cores, 4 on this server) on the one port, like rankkw's PM2 cluster: a slow page or a
  * burst no longer makes every other request wait on a single CPU core, and a crashed worker is replaced while the
  * others keep serving. The primary process only starts and restarts workers. Live messaging across workers:
  *  - sockets connect over WebSocket only, so each connection stays on one worker (no sticky sessions needed);
@@ -18,6 +18,7 @@
  * Behind nginx, /socket.io/ needs the WebSocket upgrade headers (README → Live messaging).
  */
 import cluster from 'node:cluster';
+import os from 'node:os';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { Server } from 'socket.io';
@@ -26,7 +27,9 @@ import { verifySocketTicket } from './lib/socket-ticket.js';
 
 const dev = process.argv.includes('--dev');
 process.env.NODE_ENV ??= dev ? 'development' : 'production'; // before Next loads
-const WORKERS = dev ? 1 : Math.max(1, Number(process.env.WEB_WORKERS) || 3);
+// Half the CPU cores (2–6), as in ecosystem.config.cjs; set here too because `pm2 restart` keeps the env a process
+// was first started with. 8 cores → 4 workers.
+const WORKERS = dev ? 1 : Math.max(1, Number(process.env.WEB_WORKERS) || Math.max(2, Math.min(6, Math.floor(os.cpus().length / 2))));
 
 if (WORKERS > 1 && cluster.isPrimary) {
   startPrimary();
