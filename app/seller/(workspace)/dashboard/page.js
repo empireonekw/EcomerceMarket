@@ -1,12 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck, ShoppingBag } from 'lucide-react';
+import PayoutProgress from '@/components/seller/PayoutProgress';
 import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
-import { getMonthlyEarnings } from '@/lib/data/seller-analytics';
+import { getBalanceTrend, getMonthlyEarnings } from '@/lib/data/seller-analytics';
 import { EarningsPanel } from '@/components/dashboard/SellerAnalytics';
 import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 import { listingStatus } from '@/lib/listing';
@@ -21,6 +22,7 @@ const usd = (cents) => formatPrice(cents, 'USD');
 export default async function SellerDashboardPage() {
   const seller = await requireSellerStore();
   const [data, monthly] = await Promise.all([getSellerDashboard(seller.id), getMonthlyEarnings(seller.id, 12)]);
+  const trend = await getBalanceTrend(seller.id, data.balances.pendingPayout);
 
   return (
     <>
@@ -91,6 +93,16 @@ export default async function SellerDashboardPage() {
         <StatCard href="/seller/payouts" label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
         <StatCard href="/seller/sales" label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
       </section>
+
+      {/* The $50 payout threshold: ring gauge + 30-day balance chart, the Request payout button once it's reached. */}
+      <PayoutProgress
+        className="mt-6 max-w-2xl"
+        balance={data.balances.pendingPayout}
+        trend={trend}
+        openRequest={data.openRequest}
+        verification={data.verification?.status ?? null}
+        hasPayoutMethod={data.hasPayoutMethod}
+      />
 
       {/* ---------- Earnings by month ---------- */}
       <div className="mt-8">
