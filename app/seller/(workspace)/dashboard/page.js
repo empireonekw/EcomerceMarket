@@ -94,19 +94,18 @@ export default async function SellerDashboardPage() {
         <StatCard href="/seller/sales" label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
       </section>
 
-      {/* The $50 payout threshold: ring gauge + 30-day balance chart, the Request payout button once it's reached. */}
-      <PayoutProgress
-        className="mt-6 max-w-2xl"
-        balance={data.balances.pendingPayout}
-        trend={trend}
-        openRequest={data.openRequest}
-        verification={data.verification?.status ?? null}
-        hasPayoutMethod={data.hasPayoutMethod}
-      />
-
-      {/* ---------- Earnings by month ---------- */}
-      <div className="mt-8">
-        <EarningsPanel months={monthly} title="Your earnings by month" />
+      {/* ---------- The $50 payout threshold beside earnings by month (one row on large screens) ---------- */}
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <PayoutProgress
+          balance={data.balances.pendingPayout}
+          trend={trend}
+          openRequest={data.openRequest}
+          verification={data.verification?.status ?? null}
+          hasPayoutMethod={data.hasPayoutMethod}
+        />
+        <div className="min-w-0 lg:col-span-2">
+          <EarningsPanel months={monthly} title="Your earnings by month" />
+        </div>
       </div>
 
       {/* ---------- Products ---------- */}

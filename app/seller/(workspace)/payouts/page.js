@@ -56,15 +56,6 @@ export default async function SellerPayoutsPage() {
         </div>
       )}
 
-      <PayoutProgress
-        className="mb-6 max-w-2xl"
-        balance={data.balances.pendingPayout}
-        trend={trend}
-        openRequest={data.openRequest}
-        verification={data.verification}
-        hasPayoutMethod={data.hasPayoutMethod}
-      />
-
       <section aria-label="Balances" className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Pending Payout" value={usd(data.balances.pendingPayout)} sub="Earned, not yet paid out" icon={Clock} tone="warning" />
         <StatCard label="Completed Payouts" value={usd(data.balances.paidPayout)} sub="Sent to your account" icon={CheckCircle2} tone="info" />
@@ -78,26 +69,37 @@ export default async function SellerPayoutsPage() {
           </div>
         </Panel>
 
-        <Panel title="Payouts" action={<span className="text-sm text-stone-500">Available: {usd(data.balances.pendingPayout)}</span>}>
-          {data.payouts.length === 0 ? (
-            <p className="px-5 py-6 text-center text-sm text-stone-500">No payouts yet.</p>
-          ) : (
-            <ul className="divide-y divide-stone-100">
-              {data.payouts.map((p) => (
-                <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
-                  <div>
-                    <p className="font-medium tabular-nums">{usd(p.amount)}</p>
-                    <p className="text-xs text-stone-500">
-                      {formatDateTime(p.paidAt ?? p.createdAt).date}
-                      {p.reference && ` · Ref ${p.reference}`}
-                    </p>
-                  </div>
-                  <StatusBadge status={p.status} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </Panel>
+        {/* Right column: the $50 payout threshold (and Request payout) above the payout history. */}
+        <div className="grid min-w-0 gap-6">
+          <PayoutProgress
+            balance={data.balances.pendingPayout}
+            trend={trend}
+            openRequest={data.openRequest}
+            verification={data.verification}
+            hasPayoutMethod={data.hasPayoutMethod}
+          />
+
+          <Panel title="Payouts" action={<span className="text-sm text-stone-500">Available: {usd(data.balances.pendingPayout)}</span>}>
+            {data.payouts.length === 0 ? (
+              <p className="px-5 py-6 text-center text-sm text-stone-500">No payouts yet.</p>
+            ) : (
+              <ul className="divide-y divide-stone-100">
+                {data.payouts.map((p) => (
+                  <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+                    <div>
+                      <p className="font-medium tabular-nums">{usd(p.amount)}</p>
+                      <p className="text-xs text-stone-500">
+                        {formatDateTime(p.paidAt ?? p.createdAt).date}
+                        {p.reference && ` · Ref ${p.reference}`}
+                      </p>
+                    </div>
+                    <StatusBadge status={p.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        </div>
       </div>
     </>
   );
