@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequestUser } from '@/lib/auth';
 import { claimOrder } from '@/lib/data/orders';
+import { tooMany } from '@/lib/api';
 
 const noStore = { 'Cache-Control': 'no-store' };
 
@@ -15,6 +16,9 @@ const MESSAGES = {
 export async function POST(request) {
   const user = await getRequestUser(request); // same-origin enforced
   if (!user) return NextResponse.json({ error: 'Please log in first.' }, { status: 401, headers: noStore });
+  // Each try guesses a receipt token: keep guessing slow.
+  const slow = tooMany(`order-claim:${user.id}`, 20, 10 * 60_000);
+  if (slow) return slow;
 
   let body;
   try {

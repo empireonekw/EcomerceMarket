@@ -151,8 +151,28 @@ for list in ips-v4 ips-v6; do
 done
 [ -n "$CF_REALIP" ] || warn "Could not fetch Cloudflare's IP ranges; visitor IPs will be Cloudflare's until you re-run this script."
 
+# The proxy settings every location below shares.
+PROXY="        proxy_pass http://127.0.0.1:$PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr; # the real visitor IP (real_ip_header above), never client-supplied
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;
+        proxy_read_timeout 300s;"
+
 cat > "$CONF_DIR/$DOMAIN.conf" <<EOF
 # $DOMAIN -> Next.js on 127.0.0.1:$PORT (written by scripts/server/setup.sh)
+
+# Per-IP limits shared by all Node workers (each worker also counts on its own, proxy.js). Generous on purpose: only
+# floods reach them, and many phone users share one IP through their mobile carrier. Over the limit → 429.
+limit_req_zone \$binary_remote_addr zone=${APP}_api:10m rate=10r/s;
+limit_req_zone \$binary_remote_addr zone=${APP}_pages:10m rate=10r/s;
+# Sign-in, sign-up and other auth POSTs only (GET /api/auth/me runs on every page): 20 a minute per IP.
+map \$request_method \$${APP}_auth_key { POST \$binary_remote_addr; default ""; }
+limit_req_zone \$${APP}_auth_key zone=${APP}_auth:10m rate=20r/m;
+limit_conn_zone \$binary_remote_addr zone=${APP}_conn:10m;
+
 server {
     $LISTEN
     server_name www.$DOMAIN;
@@ -177,6 +197,10 @@ server {
 
 $CF_REALIP    real_ip_header CF-Connecting-IP;
 
+    limit_req_status 429;
+    limit_conn_status 429;
+    limit_conn ${APP}_conn 60; # open connections per IP at once
+
     client_max_body_size 600m; # seller uploads: videos up to 100 MB, PDF/ZIP up to 500 MB (lib/listing.js)
 
     # Live messaging (Socket.IO, server.js): WebSocket upgrade.
@@ -192,15 +216,30 @@ $CF_REALIP    real_ip_header CF-Connecting-IP;
         proxy_read_timeout 120s;
     }
 
+    # Build files (scripts, styles, fonts) and resized images: many per page, never limited.
+    location ~ ^/_next/(static|image)/ {
+$PROXY
+    }
+
+    location /api/auth/ {
+        limit_req zone=${APP}_auth burst=10 nodelay;
+        limit_req zone=${APP}_api burst=100 nodelay;
+$PROXY
+    }
+
+    # Rankkw's server calls these for every seller from one IP: they count failed tokens themselves (lib/rankkw-link.js).
+    location /api/integrations/rankkw/ {
+$PROXY
+    }
+
+    location /api/ {
+        limit_req zone=${APP}_api burst=100 nodelay;
+$PROXY
+    }
+
     location / {
-        proxy_pass http://127.0.0.1:$PORT;
-        proxy_http_version 1.1;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr; # the real visitor IP (real_ip_header above), never client-supplied
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header CF-Connecting-IP \$http_cf_connecting_ip;
-        proxy_read_timeout 300s;
+        limit_req zone=${APP}_pages burst=120 nodelay;
+$PROXY
     }
 }
 EOF
