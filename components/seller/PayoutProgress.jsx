@@ -20,89 +20,89 @@ export function payoutBlocker({ openRequest, verification, hasPayoutMethod }) {
   return null;
 }
 
-/** Ring gauge: how far the balance is towards $50, the percentage in the middle. */
-function Gauge({ percent, color, balance }) {
-  const r = 52;
+/** Small ring towards $50 with the percentage inside. */
+function Ring({ percent, color }) {
+  const r = 20;
   const c = 2 * Math.PI * r;
   return (
-    <div className="relative size-36 shrink-0">
-      <svg viewBox="0 0 120 120" className="size-full -rotate-90" aria-hidden="true">
-        <circle cx="60" cy="60" r={r} fill="none" stroke="#f1f5f9" strokeWidth="10" />
+    <div className="relative size-12 shrink-0">
+      <svg viewBox="0 0 48 48" className="size-full -rotate-90" aria-hidden="true">
+        <circle cx="24" cy="24" r={r} fill="none" stroke="#f1f5f9" strokeWidth="5" />
         <circle
-          cx="60"
-          cy="60"
+          cx="24"
+          cy="24"
           r={r}
           fill="none"
           stroke={color}
-          strokeWidth="10"
+          strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={`${(percent / 100) * c} ${c}`}
           className="transition-[stroke-dasharray] duration-700 ease-out"
         />
       </svg>
-      <div className="absolute inset-0 grid place-content-center text-center">
-        <p className="text-2xl font-semibold tabular-nums tracking-tight text-ink">{percent}%</p>
-        <p className="text-xs text-stone-500">of {usd(MIN_PAYOUT)}</p>
-      </div>
+      <span className="absolute inset-0 grid place-items-center text-[11px] font-semibold tabular-nums text-ink">{percent}%</span>
     </div>
   );
 }
 
-/** Area chart of the balance over the last 30 days with a dashed $50 target line. */
-function TrendChart({ trend, color }) {
-  const W = 320;
-  const H = 120;
-  const pad = { top: 14, bottom: 18, left: 2, right: 2 };
+/**
+ * The balance over the last 30 days against a dashed $50 line. Fills whatever height its parent gives it (the SVG
+ * stretches, strokes stay 2px), so the card has no empty space when it sits next to a taller widget; the labels are
+ * HTML so they never stretch with it.
+ */
+function Sparkline({ trend, color }) {
   const values = trend.balance;
   const max = Math.max(MIN_PAYOUT * 1.25, ...values);
-  const x = (i) => pad.left + (values.length > 1 ? (i / (values.length - 1)) * (W - pad.left - pad.right) : 0);
-  const y = (v) => pad.top + (H - pad.top - pad.bottom) * (1 - v / max);
+  const x = (i) => (values.length > 1 ? (i / (values.length - 1)) * 100 : 0);
+  const y = (v) => 8 + 88 * (1 - v / max); // 8% headroom for the end dot, 4% at the bottom
   // Smooth curve: each segment bends at its horizontal midpoint, so it never overshoots the real values.
   const pts = values.map((v, i) => [x(i), y(v)]);
   const curve = pts
     .map(([px, py], i) => {
-      if (i === 0) return `M${px.toFixed(1)},${py.toFixed(1)}`;
+      if (i === 0) return `M${px},${py.toFixed(2)}`;
       const [qx, qy] = pts[i - 1];
-      const mx = ((qx + px) / 2).toFixed(1);
-      return `C${mx},${qy.toFixed(1)} ${mx},${py.toFixed(1)} ${px.toFixed(1)},${py.toFixed(1)}`;
+      const mx = ((qx + px) / 2).toFixed(2);
+      return `C${mx},${qy.toFixed(2)} ${mx},${py.toFixed(2)} ${px},${py.toFixed(2)}`;
     })
     .join(' ');
-  const base = H - pad.bottom;
   const target = y(MIN_PAYOUT);
-  const short = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', timeZone: 'UTC' });
-  const id = color === EMERALD ? 'payout-fill-ok' : 'payout-fill-locked';
+  const end = y(values.at(-1));
+  const id = color === EMERALD ? 'payout-spark-ok' : 'payout-spark-locked';
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Balance over the last ${values.length} days, now ${usd(values.at(-1))}`}>
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {/* $50 target */}
-      <line x1={pad.left} x2={W - pad.right} y1={target} y2={target} stroke="#94a3b8" strokeWidth="1" strokeDasharray="4 4" />
-      <text x={pad.left} y={target - 5} fontSize="10" fill="#64748b">
-        {usd(MIN_PAYOUT)} target
-      </text>
-      <path d={`${curve} L${x(values.length - 1)},${base} L${x(0)},${base} Z`} fill={`url(#${id})`} />
-      <path d={curve} fill="none" stroke={color} strokeWidth="2.25" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={x(values.length - 1)} cy={y(values.at(-1))} r="3.5" fill="white" stroke={color} strokeWidth="2" />
-      <text x={pad.left} y={H - 4} fontSize="10" fill="#94a3b8">
-        {short(trend.days[0])}
-      </text>
-      <text x={W - pad.right} y={H - 4} textAnchor="end" fontSize="10" fill="#94a3b8">
-        Today
-      </text>
-    </svg>
+    <div className="absolute inset-0" role="img" aria-label={`Balance over the last ${values.length} days, now ${usd(values.at(-1))}`}>
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden="true">
+        <defs>
+          <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <line x1="0" x2="100" y1={target} y2={target} stroke="#94a3b8" strokeWidth="1" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
+        <path d={`${curve} L100,100 L0,100 Z`} fill={`url(#${id})`} />
+        <path d={curve} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <span
+        aria-hidden="true"
+        className="absolute left-0 -translate-y-full pb-0.5 text-[10px] leading-none text-slate-500"
+        style={{ top: `${target}%` }}
+      >
+        {usd(MIN_PAYOUT)}
+      </span>
+      <span
+        aria-hidden="true"
+        className="absolute right-0 size-2 translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white"
+        style={{ top: `${end}%`, borderColor: color }}
+      />
+    </div>
   );
 }
 
 /**
- * The $50 payout threshold card (lib/commission.js MIN_PAYOUT), on the seller dashboard and the Payouts page: a ring
- * gauge towards $50, the balance's last-30-days chart against the $50 target line, and the status. Locked (under $50):
- * amber, "$X / $50 to unlock your first payout" and how much is left. Unlocked: emerald, "Threshold unlocked!" and the
- * Request payout button (or what still stops it). `trend` comes from lib/data/seller-analytics.js getBalanceTrend.
+ * The $50 payout threshold card (lib/commission.js MIN_PAYOUT), on the seller dashboard and the Payouts page. Compact:
+ * ring + balance "$X / $50" + Locked/Unlocked badge in one row, a thin progress bar, the 30-day balance sparkline
+ * (it grows into any spare height, so the card fits beside taller widgets in a grid), and either how much is left or
+ * the Request payout button (with what still stops it). `trend` comes from lib/data/seller-analytics.js getBalanceTrend.
  */
 export default function PayoutProgress({ balance, trend, openRequest = null, verification = null, hasPayoutMethod = false, className = '' }) {
   const unlocked = balance >= MIN_PAYOUT;
@@ -112,58 +112,30 @@ export default function PayoutProgress({ balance, trend, openRequest = null, ver
   const gained = trend ? trend.balance.at(-1) - trend.balance[0] : 0;
 
   return (
-    <section aria-labelledby="payout-threshold" className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${className}`}>
-      <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="flex min-w-[14rem] flex-1 items-center gap-3">
-          <span
-            aria-hidden="true"
-            className={`grid size-10 shrink-0 place-items-center rounded-xl ${unlocked ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}
-          >
-            {unlocked ? <CheckCircle2 size={20} strokeWidth={1.9} /> : <Lock size={18} strokeWidth={1.9} />}
-          </span>
-          <div>
-            <h2 id="payout-threshold" className="text-[15px] font-semibold text-ink">
-              Payout threshold
-            </h2>
-            <p className="text-sm text-stone-500">Minimum {usd(MIN_PAYOUT)} to request a payout</p>
-          </div>
+    <section aria-labelledby="payout-threshold" className={`flex h-auto w-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
+      <div className="flex items-center gap-3">
+        <Ring percent={percent} color={color} />
+        <div className="min-w-0 flex-1">
+          <h2 id="payout-threshold" className="text-xs font-medium text-stone-500">
+            Payout threshold
+          </h2>
+          <p className="flex flex-wrap items-baseline gap-x-1">
+            <span className="text-xl font-semibold tabular-nums tracking-tight text-ink">{usd(balance)}</span>
+            <span className="text-sm tabular-nums text-stone-500">/ {usd(MIN_PAYOUT)}</span>
+          </p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${
-            unlocked ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/15'
+          className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+            unlocked ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'
           }`}
         >
-          {unlocked ? 'Threshold unlocked!' : 'Locked'}
+          {unlocked ? <CheckCircle2 size={12} strokeWidth={2.25} aria-hidden="true" /> : <Lock size={11} strokeWidth={2.25} aria-hidden="true" />}
+          {unlocked ? 'Unlocked' : 'Locked'}
         </span>
       </div>
 
-      <div className="mt-6 grid items-center gap-6 sm:grid-cols-[auto_minmax(0,1fr)]">
-        <div className="flex justify-center">
-          <Gauge percent={percent} color={color} balance={balance} />
-        </div>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <p className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold tabular-nums tracking-tight text-ink">{usd(balance)}</span>
-              <span className="text-sm text-stone-500">/ {usd(MIN_PAYOUT)}</span>
-            </p>
-            {trend && gained > 0 && (
-              <p className="flex items-center gap-1 text-xs font-medium text-emerald-700">
-                <TrendingUp size={14} strokeWidth={2} aria-hidden="true" />+{usd(gained)} in {trend.days.length} days
-              </p>
-            )}
-          </div>
-          <p className="text-xs text-stone-500">Pending balance · last {trend?.days.length ?? 30} days</p>
-          {trend && (
-            <div className="mt-2">
-              <TrendChart trend={trend} color={color} />
-            </div>
-          )}
-        </div>
-      </div>
-
       <div
-        className="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100"
+        className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"
         role="progressbar"
         aria-label="Progress to the payout minimum"
         aria-valuemin={0}
@@ -176,17 +148,33 @@ export default function PayoutProgress({ balance, trend, openRequest = null, ver
         />
       </div>
 
+      {trend && (
+        <>
+          <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+            <span className="text-stone-500">Last {trend.days.length} days</span>
+            {gained > 0 ? (
+              <span className="inline-flex items-center gap-1 font-medium tabular-nums text-emerald-700">
+                <TrendingUp size={13} strokeWidth={2} aria-hidden="true" />+{usd(gained)}
+              </span>
+            ) : (
+              <span className="text-stone-400">No change</span>
+            )}
+          </div>
+          <div className="relative mt-2 min-h-14 flex-1">
+            <Sparkline trend={trend} color={color} />
+          </div>
+        </>
+      )}
+
       {unlocked ? (
-        <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-stone-600">
-            {blocker ? 'You’ve reached the minimum.' : `Your balance of ${usd(balance)} is ready to withdraw.`}
-          </p>
+        <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+          {!blocker && <p className="text-xs text-stone-500">Your {usd(balance)} is ready to withdraw.</p>}
           <RequestPayoutButton disabled={Boolean(blocker)} reason={blocker} />
         </div>
       ) : (
-        <p className="mt-3 text-sm text-stone-600">
-          You need <span className="font-semibold tabular-nums text-ink">{usd(MIN_PAYOUT - Math.max(0, balance))}</span> more in sales to request
-          your first payout. Once it’s unlocked, request it here in one click.
+        <p className="mt-3 text-xs text-stone-500">
+          <span className="font-semibold tabular-nums text-ink">{usd(MIN_PAYOUT - Math.max(0, balance))}</span> more in sales unlocks your first
+          payout.
         </p>
       )}
     </section>
