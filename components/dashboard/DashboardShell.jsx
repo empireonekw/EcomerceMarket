@@ -96,7 +96,7 @@ const AREAS = {
         items: [
           { href: '/seller/listings', label: 'Listings', icon: Package, match: (p) => p.startsWith('/seller/listings') },
           { href: '/seller/reviews', label: 'Reviews', icon: Star, match: (p) => p.startsWith('/seller/reviews') },
-          { href: '/seller/dashboard#shop', label: 'Shop Settings', icon: Store, match: () => false },
+          { href: '/seller/settings', label: 'Shop Settings', icon: Store, match: (p) => p.startsWith('/seller/settings') },
         ],
       },
       {

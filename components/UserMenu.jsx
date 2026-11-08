@@ -42,7 +42,7 @@ function accountLinks(user) {
       { href: '/seller/messages', label: 'Messages', inbox: true },
       { href: '/seller/sales', label: 'Sales history' },
       { href: '/seller/payouts', label: 'Payouts' },
-      { href: '/seller/dashboard#shop', label: 'Shop settings' },
+      { href: '/seller/settings', label: 'Shop settings' },
       purchases,
       support,
       settings,
