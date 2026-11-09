@@ -29,21 +29,24 @@ export default async function AdminReviewsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Reviews" description="Check reviews sellers reported. Keep, correct or remove them: both the seller and the buyer are told." />
+      <PageHeader
+        title="Reviews"
+        description="Check reviews sellers reported. Keep, correct or remove them: both the seller and the buyer are told."
+      />
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <nav aria-label="Review views" className="flex flex-wrap gap-2">
+        <nav aria-label="Review views" className="inline-flex flex-wrap gap-0.5 rounded-xl bg-stone-100 p-1">
           {VIEWS.map((v) => (
             <Link
               key={v.value}
               href={href(v.value)}
               aria-current={view === v.value ? 'page' : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${view === v.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${view === v.value ? 'bg-white text-ink shadow-[0_1px_2px_rgba(16,16,16,0.08)]' : 'text-stone-500 hover:text-ink'}`}
             >
               {v.label}
               <span
                 className={`rounded-full px-2 text-xs font-medium leading-4 tabular-nums ${
-                  v.value === 'reported' && counts.reported ? 'bg-amber-400 text-ink' : view === v.value ? 'bg-white/20' : 'bg-stone-100 text-stone-600'
+                  v.value === 'reported' && counts.reported ? 'bg-brand-500 text-ink' : 'text-stone-400'
                 }`}
               >
                 {counts[v.count]}
@@ -56,7 +59,14 @@ export default async function AdminReviewsPage({ searchParams }) {
           <label htmlFor="review-search" className="sr-only">
             Search reviews
           </label>
-          <input id="review-search" type="search" name="q" defaultValue={q} placeholder="Product, text or buyer…" className={`${field} w-full lg:w-72`} />
+          <input
+            id="review-search"
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Product, text or buyer…"
+            className={`${field} w-full lg:w-72`}
+          />
           <button type="submit" className={buttonClasses.secondary}>
             Search
           </button>

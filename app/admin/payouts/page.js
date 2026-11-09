@@ -65,7 +65,7 @@ export default async function AdminPayoutsPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left text-sm">
-                <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
+                <thead className="border-b border-stone-100 bg-stone-50 text-xs font-medium text-stone-500">
                   <tr>
                     <th scope="col" className="px-5 py-3">Seller</th>
                     <th scope="col" className="px-5 py-3">Send to</th>

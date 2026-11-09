@@ -22,14 +22,14 @@ function Tabs({ active, chatsOpen, contactOpen }) {
     <Link
       href={href}
       aria-current={active === key ? 'page' : undefined}
-      className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-base transition-colors ${active === key ? 'border-black font-medium text-black' : 'border-transparent text-stone-500 hover:text-black'}`}
+      className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors ${active === key ? 'bg-white text-ink shadow-[0_1px_2px_rgba(16,16,16,0.08)]' : 'text-stone-500 hover:text-ink'}`}
     >
       {label}
       {count > 0 && <span className="rounded-full bg-brand-500 px-2 py-0.5 text-xs font-semibold tabular-nums leading-none text-ink">{count}</span>}
     </Link>
   );
   return (
-    <nav aria-label="Message type" className="mb-6 flex gap-7 border-b border-stone-200">
+    <nav aria-label="Message type" className="mb-5 inline-flex flex-wrap gap-0.5 rounded-xl bg-stone-100 p-1">
       {tab('chats', '/admin/messages', 'Chats', chatsOpen)}
       {tab('contact', '/admin/messages?view=contact', 'Contact form', contactOpen)}
     </nav>
@@ -48,19 +48,25 @@ export default async function AdminMessagesPage({ searchParams }) {
 
   if (sp.view === 'contact') {
     const status = CONTACT_FILTERS.some((f) => f.id === sp.status) ? sp.status : '';
-    const [{ items, open, pagination }, chats] = await Promise.all([getContactMessages({ status, page: sp.page }), listSupportThreads({ status: 'open' })]);
+    const [{ items, open, pagination }, chats] = await Promise.all([
+      getContactMessages({ status, page: sp.page }),
+      listSupportThreads({ status: 'open' }),
+    ]);
     return (
       <>
-        <PageHeader title="Messages" description="Messages from the Contact Us page. Answer signed-in users in a chat, guests by email, then mark them resolved." />
+        <PageHeader
+          title="Messages"
+          description="Messages from the Contact Us page. Answer signed-in users in a chat, guests by email, then mark them resolved."
+        />
         <Tabs active="contact" chatsOpen={chats.counts.unread} contactOpen={open} />
 
-        <nav aria-label="Filter messages" className="mb-5 flex flex-wrap gap-2">
+        <nav aria-label="Filter messages" className="mb-5 flex flex-wrap gap-1.5">
           {CONTACT_FILTERS.map((f) => (
             <Link
               key={f.id || 'all'}
               href={f.id ? `/admin/messages?view=contact&status=${f.id}` : '/admin/messages?view=contact'}
               aria-current={status === f.id ? 'page' : undefined}
-              className={`btn btn-sm ${status === f.id ? 'btn-dark' : 'btn-outline'}`}
+              className={`rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors ${status === f.id ? 'border-ink bg-ink text-white' : 'border-stone-200 bg-white text-stone-600 hover:border-stone-300'}`}
             >
               {f.label}
             </Link>
@@ -74,7 +80,10 @@ export default async function AdminMessagesPage({ searchParams }) {
             {items.map((m) => {
               const { date, time } = formatDateTime(m.createdAt);
               return (
-                <li key={m._id} className={`rounded-2xl border bg-white p-5 ${m.status === 'new' ? 'border-stone-300' : 'border-stone-200 opacity-80'}`}>
+                <li
+                  key={m._id}
+                  className={`rounded-2xl border bg-white p-5 ${m.status === 'new' ? 'border-stone-300' : 'border-stone-200 opacity-80'}`}
+                >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="flex flex-wrap items-center gap-2">
@@ -82,7 +91,10 @@ export default async function AdminMessagesPage({ searchParams }) {
                         <StatusBadge status={m.status === 'new' ? 'pending' : 'completed'} label={m.status === 'new' ? 'Open' : 'Resolved'} />
                         {m.user && <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-500">Signed in</span>}
                       </p>
-                      <a href={`mailto:${m.email}?subject=${encodeURIComponent('Re: your message')}`} className="mt-0.5 block truncate text-sm text-brand-700 hover:underline">
+                      <a
+                        href={`mailto:${m.email}?subject=${encodeURIComponent('Re: your message')}`}
+                        className="mt-0.5 block truncate text-sm text-brand-700 hover:underline"
+                      >
                         {m.email}
                       </a>
                     </div>
@@ -99,7 +111,9 @@ export default async function AdminMessagesPage({ searchParams }) {
                       <MessageStatusButton id={m._id} status={m.status} />
                     </div>
                   </div>
-                  <p className="mt-4 whitespace-pre-line break-words border-t border-stone-100 pt-4 text-sm leading-relaxed text-stone-700">{m.message}</p>
+                  <p className="mt-4 whitespace-pre-line break-words border-t border-stone-100 pt-4 text-sm leading-relaxed text-stone-700">
+                    {m.message}
+                  </p>
                 </li>
               );
             })}

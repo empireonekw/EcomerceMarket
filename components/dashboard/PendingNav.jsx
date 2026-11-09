@@ -77,11 +77,11 @@ export function FilterTabs({ label, items, activeKey }) {
 
   return (
     <nav aria-label={label} className="-mx-4 overflow-x-auto px-4 lg:mx-0 lg:px-0">
-      <div ref={listRef} className="relative flex w-max gap-1">
+      <div ref={listRef} className="relative flex w-max gap-0.5 rounded-xl bg-stone-100 p-1">
         {pill && (
           <span
             aria-hidden="true"
-            className={`absolute inset-y-0 left-0 rounded-full bg-black ${pill.animate ? 'transition-[translate,width] duration-300 ease-out motion-reduce:transition-none' : ''}`}
+            className={`absolute inset-y-1 left-0 rounded-lg bg-white shadow-[0_1px_2px_rgba(16,16,16,0.08)] ${pill.animate ? 'transition-[translate,width] duration-300 ease-out motion-reduce:transition-none' : ''}`}
             style={{ width: pill.width, translate: `${pill.left}px 0` }}
           />
         )}
@@ -99,12 +99,14 @@ export function FilterTabs({ label, items, activeKey }) {
                 if (!active) navigate(item.href);
               }}
               aria-current={active ? 'page' : undefined}
-              className={`relative whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors duration-300 ${
-                active ? `text-white ${pill ? '' : 'bg-black'}` : 'text-stone-600 hover:bg-stone-100 hover:text-black'
+              className={`relative whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-300 ${
+                active ? `text-ink ${pill ? '' : 'bg-white'}` : 'text-stone-500 hover:text-ink'
               }`}
             >
               {item.label}
-              {item.count != null && <span className={`ml-2 tabular-nums transition-colors duration-300 ${active ? 'text-white/60' : 'text-stone-400'}`}>{item.count}</span>}
+              {item.count != null && (
+                <span className={`ml-1.5 text-xs tabular-nums ${active ? 'text-stone-500' : 'text-stone-400'}`}>{item.count}</span>
+              )}
             </Link>
           );
         })}

@@ -137,7 +137,7 @@ export default async function AdminProductsPage({ searchParams }) {
         <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-stone-100 text-xs font-semibold uppercase tracking-wider text-stone-400">
+              <thead className="border-b border-stone-100 bg-stone-50 text-xs font-medium text-stone-500">
                 <tr>
                   <th scope="col" className="w-10 py-3 pr-0 pl-4">
                     <SelectAllProducts className="align-middle" />

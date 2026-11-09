@@ -3,6 +3,7 @@ import { Fraunces, Inter } from 'next/font/google';
 
 import NavigationProgress from '@/components/NavigationProgress';
 import RobotCheckRedirect from '@/components/RobotCheckRedirect';
+import VisitTracker from '@/components/VisitTracker';
 import { REVEAL_SCRIPT } from '@/components/Reveal';
 import { siteConfig } from '@/lib/site';
 
@@ -69,6 +70,7 @@ export default function RootLayout({ children }) {
         </Suspense>
         {children}
         <RobotCheckRedirect />
+        <VisitTracker />
       </body>
     </html>
   );

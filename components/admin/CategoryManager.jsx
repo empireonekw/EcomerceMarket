@@ -374,7 +374,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
         aria-sort={sort.key === k ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined}
         className={`px-4 py-3 ${className}`}
       >
-        <button type="button" onClick={() => toggleSort(k)} className="inline-flex items-center gap-1 uppercase tracking-wide hover:text-black">
+        <button type="button" onClick={() => toggleSort(k)} className="inline-flex items-center gap-1 hover:text-black">
           {label}
           <Icon size={13} strokeWidth={2} aria-hidden="true" className={sort.key === k ? 'text-black' : 'text-stone-400'} />
         </button>
@@ -392,7 +392,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
         aria-labelledby="cat-form-title"
         className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:overscroll-contain lg:pb-0 lg:[scrollbar-gutter:stable] lg:[scrollbar-width:thin]"
       >
-        <h2 id="cat-form-title" className="headline text-2xl">
+        <h2 id="cat-form-title" className="text-lg font-semibold text-ink">
           {editingId ? 'Edit Category' : 'Add New Category'}
         </h2>
         {editingId && (
@@ -746,7 +746,7 @@ export default function CategoryManager({ categories, initialPage = 1 }) {
                     />
                   </th>
                   {sortHeader('name', 'Name')}
-                  <th scope="col" className="px-4 py-3 uppercase tracking-wide">
+                  <th scope="col" className="px-4 py-3">
                     Description
                   </th>
                   {sortHeader('slug', 'Slug')}

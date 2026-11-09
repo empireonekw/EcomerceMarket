@@ -9,12 +9,15 @@ const bar = 'rounded-full bg-stone-200/80';
 export function AdminOverviewSkeleton() {
   return (
     <DashboardPageSkeleton>
+      {/* Same frame as the analytics overview: KPI row, stat strip, chart + traffic, then two tables. */}
       <HeaderSkeleton action />
       <StatsSkeleton />
-      <div className="mt-4">
-        <StatsSkeleton count={3} />
+      <div className="mt-4 h-[74px] rounded-2xl border border-stone-200 bg-white" />
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <ChartSkeleton />
+        <PanelSkeleton rows={5} />
       </div>
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <PanelSkeleton rows={6} />
         <PanelSkeleton rows={5} />
       </div>
@@ -67,13 +70,12 @@ export function AdminUserSkeleton() {
           <div className={`mt-3 h-4 w-80 max-w-full ${bar}`} />
         </div>
       </div>
+      {/* Same order as the page: identity check, numbers, then the two columns. */}
+      <div className="mb-4 h-80 rounded-2xl border border-stone-200 bg-white" />
       <StatsSkeleton />
-      <div className="mt-8">
-        <ChartSkeleton />
-      </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
-        <PanelSkeleton rows={4} />
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
         <PanelSkeleton rows={6} />
+        <PanelSkeleton rows={5} />
       </div>
     </DashboardPageSkeleton>
   );

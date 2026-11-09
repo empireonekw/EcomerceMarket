@@ -93,7 +93,7 @@ export default async function AdminOrdersPage({ searchParams }) {
         <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
+              <thead className="border-b border-stone-100 bg-stone-50 text-xs font-medium text-stone-500">
                 <tr>
                   <th scope="col" className="px-4 py-3">Order & buyer</th>
                   <th scope="col" className="px-4 py-3">Items</th>
