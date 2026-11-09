@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, BadgeCheck, Banknote, Clock, Inbox, Info, Mail, PackageCheck, Store, UserX } from 'lucide-react';
 import { RoleBadge, StatusBadge, formatDateTime } from '@/components/dashboard/ui';
 import { Card, TABLE_HEAD } from '@/components/admin/ui';
+import Thumb from '@/components/dashboard/Thumb';
 import KpiCard, { StatStrip } from '@/components/admin/analytics/KpiCard';
 import RangeShell from '@/components/admin/analytics/RangeShell';
 import TrendChart from '@/components/admin/analytics/TrendChart';
@@ -11,21 +11,13 @@ import { formatCount, formatMoney, formatPercent } from '@/components/admin/anal
 import { getAdminAnalytics, RANGE_PRESETS } from '@/lib/data/admin-analytics';
 import { statsDay } from '@/lib/listing-stats';
 import { countryName, DEVICES, PAGE_SECTIONS } from '@/lib/site-stats';
-import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
 
 // `absolute`: the admin layout's title template only applies to child segments, not this same-segment page.
 export const metadata = {
   title: { absolute: `Dashboard · ${siteConfig.name} Admin` },
 };
-
-function Thumb({ src }) {
-  return (
-    <span className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-stone-100">
-      {src && <Image src={src} alt="" fill sizes="36px" placeholder="blur" blurDataURL={NEUTRAL_BLUR_DATA_URL} className="object-cover" />}
-    </span>
-  );
-}
 
 const SOURCE_GROUPS = [
   { key: 'direct', label: 'Direct', from: ['direct'] },
@@ -484,7 +476,7 @@ function ProductTable({ rows, metric, note }) {
             <tr key={p.id}>
               <td className="py-2.5 pr-3 pl-3">
                 <Link href={`/admin/products/${p.id}/edit`} prefetch={false} className="flex min-w-0 items-center gap-3 hover:text-brand-700">
-                  <Thumb src={p.coverImage} />
+                  <Thumb src={p.coverImage} sizes="36px" className="size-9" />
                   <span className="truncate font-medium text-ink">{p.title}</span>
                 </Link>
               </td>

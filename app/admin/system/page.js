@@ -1,5 +1,5 @@
 import LiveFlow from '@/components/admin/LiveFlow';
-import { PageHeader } from '@/components/dashboard/ui';
+import { PageTitle } from '@/components/admin/ui';
 import { requireAdmin } from '@/lib/auth';
 import { getSystemSnapshot } from '@/lib/data/monitor';
 
@@ -11,7 +11,7 @@ export default async function SystemHealthPage() {
   const initial = await getSystemSnapshot();
   return (
     <>
-      <PageHeader
+      <PageTitle
         title="System Health"
         description="A live map of the site. Every page area, API and service. Green is healthy, amber means calls are coming in too fast or slowly, red means something is failing. Updates every 5 seconds."
       />

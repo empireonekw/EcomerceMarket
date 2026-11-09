@@ -129,7 +129,7 @@ export function FilterMenu({ label, options, activeKey, range }) {
         <div
           className={`absolute ${alignRight ? 'right-0' : 'left-0'} z-30 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-1.5 shadow-[0_24px_50px_-20px_rgba(16,16,16,0.25)]`}
         >
-          <ul aria-label={label}>
+          <ul aria-label={label} className="max-h-80 overflow-y-auto">
             {options.map((o) => (
               <li key={o.key || 'all'}>
                 <button
