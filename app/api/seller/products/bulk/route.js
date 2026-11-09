@@ -1,5 +1,5 @@
 import { getRequestUser } from '@/lib/auth';
-import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
+import { json, unauthorized, forbidden, readJson, errorResponse, tooMany } from '@/lib/api';
 import { bulkSellerListings } from '@/lib/data/seller';
 import { refreshStorefront } from '@/lib/revalidate';
 
@@ -8,6 +8,8 @@ export async function POST(request) {
   const user = await getRequestUser(request); // same-origin enforced
   if (!user) return unauthorized();
   if (user.role !== 'seller') return forbidden('Seller account required.');
+  const slow = tooMany(`listing-bulk:${user.id}`, 30, 10 * 60_000);
+  if (slow) return slow;
 
   try {
     const { action, ids } = await readJson(request);

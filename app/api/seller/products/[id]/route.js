@@ -1,5 +1,5 @@
 import { getRequestUser } from '@/lib/auth';
-import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
+import { json, unauthorized, forbidden, readJson, errorResponse, tooMany } from '@/lib/api';
 import { deleteSellerProduct, setSellerProductFeatured, setSellerProductVisibility, updateSellerProduct } from '@/lib/data/seller';
 import { refreshStorefront } from '@/lib/revalidate';
 
@@ -8,6 +8,8 @@ async function sellerOrError(request) {
   if (!user) return { error: unauthorized() };
   if (user.role !== 'seller') return { error: forbidden('Seller account required.') };
   if (!user.storeName) return { error: json({ error: 'Set up your shop first.' }, 409) };
+  const slow = tooMany(`listing-edit:${user.id}`, 300, 60 * 60_000); // edits, show/hide, feature, delete
+  if (slow) return { error: slow };
   return { user };
 }
 

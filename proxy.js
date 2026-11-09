@@ -14,6 +14,9 @@ const PROTECTED = ['/admin', '/profile', '/seller', '/messages'];
  * optimizer, and local dev) are never limited.
  * Going over a limit flags the IP (lib/robot-check.js): until it ticks "I'm not a robot" on /verify, its pages
  * redirect there and its API calls get 429 { code: 'robot_check' }. Doing it again brings the check back.
+ * Before the limits: probes for WordPress/PHP/.env files get 404 and flag the IP; attack tools and scrapers get 403.
+ * The live server runs several workers, each counting on its own, so nginx adds one shared per-IP limit in front
+ * (scripts/server/setup.sh).
  */
 const LIMITS = {
   auth: { limit: 30, windowMs: 60_000 }, // /api/auth/* — sign-in, sign-up, session
@@ -25,6 +28,19 @@ const LIMITS = {
 // Rankkw's server calls these for every seller connected to it, all from one IP: they're left out of the per-IP limits
 // and check their own Bearer token or shared secret, with per-seller limits (lib/rankkw-link.js).
 const RANKKW_SERVER_ROUTES = /^\/api\/integrations\/rankkw\/(token|me|categories|upload-ticket|products|products\/status)$/;
+
+// Probes for software this site doesn't run (WordPress, PHP, server files like .env or .git): only attack scanners ask
+// for these. Answered 404 at once, and the IP is flagged, so its next pages meet the robot check.
+const SCANNER_PATH =
+  /(?:^|\/)\.(?:env|git|svn|hg|aws|ssh|htaccess|htpasswd|DS_Store)(?:[/.]|$)|^\/(?:wp-(?:admin|login|content|includes|config)|xmlrpc|phpmyadmin|pma|cgi-bin|vendor\/phpunit|server-status|actuator|boaform|HNAP1)(?:[/.]|$)|\.(?:php\d?|aspx?|jsp|cgi)$/i;
+// No User-Agent at all, attack tools, scripting libraries and the most aggressive scrapers (search engines, social
+// previews and browsers are fine). Refused with 403 before anything runs.
+const BAD_AGENT =
+  /sqlmap|nikto|nmap|masscan|zgrab|nuclei|wpscan|dirbuster|gobuster|ffuf|feroxbuster|acunetix|netsparker|openvas|w3af|whatweb|python-requests|python-urllib|aiohttp|go-http-client|scrapy|libwww-perl|bytespider|mj12bot|dotbot|blexbot|petalbot|ahrefsbot|semrushbot|dataforseobot/i;
+// Machines that may call with plain scripts: the uptime check and PayFast's payment notices (Rankkw's routes above too).
+const MACHINE_ROUTES = /^\/api\/(?:health|payments\/payfast\/notify)$/;
+const notFound = () => new NextResponse('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+const refused = () => new NextResponse('Forbidden', { status: 403, headers: { 'Cache-Control': 'no-store' } });
 
 function tierOf(request) {
   const { pathname } = request.nextUrl;
@@ -54,6 +70,15 @@ export function proxy(request) {
   const { pathname: path } = request.nextUrl;
   // The check itself stays reachable (POST /api/robot-check has its own, stricter limit).
   const isVerify = path === VERIFY_PAGE || path === VERIFY_API;
+  if (SCANNER_PATH.test(path)) {
+    if (ip !== 'local') flagIp(ip);
+    return notFound();
+  }
+  // The server calling itself (e.g. the image optimizer) has no client IP and may send no User-Agent: never refused.
+  if (ip !== 'local' && !RANKKW_SERVER_ROUTES.test(path) && !MACHINE_ROUTES.test(path)) {
+    const agent = request.headers.get('user-agent') ?? '';
+    if (!agent.trim() || BAD_AGENT.test(agent)) return refused();
+  }
   if (ip !== 'local' && !isVerify && !RANKKW_SERVER_ROUTES.test(path)) {
     const tier = tierOf(request);
     if (needsRobotCheck(ip, request.cookies.get(HUMAN_COOKIE)?.value)) return robotCheck(request, tier);

@@ -1,11 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck, ShoppingBag, Store } from 'lucide-react';
+import PayoutProgress from '@/components/seller/PayoutProgress';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
-import { getMonthlyEarnings } from '@/lib/data/seller-analytics';
+import { getBalanceTrend, getMonthlyEarnings } from '@/lib/data/seller-analytics';
 import { EarningsPanel } from '@/components/dashboard/SellerAnalytics';
 import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
 import { listingStatus } from '@/lib/listing';
@@ -20,6 +21,7 @@ const usd = (cents) => formatPrice(cents, 'USD');
 export default async function SellerDashboardPage() {
   const seller = await requireSellerStore();
   const [data, monthly] = await Promise.all([getSellerDashboard(seller.id), getMonthlyEarnings(seller.id, 12)]);
+  const trend = await getBalanceTrend(seller.id, data.balances.pendingPayout);
 
   return (
     <>
@@ -91,9 +93,18 @@ export default async function SellerDashboardPage() {
         <StatCard href="/seller/sales" label="Total Sales" value={data.sales.count.toLocaleString('en-US')} sub={`${usd(data.sales.gross)} gross sales`} icon={ShoppingBag} />
       </section>
 
-      {/* ---------- Earnings by month ---------- */}
-      <div className="mt-8">
-        <EarningsPanel months={monthly} title="Your earnings by month" />
+      {/* ---------- The $50 payout threshold beside earnings by month (one row on large screens) ---------- */}
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <PayoutProgress
+          balance={data.balances.pendingPayout}
+          trend={trend}
+          openRequest={data.openRequest}
+          verification={data.verification?.status ?? null}
+          hasPayoutMethod={data.hasPayoutMethod}
+        />
+        <div className="min-w-0 lg:col-span-2">
+          <EarningsPanel months={monthly} title="Your earnings by month" />
+        </div>
       </div>
 
       {/* ---------- Products ---------- */}
