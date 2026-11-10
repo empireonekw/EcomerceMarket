@@ -1,43 +1,33 @@
-import Link from 'next/link';
-import { Store, UserPlus, Users, UserRound } from 'lucide-react';
 import Pagination from '@/components/Pagination';
-import JoinedFilter from '@/components/admin/JoinedFilter';
+import IdReviewQueue from '@/components/admin/IdReviewQueue';
 import UsersTable from '@/components/admin/UsersTable';
-import { FilterTabs, PendingContent, PendingNavProvider, PendingSearchForm } from '@/components/dashboard/PendingNav';
+import { ClearFilters, FilterMenu, SearchBox, SegmentedNav } from '@/components/admin/ListToolbar';
+import { MetricCard } from '@/components/admin/analytics/KpiCard';
+import { PageTitle } from '@/components/admin/ui';
+import { PendingContent, PendingNavProvider } from '@/components/dashboard/PendingNav';
 import { AdminUsersListSkeleton } from '@/components/dashboard/RouteSkeletons';
-import { PageHeader, StatCard, EmptyState, buttonClasses } from '@/components/dashboard/ui';
+import { EmptyState } from '@/components/dashboard/ui';
 import { requireAdmin } from '@/lib/auth';
-import { getAdminUsers, VERIFICATION_FILTERS } from '@/lib/data/admin-users';
-import VerifiedBadge from '@/components/VerifiedBadge';
+import { ACCOUNT_FILTERS, getAdminUsers, VERIFICATION_FILTERS } from '@/lib/data/admin-users';
 
 export const metadata = { title: 'Users' };
 
-const field = 'h-11 rounded-full border border-stone-300 bg-white px-4 text-sm focus:border-black focus:outline-none';
-
-const VERIFICATION_TABS = [
-  { value: '', label: 'All' },
-  { value: 'pending', label: 'To review' },
-  { value: 'verified', label: 'Verified' },
-  { value: 'rejected', label: 'Rejected' },
-];
-
 const ROLE_TABS = [
-  { value: '', label: 'All users', key: 'total' },
-  { value: 'customer', label: 'Customers', key: 'customer' },
+  { value: '', label: 'All', key: 'total' },
+  { value: 'customer', label: 'Shoppers', key: 'customer' },
   { value: 'seller', label: 'Sellers', key: 'seller' },
   { value: 'admin', label: 'Admins', key: 'admin' },
 ];
 
-function tabHref(role, q, dates = {}) {
+/** /admin/users with these params (empty ones dropped). */
+function usersHref(params) {
   const qs = new URLSearchParams();
-  if (role) qs.set('role', role);
-  if (q) qs.set('q', q);
-  for (const [k, v] of Object.entries(dates)) if (v) qs.set(k, v);
+  for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v);
   const s = qs.toString();
   return s ? `/admin/users?${s}` : '/admin/users';
 }
 
-/** Every account — customers, sellers and admins — with status, purchases and selling at a glance. */
+/** Every account (shoppers, sellers, admins) with status, purchases and selling at a glance; the ID review queue. */
 export default async function AdminUsersPage({ searchParams }) {
   const sp = await searchParams;
   const params = {
@@ -48,113 +38,139 @@ export default async function AdminUsersPage({ searchParams }) {
     from: sp.from ?? '',
     to: sp.to ?? '',
     verification: VERIFICATION_FILTERS.includes(sp.verification) ? sp.verification : '',
+    status: ACCOUNT_FILTERS.some((f) => f.value === sp.status) ? sp.status : '',
   };
   const [admin, { items, pagination, summary }] = await Promise.all([requireAdmin(), getAdminUsers(params)]);
-  // Filters kept when switching tabs, searching or paging (the ID check one included).
-  const dates = { joined: params.joined, from: params.from, to: params.to, verification: params.verification };
-  const filtered = Boolean(params.q || params.role || params.joined || params.from || params.to || params.verification);
+  // Every filter, kept when another one changes (the page resets).
+  const keep = {
+    role: params.role,
+    q: params.q,
+    joined: params.joined,
+    from: params.from,
+    to: params.to,
+    verification: params.verification,
+    status: params.status,
+  };
+  const filtered = Object.values(keep).some(Boolean);
+  const reviewQueue = params.verification === 'pending';
+  const joinedKey = params.joined === 'today' || params.joined === 'yesterday' ? params.joined : params.from || params.to ? 'range' : '';
+  const shown =
+    pagination.total === 0
+      ? 'No accounts'
+      : `${(pagination.page - 1) * pagination.limit + 1}–${Math.min(pagination.page * pagination.limit, pagination.total)} of ${pagination.total.toLocaleString('en-US')}`;
 
   return (
     <>
-      <PageHeader
+      <PageTitle
         title="Users"
-        description={`${pagination.total} account${pagination.total === 1 ? '' : 's'}${filtered ? ' match your filters' : ''} · newest first${
-          pagination.totalPages > 1
-            ? ` · showing ${(pagination.page - 1) * pagination.limit + 1}–${Math.min(pagination.page * pagination.limit, pagination.total)} (page ${pagination.page} of ${pagination.totalPages})`
-            : ''
-        }`}
+        description={`${summary.total.toLocaleString('en-US')} accounts · ${summary.newToday} new today, ${summary.newYesterday} yesterday`}
       />
 
-      <section aria-label="User totals" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total users" value={summary.total.toLocaleString('en-US')} sub={`${summary.byRole.admin} admin${summary.byRole.admin === 1 ? '' : 's'}`} icon={Users} />
-        <StatCard label="Customers" value={summary.byRole.customer.toLocaleString('en-US')} sub="Shopping accounts" icon={UserRound} tone="info" />
-        <StatCard
+      <section aria-label="User totals" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <MetricCard
+          label="Total users"
+          value={summary.total.toLocaleString('en-US')}
+          sub={`${summary.newLast30d.toLocaleString('en-US')} joined in the last 30 days`}
+          tone="brand"
+        />
+        <MetricCard
+          label="Shoppers"
+          value={summary.byRole.customer.toLocaleString('en-US')}
+          sub={summary.stuckShoppers ? `${summary.stuckShoppers} part-way through opening a shop` : 'Shopping accounts'}
+          href={usersHref({ role: 'customer' })}
+        />
+        <MetricCard
           label="Sellers"
           value={summary.byRole.seller.toLocaleString('en-US')}
-          sub={
-            summary.idsToReview
-              ? `${summary.idsToReview} ID${summary.idsToReview === 1 ? '' : 's'} to review`
-              : summary.setupPending
-                ? `${summary.setupPending} haven’t set up a shop`
-                : 'All shops set up'
-          }
-          icon={Store}
-          tone={summary.idsToReview || summary.setupPending ? 'warning' : 'positive'}
+          sub={summary.setupPending ? `${summary.setupPending} haven’t opened their shop` : 'All shops open'}
+          href={usersHref({ role: 'seller' })}
         />
-        <StatCard label="New in 30 days" value={summary.newLast30d.toLocaleString('en-US')} sub="Sign-ups this month" icon={UserPlus} tone="positive" />
+        <MetricCard
+          label="IDs to review"
+          value={summary.idsToReview.toLocaleString('en-US')}
+          sub={summary.idsToReview ? 'Waiting for your check' : 'All caught up'}
+          tone="ink"
+          href={usersHref({ verification: 'pending' })}
+        />
       </section>
 
-      {/* Tabs and search switch instantly; the list shows a skeleton until the new results arrive. */}
+      {/* Tabs, search and filters switch instantly; the list shows a skeleton until the new results arrive. */}
       <PendingNavProvider>
-        <div className="mb-5 mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <FilterTabs
-            label="Filter by role"
-            activeKey={params.role}
-            items={ROLE_TABS.map((t) => ({
-              key: t.value,
-              label: t.label,
-              count: t.key === 'total' ? summary.total : summary.byRole[t.key],
-              href: tabHref(t.value, params.q, dates),
-            }))}
-          />
-
-          <PendingSearchForm
-            action="/admin/users"
-            params={{ role: params.role, ...dates }}
-            defaultValue={params.q}
-            label="Search users"
-            placeholder="Name, email or shop…"
-            inputClassName={`${field} w-full lg:w-72`}
-            buttonClassName={buttonClasses.secondary}
-          />
-        </div>
-
-        {/* ID check (sellers who sent their ID after their first sale): to review / verified / rejected. */}
-        <nav aria-label="Filter by ID check" className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-stone-500">ID check:</span>
-          {VERIFICATION_TABS.map((t) => (
-            <Link
-              key={t.value}
-              href={tabHref(params.role, params.q, { ...dates, verification: t.value })}
-              aria-current={params.verification === t.value ? 'page' : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 transition-colors ${
-                params.verification === t.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'
-              }`}
-            >
-              {t.value === 'verified' && <VerifiedBadge size={14} decorative />}
-              {t.label}
-              {t.value === 'pending' && summary.idsToReview > 0 && (
-                <span className="rounded-full bg-amber-400 px-2 text-xs font-medium leading-4 text-ink">{summary.idsToReview}</span>
-              )}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="mb-5">
-          <JoinedFilter
-            base={{ role: params.role, q: params.q, verification: params.verification }}
-            joined={params.joined}
-            from={params.from}
-            to={params.to}
-            counts={{ today: summary.newToday, yesterday: summary.newYesterday }}
-            today={summary.today}
-          />
+        <div className="mt-4 mb-4 rounded-2xl border border-stone-200 bg-white p-3 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <SegmentedNav
+              label="Filter by role"
+              activeKey={params.role}
+              items={ROLE_TABS.map((t) => ({
+                key: t.value,
+                label: t.label,
+                count: t.key === 'total' ? summary.total : summary.byRole[t.key],
+                href: usersHref({ ...keep, role: t.value }),
+              }))}
+            />
+            <SearchBox action="/admin/users" params={{ ...keep, q: '' }} defaultValue={params.q} placeholder="Name, email or shop…" />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-stone-100 pt-3">
+            <FilterMenu
+              label="ID check"
+              activeKey={params.verification}
+              options={[
+                { key: '', label: 'Any', href: usersHref({ ...keep, verification: '' }) },
+                { key: 'pending', label: 'To review', count: summary.idsToReview, href: usersHref({ ...keep, verification: 'pending' }) },
+                { key: 'verified', label: 'Verified', href: usersHref({ ...keep, verification: 'verified' }) },
+                { key: 'rejected', label: 'Rejected', href: usersHref({ ...keep, verification: 'rejected' }) },
+              ]}
+            />
+            <FilterMenu
+              label="Needs attention"
+              activeKey={params.status}
+              options={[
+                { key: '', label: 'Any', href: usersHref({ ...keep, status: '' }) },
+                ...ACCOUNT_FILTERS.map((f) => ({
+                  key: f.value,
+                  label: f.label,
+                  count: { setup: summary.setupPending, wizard: summary.stuckShoppers, payout: summary.payoutMissing }[f.value],
+                  href: usersHref({ ...keep, status: f.value }),
+                })),
+              ]}
+            />
+            <FilterMenu
+              label="Joined"
+              activeKey={joinedKey}
+              options={[
+                { key: '', label: 'Any time', href: usersHref({ ...keep, joined: '', from: '', to: '' }) },
+                { key: 'today', label: 'Today', count: summary.newToday, href: usersHref({ ...keep, joined: 'today', from: '', to: '' }) },
+                {
+                  key: 'yesterday',
+                  label: 'Yesterday',
+                  count: summary.newYesterday,
+                  href: usersHref({ ...keep, joined: 'yesterday', from: '', to: '' }),
+                },
+              ]}
+              range={{
+                from: params.from,
+                to: params.to,
+                max: summary.today,
+                action: '/admin/users',
+                params: { ...keep, joined: '', from: '', to: '' },
+              }}
+            />
+            {filtered && <ClearFilters href="/admin/users" />}
+          </div>
         </div>
 
         <PendingContent fallback={<AdminUsersListSkeleton />}>
           {items.length === 0 ? (
-            <EmptyState title={filtered ? 'No users match these filters' : 'No users yet'}>
-              {filtered && (
-                <Link href="/admin/users" className="font-medium text-black underline underline-offset-2">
-                  Clear filters
-                </Link>
-              )}
+            <EmptyState title={reviewQueue ? 'No IDs waiting for review' : filtered ? 'No users match these filters' : 'No users yet'}>
+              {reviewQueue ? 'New identity checks appear here after a seller’s first sale.' : null}
             </EmptyState>
+          ) : reviewQueue ? (
+            <IdReviewQueue items={items} />
           ) : (
-            <UsersTable items={items} currentAdminId={admin.id} />
+            <UsersTable items={items} currentAdminId={admin.id} summary={shown} />
           )}
 
-          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={{ q: params.q, role: params.role, ...dates }} />
+          <Pagination page={pagination.page} totalPages={pagination.totalPages} basePath="/admin/users" params={keep} />
         </PendingContent>
       </PendingNavProvider>
     </>

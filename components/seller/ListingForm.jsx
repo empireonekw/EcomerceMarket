@@ -427,7 +427,8 @@ export default function ListingForm({ categories, recentCategories = [], listing
         setServerErrors(data.fields ?? {});
         const first = FIELD_ORDER.find((f) => data.fields?.[f]);
         if (first) scrollTo(sectionOf(first));
-        toast.error('Could not save the listing', data.error);
+        // Say what's wrong, not just "Validation failed": the first field message, even for fields the form doesn't show.
+        toast.error('Could not save the listing', (first && data.fields[first]) || Object.values(data.fields ?? {})[0] || data.error);
         setSaving(null);
         return;
       }

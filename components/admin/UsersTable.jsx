@@ -7,6 +7,7 @@ import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import DeleteUsersDialog from '@/components/admin/DeleteUsersDialog';
 import { BlockUserButton, RoleSelect } from '@/components/admin/UserAccessControls';
 import { StatusBadge, formatDateTime } from '@/components/dashboard/ui';
+import { Avatar, TABLE_HEAD } from '@/components/admin/ui';
 import { formatPrice } from '@/lib/utils';
 import VerifiedBadge from '@/components/VerifiedBadge';
 
@@ -41,6 +42,19 @@ function Selling({ s }) {
   );
 }
 
+/** The seller's ID check, when there is one: to review (amber), rejected (red). Verified shows as the blue tick. */
+function IdChip({ v }) {
+  if (v === 'pending')
+    return (
+      <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800 ring-1 ring-amber-600/20 ring-inset">
+        ID to review
+      </span>
+    );
+  if (v === 'rejected')
+    return <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-600/20 ring-inset">ID rejected</span>;
+  return null;
+}
+
 function RowCheckbox({ u, selectable, checked, onToggle }) {
   if (!selectable) return <span className="block size-4" aria-hidden="true" />;
   return <input type="checkbox" checked={checked} onChange={() => onToggle(u.id)} aria-label={`Select ${u.name}`} className={checkbox} />;
@@ -63,7 +77,7 @@ function Actions({ u, selectable, isYou }) {
  * dropdown per row and Block / Delete actions. Admin accounts — including yours — are never selectable or blockable
  * (the API refuses them too); your own role and the owner's are locked.
  */
-export default function UsersTable({ items, currentAdminId }) {
+export default function UsersTable({ items, currentAdminId, summary }) {
   const deletable = useMemo(() => items.filter((u) => u.role !== 'admin' && u.id !== currentAdminId), [items, currentAdminId]);
   const [selected, setSelected] = useState(() => new Set());
   const [bulkOpen, setBulkOpen] = useState(false);
@@ -91,139 +105,164 @@ export default function UsersTable({ items, currentAdminId }) {
 
   return (
     <>
-      {/* ---------- Bulk bar ---------- */}
-      <div className="mb-3 flex min-h-12 flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-2">
-        <label className="flex cursor-pointer items-center gap-3 text-sm text-stone-700">
-          <input ref={headerRef} type="checkbox" checked={allSelected} onChange={toggleAll} disabled={deletable.length === 0} className={checkbox} />
+      <section className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
+        {/* ---------- Bulk bar (the card's header) ---------- */}
+        <div className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-2.5 sm:px-5">
+          <label className="flex cursor-pointer items-center gap-3 text-sm text-stone-600">
+            <input
+              ref={headerRef}
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleAll}
+              disabled={deletable.length === 0}
+              className={checkbox}
+            />
+            {selected.size > 0 ? (
+              <span>
+                <span className="font-semibold text-ink">{selected.size}</span> selected
+              </span>
+            ) : (
+              <span>Select all on this page</span>
+            )}
+          </label>
           {selected.size > 0 ? (
-            <span>
-              <span className="font-medium text-black">{selected.size}</span> selected
-            </span>
-          ) : (
-            <span>Select all on this page</span>
-          )}
-        </label>
-        {selected.size > 0 && (
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setSelected(new Set())} className="btn btn-sm text-stone-600 hover:bg-stone-100">
-              <X size={14} strokeWidth={2} aria-hidden="true" />
-              Clear
-            </button>
-            <button type="button" onClick={() => setBulkOpen(true)} className="btn btn-sm bg-red-600 text-white hover:bg-red-700">
-              <Trash2 size={14} strokeWidth={2} aria-hidden="true" />
-              Delete selected
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* ---------- Phones: cards ---------- */}
-      <ul className="space-y-3 md:hidden">
-        {items.map((u) => (
-          <li
-            key={u.id}
-            className={`relative rounded-2xl border bg-white p-4 transition-shadow hover:shadow-lift ${selected.has(u.id) ? 'border-brand-500 ring-1 ring-brand-500' : 'border-stone-200'}`}
-          >
-            <div className="flex items-start gap-3">
-              <div className="pt-1">
-                <RowCheckbox u={u} selectable={canSelect(u)} checked={selected.has(u.id)} onToggle={toggle} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <Link href={`/admin/users/${u.id}`} className="block truncate font-medium after:absolute after:inset-0 after:rounded-2xl">
-                      {u.name}
-                    </Link>
-                    <p className="flex min-w-0 items-center gap-1 text-sm text-stone-500">
-                      <span className="truncate">{u.selling?.storeName ?? u.email}</span>
-                      {u.selling?.verification === 'verified' && <VerifiedBadge size={14} />}
-                    </p>
-                  </div>
-                  <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
-                </div>
-                <p className="mt-2 text-xs text-stone-500">
-                  {u.selling ? `${plural(u.selling.sales, 'product')} sold` : `${plural(u.purchases.items, 'item')} purchased`} · Joined{' '}
-                  {formatDateTime(u.createdAt).date}
-                </p>
-                <div className="mt-3 flex items-center justify-between gap-2 border-t border-stone-100 pt-3">
-                  <StatusBadge status={u.status.tone} label={u.status.label} />
-                  <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setSelected(new Set())} className="btn btn-sm text-stone-600 hover:bg-stone-100">
+                <X size={14} strokeWidth={2} aria-hidden="true" />
+                Clear
+              </button>
+              <button type="button" onClick={() => setBulkOpen(true)} className="btn btn-sm bg-red-600 text-white hover:bg-red-700">
+                <Trash2 size={14} strokeWidth={2} aria-hidden="true" />
+                Delete selected
+              </button>
             </div>
-          </li>
-        ))}
-      </ul>
-
-      {/* ---------- Desktop: table ---------- */}
-      <div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
-              <tr>
-                <th scope="col" className="w-10 py-3 pl-4">
-                  <span className="sr-only">Select</span>
-                </th>
-                <th scope="col" className="px-4 py-3">User</th>
-                <th scope="col" className="px-4 py-3">Role</th>
-                <th scope="col" className="px-4 py-3">Status</th>
-                <th scope="col" className="px-4 py-3 text-right">Activity</th>
-                <th scope="col" className="px-4 py-3">Joined</th>
-                <th scope="col" className="px-4 py-3 text-right">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone-100">
-              {items.map((u) => (
-                <tr key={u.id} className={`relative transition-colors ${selected.has(u.id) ? 'bg-brand-50/60' : 'hover:bg-stone-50/70'}`}>
-                  <td className="py-4 pl-4">
-                    <RowCheckbox u={u} selectable={canSelect(u)} checked={selected.has(u.id)} onToggle={toggle} />
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-full bg-stone-100 text-sm font-medium text-stone-700">
-                        {u.name.charAt(0).toUpperCase()}
-                      </span>
-                      <div className="min-w-0">
-                        {/* Stretched link: the whole row opens the user (checkbox and actions sit above it). */}
-                        <Link href={`/admin/users/${u.id}`} className="block max-w-[13rem] truncate font-medium after:absolute after:inset-0 hover:underline">
-                          {u.name}
-                        </Link>
-                        <p className="max-w-[13rem] truncate text-xs text-stone-500">{u.email}</p>
-                        {u.selling?.storeName && (
-                          <p className="flex max-w-[13rem] items-center gap-1 text-xs text-brand-700">
-                            <span className="truncate">{u.selling.storeName}</span>
-                            {u.selling.verification === 'verified' && <VerifiedBadge size={13} />}
-                            {u.selling.verification === 'pending' && (
-                              <span className="shrink-0 rounded-full bg-amber-50 px-2 text-xs font-medium text-amber-800">ID to review</span>
-                            )}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
-                  </td>
-                  <td className="px-4 py-4">
-                    <StatusBadge status={u.status.tone} label={u.status.label} />
-                  </td>
-                  {/* Sellers: what they sold; everyone else: what they bought. */}
-                  <td className="whitespace-nowrap px-4 py-4 text-right">{u.selling ? <Selling s={u.selling} /> : <Purchases p={u.purchases} />}</td>
-                  <td className="whitespace-nowrap px-4 py-4 text-stone-600">
-                    {formatDateTime(u.createdAt).date}
-                    <span className="block text-xs text-stone-400">Active {lastActive(u)}</span>
-                  </td>
-                  <td className="whitespace-nowrap py-4 pl-2 pr-3 text-right">
-                    <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          ) : (
+            summary && <span className="text-xs text-stone-500">{summary}</span>
+          )}
         </div>
-      </div>
+
+        {/* ---------- Phones: rows ---------- */}
+        <ul className="divide-y divide-stone-100 border-t border-stone-100 md:hidden">
+          {items.map((u) => (
+            <li key={u.id} className={`relative px-4 py-3.5 ${selected.has(u.id) ? 'bg-brand-50/60' : ''}`}>
+              <div className="flex items-start gap-3">
+                <div className="pt-2.5">
+                  <RowCheckbox u={u} selectable={canSelect(u)} checked={selected.has(u.id)} onToggle={toggle} />
+                </div>
+                <Avatar name={u.name} tone={u.role === 'seller' ? 'brand' : 'stone'} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link href={`/admin/users/${u.id}`} className="block truncate text-sm font-semibold text-ink after:absolute after:inset-0">
+                        {u.name}
+                      </Link>
+                      <p className="flex min-w-0 items-center gap-1 text-xs text-stone-500">
+                        <span className="truncate">{u.selling?.storeName ?? u.email}</span>
+                        {u.selling?.verification === 'verified' && <VerifiedBadge size={13} />}
+                      </p>
+                    </div>
+                    <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="flex flex-wrap items-center gap-1.5">
+                      <StatusBadge status={u.status.tone} label={u.status.label} />
+                      <IdChip v={u.selling?.verification} />
+                    </span>
+                    <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
+                  </div>
+                  <p className="mt-1.5 text-xs text-stone-500">
+                    {u.selling ? `${plural(u.selling.sales, 'product')} sold` : `${plural(u.purchases.items, 'item')} purchased`} · Joined{' '}
+                    {formatDateTime(u.createdAt).date}
+                  </p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {/* ---------- Desktop: table ---------- */}
+        <div className="hidden px-3 pb-3 md:block">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead className={TABLE_HEAD}>
+                <tr>
+                  <th scope="col" className="w-10 pl-3">
+                    <span className="sr-only">Select</span>
+                  </th>
+                  <th scope="col" className="px-3">
+                    User
+                  </th>
+                  <th scope="col" className="px-3">
+                    Role
+                  </th>
+                  <th scope="col" className="px-3">
+                    Status
+                  </th>
+                  <th scope="col" className="px-3 text-right">
+                    Activity
+                  </th>
+                  <th scope="col" className="px-3">
+                    Joined
+                  </th>
+                  <th scope="col" className="pr-3 text-right">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {items.map((u) => (
+                  <tr key={u.id} className={`relative transition-colors ${selected.has(u.id) ? 'bg-brand-50/60' : 'hover:bg-stone-50/80'}`}>
+                    <td className="py-3 pl-3">
+                      <RowCheckbox u={u} selectable={canSelect(u)} checked={selected.has(u.id)} onToggle={toggle} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={u.name} tone={u.role === 'seller' ? 'brand' : 'stone'} />
+                        <div className="min-w-0">
+                          {/* Stretched link: the whole row opens the user (checkbox and actions sit above it). */}
+                          <Link
+                            href={`/admin/users/${u.id}`}
+                            className="block max-w-[15rem] truncate font-semibold text-ink after:absolute after:inset-0 hover:underline"
+                          >
+                            {u.name}
+                          </Link>
+                          <p className="max-w-[15rem] truncate text-xs text-stone-500">{u.email}</p>
+                          {u.selling?.storeName && (
+                            <p className="flex max-w-[15rem] items-center gap-1 text-xs font-medium text-brand-800">
+                              <span className="truncate">{u.selling.storeName}</span>
+                              {u.selling.verification === 'verified' && <VerifiedBadge size={13} />}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3">
+                      <RoleSelect user={u} locked={u.id === currentAdminId || u.isOwner} />
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="flex flex-col items-start gap-1">
+                        <StatusBadge status={u.status.tone} label={u.status.label} />
+                        <IdChip v={u.selling?.verification} />
+                      </span>
+                    </td>
+                    {/* Sellers: what they sold; everyone else: what they bought. */}
+                    <td className="px-3 py-3 text-right whitespace-nowrap">
+                      {u.selling ? <Selling s={u.selling} /> : <Purchases p={u.purchases} />}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-stone-600">
+                      {formatDateTime(u.createdAt).date}
+                      <span className="block text-xs text-stone-400">Active {lastActive(u)}</span>
+                    </td>
+                    <td className="py-3 pr-3 pl-2 text-right whitespace-nowrap">
+                      <Actions u={u} selectable={canSelect(u)} isYou={u.id === currentAdminId} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
 
       <DeleteUsersDialog
         users={selectedUsers}
