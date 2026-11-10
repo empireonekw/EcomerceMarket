@@ -52,10 +52,17 @@ function Redirect({ to }) {
 export function LoginFromUrl() {
   const params = useSearchParams();
   const registered = ['1', 'seller'].includes(params.get('registered')) ? params.get('registered') : false;
-  return <LoginView next={safeNext(params.get('next'))} registered={registered} oauthError={GOOGLE_ERRORS[params.get('error')] ?? null} />;
+  return (
+    <LoginView
+      next={safeNext(params.get('next'))}
+      registered={registered}
+      passwordReset={params.get('reset') === '1'}
+      oauthError={GOOGLE_ERRORS[params.get('error')] ?? null}
+    />
+  );
 }
 
-export function LoginView({ next, registered = false, oauthError = null }) {
+export function LoginView({ next, registered = false, passwordReset = false, oauthError = null }) {
   const { arrival, checking } = useArrivalUser();
   const { logout } = useAuth();
   if (checking) return <AuthSkeleton />;
@@ -80,8 +87,9 @@ export function LoginView({ next, registered = false, oauthError = null }) {
   }
 
   const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : '/signup';
-  const intro =
-    registered === 'seller'
+  const intro = passwordReset
+    ? { title: 'Password changed', subtitle: 'Log in with your new password.' }
+    : registered === 'seller'
       ? { title: 'Your seller account is ready', subtitle: 'Log in to set up your shop. It only takes a minute.' }
       : registered
         ? { title: 'Welcome aboard', subtitle: `Log in to start shopping on ${siteConfig.name}.` }
@@ -102,7 +110,7 @@ export function LoginView({ next, registered = false, oauthError = null }) {
         </p>
       }
     >
-      <LoginForm next={next} registered={registered} oauthError={oauthError} />
+      <LoginForm next={next} registered={registered} passwordReset={passwordReset} oauthError={oauthError} />
     </AuthCard>
   );
 }

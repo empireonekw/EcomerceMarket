@@ -1,25 +1,22 @@
 import Link from 'next/link';
 import AuthCard from '@/components/auth/AuthCard';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm';
 
 export const metadata = { title: 'Forgot password', robots: { index: false } };
 
-// Self-service reset needs an email provider to send reset links; until one is configured,
-// this page explains what still works.
+/** "Forgot password?" from the login form: a 6-digit code by email, then a new password (components/auth/ForgotPasswordForm.jsx). */
 export default function ForgotPasswordPage() {
   return (
     <AuthCard
       title="Forgot your password?"
-      subtitle="Email password resets are coming soon."
+      subtitle="Enter your account’s email. We’ll send you a 6-digit code to choose a new password."
       footer={
         <Link href="/login" className="font-medium text-black hover:underline">
           Back to log in
         </Link>
       }
     >
-      <div className="space-y-2 rounded-xl bg-stone-50 p-4 text-sm text-stone-700">
-        <p>We’re setting up password reset by email. Until then, try logging in again, passwords are case-sensitive.</p>
-        <p className="text-stone-500">Bought as a guest? Your private receipt link still gives you access to your downloads.</p>
-      </div>
+      <ForgotPasswordForm />
     </AuthCard>
   );
 }

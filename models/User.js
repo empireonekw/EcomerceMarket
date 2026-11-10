@@ -104,6 +104,11 @@ const userSchema = new Schema(
       type: new Schema({ hash: String, sentAt: Date, expiresAt: Date, attempts: { type: Number, default: 0 } }, { _id: false }),
       select: false,
     },
+    // "Forgot password": the latest reset code sent (lib/data/password-reset.js), hash only. Private.
+    passwordResetOtp: {
+      type: new Schema({ hash: String, sentAt: Date, expiresAt: Date, attempts: { type: Number, default: 0 } }, { _id: false }),
+      select: false,
+    },
     phone: { type: String, trim: true, maxlength: 20 }, // E.164 ("+923001234567"), required at email sign-up (Google sign-ups may not have one); never public
     googleId: { type: String, select: false }, // "Continue with Google" account id (app/api/auth/google/callback)
     // The shop-opening wizard's saved steps until it's submitted (lib/data/seller-onboarding.js), so a seller can
