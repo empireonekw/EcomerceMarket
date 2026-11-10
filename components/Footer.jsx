@@ -15,7 +15,10 @@ const TRUST = [
 /** Main categories for the Shop column (cached list); a database hiccup falls back to "All products" only. */
 async function shopLinks() {
   try {
-    return (await getCategories()).filter((c) => !c.parent).slice(0, 6).map((c) => ({ label: c.name, href: categoryHref(c) }));
+    return (await getCategories())
+      .filter((c) => !c.parent)
+      .slice(0, 6)
+      .map((c) => ({ label: c.name, href: categoryHref(c) }));
   } catch (err) {
     console.error('[Footer] categories unavailable', err);
     return [];
@@ -27,6 +30,7 @@ const LINK_GROUPS = [
     title: 'Discover',
     links: [
       { label: 'All products', href: '/products' },
+      { label: 'Collections', href: '/collections' },
       { label: 'Best sellers', href: '/products?sort=popular' },
       { label: 'New arrivals', href: '/products?sort=newest' },
       { label: 'How it works', href: '/how-it-works' },
@@ -67,6 +71,7 @@ const LEGAL_BAR = [
   { label: 'Privacy', href: '/privacy' },
   { label: 'Cookies', href: '/legal/cookie-policy' },
   { label: 'Legal Center', href: '/legal' },
+  { label: 'Site map', href: '/sitemap' },
 ];
 
 // Line-style brand marks (24px grid, stroked like the Lucide icons used elsewhere).
@@ -125,7 +130,9 @@ export default async function Footer() {
           <div className="grid gap-14 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-12">
             {/* ---------- Call to action + trust points ---------- */}
             <div className="lg:col-span-5">
-              <h2 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-balance sm:text-5xl">Have something worth selling?</h2>
+              <h2 className="font-serif text-4xl font-normal leading-[1.05] tracking-tight text-balance sm:text-5xl">
+                Have something worth selling?
+              </h2>
               <p className="mt-4 max-w-lg text-lg text-stone-600">Open a store in minutes and reach buyers looking for exactly what you make.</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/sell/signup" className="btn btn-lg btn-primary">
@@ -160,7 +167,10 @@ export default async function Footer() {
                     <ul className="mt-5 space-y-3">
                       {group.links.map((l) => (
                         <li key={l.href}>
-                          <Link href={l.href} className="text-[15px] text-stone-700 transition-colors hover:text-black hover:underline hover:underline-offset-4">
+                          <Link
+                            href={l.href}
+                            className="text-[15px] text-stone-700 transition-colors hover:text-black hover:underline hover:underline-offset-4"
+                          >
                             {l.label}
                           </Link>
                         </li>

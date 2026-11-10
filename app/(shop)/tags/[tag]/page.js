@@ -11,6 +11,7 @@ import { getPopularTags, getProducts } from '@/lib/data/products';
 import { siteConfig } from '@/lib/site';
 import { parseProductQuery, PRODUCT_SORTS, tagHref } from '@/lib/utils';
 import { NO_PLATFORM_FEE } from '@/lib/commission';
+import { TAG_INDEX_MIN } from '@/lib/data/seo';
 
 const label = (tag) => tag.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -30,8 +31,8 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    // Thin tags (a single product) stay out of the index; they are still useful to shoppers.
-    robots: found.count < 2 ? { index: false, follow: true } : undefined,
+    // Thin tags stay out of the index (and the sitemap, lib/data/seo.js); they are still useful to shoppers.
+    robots: found.count < TAG_INDEX_MIN ? { index: false, follow: true } : undefined,
     alternates: { canonical: tagHref(found.tag) },
     openGraph: { type: 'website', title, description, url: tagHref(found.tag) },
   };
@@ -61,10 +62,9 @@ export default async function TagPage({ params, searchParams }) {
   // Related: the most used tags that share a word with this one, topped up with the most popular overall.
   const words = tag.toLowerCase().split(/[\s_-]+/);
   const others = tags.filter((t) => t.tag !== tag && t.count >= 2);
-  const related = [
-    ...others.filter((t) => words.some((w) => w.length > 2 && t.tag.toLowerCase().includes(w))),
-    ...others,
-  ].filter((t, i, all) => all.indexOf(t) === i).slice(0, 12);
+  const related = [...others.filter((t) => words.some((w) => w.length > 2 && t.tag.toLowerCase().includes(w))), ...others]
+    .filter((t, i, all) => all.indexOf(t) === i)
+    .slice(0, 12);
 
   const jsonLd = [
     {
@@ -122,8 +122,8 @@ export default async function TagPage({ params, searchParams }) {
       <header className="mt-5 max-w-3xl">
         <h1 className="headline text-4xl sm:text-5xl">{name}</h1>
         <p className="mt-3 text-lg leading-relaxed text-stone-600">
-          {pagination.total} {name.toLowerCase()} {pagination.total === 1 ? 'product' : 'products'} from independent creators on {siteConfig.name}. Every
-          listing is reviewed before it goes live, checkout is secure, and your files are ready to download the moment you pay
+          {pagination.total} {name.toLowerCase()} {pagination.total === 1 ? 'product' : 'products'} from independent creators on {siteConfig.name}.
+          Every listing is reviewed before it goes live, checkout is secure, and your files are ready to download the moment you pay
           {NO_PLATFORM_FEE ? ', while the creator keeps 100% of the sale.' : '.'}
         </p>
       </header>
@@ -140,7 +140,11 @@ export default async function TagPage({ params, searchParams }) {
         )}
         <SortMenu
           current={query.sort}
-          options={Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => ({ key, label: sortLabel, href: href({ sort: key === 'newest' ? undefined : key }) }))}
+          options={Object.entries(PRODUCT_SORTS).map(([key, { label: sortLabel }]) => ({
+            key,
+            label: sortLabel,
+            href: href({ sort: key === 'newest' ? undefined : key }),
+          }))}
         />
       </div>
 
