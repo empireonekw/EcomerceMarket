@@ -6,6 +6,7 @@ import { DOWNLOADS_PER_HOUR } from '@/lib/downloads';
 export const metadata = {
   title: 'Terms of Service',
   description: `The terms for buying and selling on ${siteConfig.name}: lifetime re-downloads, refunds, licences and seller rights.`,
+  alternates: { canonical: '/terms' },
 };
 
 const { name, operator, supportEmail } = siteConfig;

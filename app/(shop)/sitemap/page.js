@@ -17,7 +17,7 @@ const MAIN_PAGES = [
   ['All products', '/products'],
   ['Categories', '/categories'],
   ['Collections', '/collections'],
-  ['Sell on Sellpify', '/sell-on-sellpify'],
+  ['Sell on Sellpify', '/sell/signup'],
   ['How it works', '/how-it-works'],
   ['About', '/about'],
   ['Help & FAQ', '/help'],

@@ -4,6 +4,7 @@ import { siteConfig } from '@/lib/site';
 export const metadata = {
   title: 'Privacy Policy',
   description: `What personal data ${siteConfig.name} stores, why, who can see it and how to get it changed or deleted.`,
+  alternates: { canonical: '/privacy' },
 };
 
 const { name, operator, supportEmail } = siteConfig;
