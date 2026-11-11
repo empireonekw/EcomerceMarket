@@ -122,12 +122,9 @@ export default async function TagPage({ params, searchParams }) {
       <header className="mt-5 max-w-3xl">
         <h1 className="headline text-4xl sm:text-5xl">{name}</h1>
         <p className="mt-3 text-lg leading-relaxed text-stone-600">
-          {pagination.total} {name.toLowerCase()} {pagination.total === 1 ? 'product' : 'products'} from independent creators on {siteConfig.name}. Every
-          listing is reviewed before it goes live, checkout is secure, and your files are ready to download the moment you pay
-          {NO_PLATFORM_FEE ? ', with no platform fee taken from the creator’s sale.' : '.'}
           {pagination.total} {name.toLowerCase()} {pagination.total === 1 ? 'product' : 'products'} from independent creators on {siteConfig.name}.
           Every listing is reviewed before it goes live, checkout is secure, and your files are ready to download the moment you pay
-          {NO_PLATFORM_FEE ? ', while the creator keeps 100% of the sale.' : '.'}
+          {NO_PLATFORM_FEE ? ', with no platform fee taken from the creator’s sale.' : '.'}
         </p>
       </header>
 

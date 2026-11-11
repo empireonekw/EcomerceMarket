@@ -165,7 +165,7 @@ export default async function CollectionPage({ params, searchParams }) {
           {/* Category collections already say it in their name ("…templates"); store-wide ones spell it out. */}
           {facts.count} {lower} from {collection.shops} independent {collection.shops === 1 ? 'shop' : 'shops'}
           {collection.categoryId ? '' : `, all ${modifier.blurb}`}. {priceLine} {formats.length > 0 && <>Most come as {list(formats)}. </>}
-          Checkout is secure and your files are ready the moment you pay{NO_PLATFORM_FEE ? ', while the creator keeps 100% of the sale.' : '.'}
+          Checkout is secure and your files are ready the moment you pay{NO_PLATFORM_FEE ? ', with no platform fee taken from the creator’s sale.' : '.'}
         </p>
       </header>
 
