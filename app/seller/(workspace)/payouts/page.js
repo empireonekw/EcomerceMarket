@@ -6,7 +6,7 @@ import { PageHeader, Panel, StatCard, StatusBadge, formatDateTime } from '@/comp
 import { requireSellerStore } from '@/lib/auth';
 import { getSellerPayouts } from '@/lib/data/seller';
 import { getBalanceTrend } from '@/lib/data/seller-analytics';
-import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, MIN_PAYOUT, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { formatPrice } from '@/lib/utils';
 
 export const metadata = { title: 'Payouts & Bank Details' };
@@ -23,7 +23,7 @@ export default async function SellerPayoutsPage() {
     <>
       <PageHeader
         title="Payouts & Bank Details"
-        description={`${NO_PLATFORM_FEE ? 'No platform fees. You keep 100% of every sale.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} Request a payout any time you have a balance. Our team sends it to the details below.`}
+        description={`${NO_PLATFORM_FEE ? 'No platform fees on sales.' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale.`} A ${PAYOUT_FEE_LABEL} merchant fee is deducted only when you withdraw. Request a payout once your balance reaches ${usd(MIN_PAYOUT)}, and our team sends it to the details below.`}
       />
 
       {/* Identity is only asked for after the first sale (or once they've started it). */}
@@ -87,9 +87,10 @@ export default async function SellerPayoutsPage() {
                 {data.payouts.map((p) => (
                   <li key={p._id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
                     <div>
-                      <p className="font-medium tabular-nums">{usd(p.amount)}</p>
+                      <p className="font-medium tabular-nums">{usd(p.fee > 0 ? (p.netAmount ?? p.amount - p.fee) : p.amount)}</p>
                       <p className="text-xs text-stone-500">
                         {formatDateTime(p.paidAt ?? p.createdAt).date}
+                        {p.fee > 0 && ` · ${usd(p.amount)} withdrawn − ${usd(p.fee)} merchant fee`}
                         {p.reference && ` · Ref ${p.reference}`}
                       </p>
                     </div>
@@ -101,6 +102,25 @@ export default async function SellerPayoutsPage() {
           </Panel>
         </div>
       </div>
+
+      {/* The rules behind this page, linked where sellers handle money (payment providers check for this too). */}
+      <p className="mt-8 text-sm leading-relaxed text-stone-500">
+        Payouts follow our{' '}
+        <Link href="/legal/payout-policy" target="_blank" className="font-medium text-stone-700 underline underline-offset-2 hover:text-ink">
+          Payout Policy
+        </Link>{' '}
+        and{' '}
+        <Link href="/legal/seller-agreement" target="_blank" className="font-medium text-stone-700 underline underline-offset-2 hover:text-ink">
+          Seller Agreement
+        </Link>
+        : the {usd(MIN_PAYOUT)} minimum, the {PAYOUT_FEE_LABEL} merchant fee on each withdrawal, identity checks, timing, holds, and how
+        refunds and chargebacks are reversed. Your payout details are
+        handled as described in our{' '}
+        <Link href="/privacy" target="_blank" className="font-medium text-stone-700 underline underline-offset-2 hover:text-ink">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </>
   );
 }

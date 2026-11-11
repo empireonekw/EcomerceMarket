@@ -1,7 +1,9 @@
 import LegalPage from '@/components/LegalPage';
-import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, MIN_PAYOUT, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
+import { CHARGE_CURRENCY } from '@/lib/pricing';
 import { siteConfig } from '@/lib/site';
 import { DOWNLOADS_PER_HOUR } from '@/lib/downloads';
+import { formatPrice } from '@/lib/utils';
 
 export const metadata = {
   title: 'Terms of Service',
@@ -9,6 +11,7 @@ export const metadata = {
 };
 
 const { name, operator, supportEmail } = siteConfig;
+const provider = siteConfig.paymentProvider || 'our payment provider';
 const sellerShare = commissionPercent(1 - COMMISSION_RATE);
 const fee = commissionPercent();
 
@@ -36,10 +39,19 @@ const SECTIONS = [
     ],
   },
   {
+    id: 'marketplace',
+    heading: 'Our role: a marketplace',
+    body: [
+      `Products on the Marketplace are made and sold by independent sellers. The seller is the seller of each product they list, and the sale is between you and that seller. Products without a named shop are sold by ${operator}.`,
+      `${operator.charAt(0).toUpperCase() + operator.slice(1)} runs the Marketplace and collects payments for sellers as their limited payment collection agent, through ${provider}. When you pay us for an order, that counts as paying the seller, and you owe the seller nothing more for it. We pass the seller’s earnings on to them under our Payout Policy.`,
+      'We handle checkout, delivery, receipts, refunds and support for every order, so you always deal with us about a payment.',
+    ],
+  },
+  {
     id: 'purchases',
     heading: 'Purchases and delivery',
     body: [
-      'Prices are shown in US dollars and include any tax or service fee shown at checkout. Your order is confirmed once payment succeeds.',
+      `Prices are listed in US dollars and include any tax or service fee shown at checkout.${CHARGE_CURRENCY === 'USD' ? '' : ` Paid orders are charged in ${CHARGE_CURRENCY} at the exchange rate shown at checkout, before you pay (see the Payment Policy).`} Your order is confirmed once payment succeeds.`,
       'Products are delivered instantly after checkout: downloadable files through a private download link, and Figma, Notion and similar templates through a private access link. Links appear on your receipt and in My Purchases.',
     ],
   },
@@ -92,9 +104,9 @@ const SECTIONS = [
         'You keep ownership. You keep all copyright and other rights in your products. Listing a product only gives us a non-exclusive, worldwide, royalty-free licence to host, show, promote and deliver it to buyers. That licence ends when you remove the product, except for buyers who already bought it, who keep their lifetime access.',
         'You control your listings. You set your own prices, and you can edit, hide or delete your products at any time from your seller dashboard. New products and edits are reviewed before they go live.',
         NO_PLATFORM_FEE
-          ? `You keep 100% of every sale. We don’t charge sellers a platform fee or commission. Your earnings and full sales history are always visible in your dashboard.`
+          ? `No platform fee. We don’t charge sellers a platform fee or commission on sales: the full sale price goes into your balance. The only deduction is a ${PAYOUT_FEE_LABEL} merchant fee, taken once from each withdrawal. Your earnings and full sales history are always visible in your dashboard.`
           : `You keep ${sellerShare} of every sale. A ${fee} platform commission covers hosting, payments, delivery and support. Your earnings and full sales history are always visible in your dashboard.`,
-        'You get paid. Earnings are paid out to the bank account or mobile wallet you add in your dashboard.',
+        `You get paid. Earnings are paid out to the bank account or mobile wallet you add in your dashboard, once your balance reaches ${formatPrice(MIN_PAYOUT, 'USD')} and your identity is verified, minus the ${PAYOUT_FEE_LABEL} merchant fee on each withdrawal. The Payout Policy explains the fee, timing, holds and reversals.`,
         'Fair treatment. If we decline or remove a listing, you can contact us to find out why and ask for it to be reviewed again.',
       ],
       'In return, you confirm that you own or have the right to sell everything you upload. You agree to describe your products accurately and to help buyers with reasonable questions about them.',
@@ -137,7 +149,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of Service"
-      updated="October 2026"
+      updated="11 November 2026"
       intro={`These terms explain how buying and selling works on ${name}: what you get when you buy, how refunds work, and the rights sellers keep.`}
       sections={SECTIONS}
     />

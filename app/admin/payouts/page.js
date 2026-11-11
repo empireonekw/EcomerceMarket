@@ -2,7 +2,7 @@ import { BadgePercent, Clock, DollarSign, Users } from 'lucide-react';
 import ClearPayoutButton from '@/components/admin/ClearPayoutButton';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { getPayoutOverview } from '@/lib/data/payouts';
-import { commissionPercent, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { WALLET_OPTIONS } from '@/lib/validation';
 import { formatPrice } from '@/lib/utils';
 
@@ -40,7 +40,10 @@ export default async function AdminPayoutsPage() {
 
   return (
     <>
-      <PageHeader title="Seller Payouts" description={`${NO_PLATFORM_FEE ? 'No platform commission on seller sales' : `${commissionPercent()} platform commission on seller sales`} · payouts are sent manually`} />
+      <PageHeader
+        title="Seller Payouts"
+        description={`${NO_PLATFORM_FEE ? 'No platform commission on seller sales' : `${commissionPercent()} platform commission on seller sales`} · ${PAYOUT_FEE_LABEL} merchant fee kept from each withdrawal · payouts are sent manually`}
+      />
 
       <section aria-label="Marketplace totals" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -50,7 +53,13 @@ export default async function AdminPayoutsPage() {
           icon={DollarSign}
           tone="positive"
         />
-        <StatCard label="Admin Commission Earned" value={usd(totals.commission)} sub={NO_PLATFORM_FEE ? 'From earlier sales, no commission is charged now' : `${commissionPercent()} of seller sales`} icon={BadgePercent} tone="info" />
+        <StatCard
+          label="Admin Commission Earned"
+          value={usd(totals.commission + totals.payoutFees)}
+          sub={`${usd(totals.payoutFees)} from withdrawal merchant fees${totals.commission ? ` · ${usd(totals.commission)} commission on earlier sales` : ''}`}
+          icon={BadgePercent}
+          tone="info"
+        />
         <StatCard label="Pending Seller Payouts" value={usd(totals.pendingPayouts)} sub={`${queue.length} seller${queue.length === 1 ? '' : 's'} awaiting payment`} icon={Clock} tone="warning" />
         <StatCard label="Paid to Sellers" value={usd(totals.paidPayouts)} sub={`${totals.sellerCount} registered seller${totals.sellerCount === 1 ? '' : 's'}`} icon={Users} />
       </section>
@@ -64,12 +73,14 @@ export default async function AdminPayoutsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[920px] text-left text-sm">
                 <thead className="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
                   <tr>
                     <th scope="col" className="px-5 py-3">Seller</th>
                     <th scope="col" className="px-5 py-3">Send to</th>
                     <th scope="col" className="px-5 py-3 text-right">Pending</th>
+                    <th scope="col" className="px-5 py-3 text-right">Merchant fee</th>
+                    <th scope="col" className="px-5 py-3 text-right">Send</th>
                     <th scope="col" className="px-5 py-3 text-right">Paid to date</th>
                     <th scope="col" className="px-5 py-3 text-right">
                       <span className="sr-only">Action</span>
@@ -93,10 +104,12 @@ export default async function AdminPayoutsPage() {
                       <td className="px-5 py-4">
                         <Destination details={s.bankDetails} />
                       </td>
-                      <td className="px-5 py-4 text-right text-base font-medium tabular-nums">{usd(s.pendingPayout)}</td>
+                      <td className="px-5 py-4 text-right tabular-nums text-stone-600">{usd(s.pendingPayout)}</td>
+                      <td className="px-5 py-4 text-right tabular-nums text-stone-600">−{usd(s.withdrawal.fee)}</td>
+                      <td className="px-5 py-4 text-right text-base font-medium tabular-nums">{usd(s.withdrawal.net)}</td>
                       <td className="px-5 py-4 text-right tabular-nums text-stone-600">{usd(s.paidPayout)}</td>
                       <td className="px-5 py-4 text-right">
-                        <ClearPayoutButton sellerId={s.id} storeName={s.storeName} amount={s.pendingPayout} />
+                        <ClearPayoutButton sellerId={s.id} storeName={s.storeName} amount={s.pendingPayout} fee={s.withdrawal.fee} net={s.withdrawal.net} />
                       </td>
                     </tr>
                   ))}
@@ -125,7 +138,14 @@ export default async function AdminPayoutsPage() {
                         {p.reference && ` · Ref ${p.reference}`}
                       </p>
                     </div>
-                    <span className="font-medium tabular-nums">{usd(p.amount)}</span>
+                    <span className="text-right">
+                      <span className="block font-medium tabular-nums">{usd(p.netAmount)} sent</span>
+                      {p.fee > 0 && (
+                        <span className="block text-xs tabular-nums text-stone-500">
+                          {usd(p.amount)} − {usd(p.fee)} fee
+                        </span>
+                      )}
+                    </span>
                   </li>
                 );
               })}

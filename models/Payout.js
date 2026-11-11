@@ -12,7 +12,11 @@ export const PAYOUT_STATUSES = ['requested', 'paid'];
 const payoutSchema = new Schema(
   {
     seller: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    amount: { type: Number, required: true, min: 0 }, // cents
+    amount: { type: Number, required: true, min: 0 }, // cents debited from the seller's balance
+    // Merchant fee kept from this withdrawal (lib/commission.js payoutFee) and what the seller actually receives.
+    // Absent on payouts made before the fee existed: fee 0, net = amount.
+    fee: { type: Number, min: 0 },
+    netAmount: { type: Number, min: 0 },
     currency: { type: String, default: 'USD', uppercase: true },
     status: { type: String, enum: PAYOUT_STATUSES, default: 'requested' },
     destination: {

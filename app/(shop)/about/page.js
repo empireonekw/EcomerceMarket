@@ -1,7 +1,7 @@
 import Link from '@/components/PrefetchLink';
 import { Building2, Download, Mail, ShieldCheck, Infinity as InfinityIcon } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
-import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { siteConfig, gmailCompose } from '@/lib/site';
 
 const sellerShare = commissionPercent(1 - COMMISSION_RATE);
@@ -59,7 +59,7 @@ export default function AboutPage() {
           </p>
           <p>
             The products are made by independent creators, who own their work and set their own prices. We review every product before it goes live, sell it on
-            the creator’s behalf, and {NO_PLATFORM_FEE ? 'charge no platform fees, creators keep 100% of every sale' : `pay them ${sellerShare} of every sale`}. Every purchase comes with lifetime re-downloads and a clear{' '}
+            the creator’s behalf, and {NO_PLATFORM_FEE ? `charge no platform fees on sales, only a ${PAYOUT_FEE_LABEL} merchant fee when creators withdraw their earnings` : `pay them ${sellerShare} of every sale`}. Every purchase comes with lifetime re-downloads and a clear{' '}
             <Link href="/terms#refunds" className="text-black underline underline-offset-4 hover:text-brand-700">
               refund policy
             </Link>

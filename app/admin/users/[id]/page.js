@@ -232,6 +232,7 @@ export default async function AdminUserPage({ params }) {
                           <p className="font-medium tabular-nums">{usd(p.amount)}</p>
                           <p className="text-xs text-stone-500">
                             {date(p.paidAt ?? p.createdAt)}
+                            {p.fee > 0 && ` · ${usd(p.netAmount ?? p.amount - p.fee)} after ${usd(p.fee)} fee`}
                             {p.reference && ` · Ref ${p.reference}`}
                           </p>
                         </div>
