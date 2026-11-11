@@ -4,9 +4,9 @@ import { ArrowUpRight } from 'lucide-react';
 
 export function PageHeader({ title, description, actions }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="font-serif text-3xl font-[420] tracking-tight text-ink sm:text-4xl sm:leading-display">{title}</h1>
+        <h1 className="text-[1.75rem] leading-tight font-semibold tracking-tight text-ink">{title}</h1>
         {description && <p className="mt-1 line-clamp-2 max-w-3xl text-sm text-stone-500">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -64,8 +64,8 @@ function StatCardBody({ label, value, sub, icon: Icon, tone = 'neutral', feature
             </span>
           )}
         </div>
-        <p className="headline relative mt-3 text-4xl tabular-nums">{value}</p>
-        {sub && <p className="relative mt-1 text-sm text-ink/70">{sub}</p>}
+        <p className="relative mt-4 text-[1.75rem] leading-none font-semibold tracking-tight">{value}</p>
+        {sub && <p className="relative mt-2 text-xs text-ink/65">{sub}</p>}
       </div>
     );
   }
@@ -82,8 +82,8 @@ function StatCardBody({ label, value, sub, icon: Icon, tone = 'neutral', feature
           </span>
         )}
       </div>
-      <p className="headline mt-3 text-4xl tabular-nums">{value}</p>
-      {sub && <p className="mt-1 text-sm text-stone-500">{sub}</p>}
+      <p className="mt-4 text-[1.75rem] leading-none font-semibold tracking-tight text-ink">{value}</p>
+      {sub && <p className="mt-2 text-xs text-stone-500">{sub}</p>}
     </div>
   );
 }
@@ -143,7 +143,7 @@ export function Panel({ title, action, children, id }) {
     <section id={id} className="scroll-mt-24 rounded-2xl border border-stone-200 bg-white">
       {(title || action) && (
         <div className="flex items-center justify-between gap-4 border-b border-stone-200 px-5 py-4">
-          {title && <h2 className="headline text-xl">{title}</h2>}
+          {title && <h2 className="text-[15px] font-semibold text-ink">{title}</h2>}
           {action}
         </div>
       )}

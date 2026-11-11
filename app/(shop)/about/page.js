@@ -9,6 +9,7 @@ const sellerShare = commissionPercent(1 - COMMISSION_RATE);
 export const metadata = {
   title: 'About Us',
   description: `${siteConfig.name} is a marketplace for templates, e-books, software and vector packs from independent creators.`,
+  alternates: { canonical: '/about' },
 };
 
 const VALUES = [

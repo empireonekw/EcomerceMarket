@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, DollarSign, ShieldCheck, ShoppingBag, Store } from 'lucide-react';
 import PayoutProgress from '@/components/seller/PayoutProgress';
-import ShopDetailsForm from '@/components/seller/ShopDetailsForm';
 import VerifiedBadge from '@/components/VerifiedBadge';
 import { PageHeader, Panel, StatCard, StatusBadge, EmptyState, formatDateTime } from '@/components/dashboard/ui';
 import { requireSellerStore } from '@/lib/auth';
@@ -204,7 +203,7 @@ export default async function SellerDashboardPage() {
           )}
         </Panel>
 
-        {/* ---------- Shop settings (payouts & bank details live on /seller/payouts) ---------- */}
+        {/* ---------- Shop settings: edited on /seller/settings (payouts & bank details on /seller/payouts) ---------- */}
         <Panel
           title="Shop settings"
           id="shop"
@@ -214,8 +213,24 @@ export default async function SellerDashboardPage() {
             </Link>
           }
         >
-          <div className="p-5 sm:p-6">
-            <ShopDetailsForm initial={{ storeName: data.storeName, storeDescription: data.storeDescription }} />
+          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
+            {data.logo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={data.logo} alt="" className="size-14 shrink-0 rounded-full object-cover ring-1 ring-black/5" />
+            ) : (
+              <span className="grid size-14 shrink-0 place-items-center rounded-full bg-stone-100 text-stone-400">
+                <Store size={22} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-ink">{data.storeName}</p>
+              <p className="mt-0.5 line-clamp-2 text-sm text-stone-500">
+                {data.storeDescription || 'Add a description, profile picture and banner so buyers know who you are.'}
+              </p>
+            </div>
+            <Link href="/seller/settings" className="btn btn-md btn-outline shrink-0">
+              Edit shop settings
+            </Link>
           </div>
         </Panel>
       </div>

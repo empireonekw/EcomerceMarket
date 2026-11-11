@@ -1,5 +1,5 @@
 import { getRequestUser } from '@/lib/auth';
-import { json, unauthorized, readJson, errorResponse } from '@/lib/api';
+import { json, unauthorized, readJson, errorResponse, tooMany } from '@/lib/api';
 import { createLabel, deleteLabel, getMessagingSettings, updateAutoReply } from '@/lib/data/messages';
 
 /** GET /api/messages/settings — { labels, autoReply, isSeller }. */
@@ -17,6 +17,8 @@ export async function GET(request) {
 export async function PUT(request) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
+  const slow = tooMany(`message-settings:${user.id}`, 60, 10 * 60_000);
+  if (slow) return slow;
   try {
     const body = await readJson(request);
     return json(await updateAutoReply(user.id, body.autoReply));
@@ -29,6 +31,8 @@ export async function PUT(request) {
 export async function POST(request) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
+  const slow = tooMany(`message-settings:${user.id}`, 60, 10 * 60_000);
+  if (slow) return slow;
   try {
     const body = await readJson(request);
     return json(await createLabel(user.id, body.label), 201);
@@ -41,6 +45,8 @@ export async function POST(request) {
 export async function DELETE(request) {
   const user = await getRequestUser(request);
   if (!user) return unauthorized();
+  const slow = tooMany(`message-settings:${user.id}`, 60, 10 * 60_000);
+  if (slow) return slow;
   try {
     return json(await deleteLabel(user.id, request.nextUrl.searchParams.get('label')));
   } catch (err) {

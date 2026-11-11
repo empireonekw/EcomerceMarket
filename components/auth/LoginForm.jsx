@@ -13,8 +13,11 @@ import GoogleButton from '@/components/auth/GoogleButton';
 // Where each role lands after logging in: customers go back to shopping. Sellers without a shop are forwarded to /sell-on-sellpify.
 const DASHBOARD = { admin: '/admin', seller: '/seller/dashboard', customer: '/' };
 
-/** `registered` = arriving straight from sign-up: email prefilled. A `next` (e.g. checkout) always wins. */
-export default function LoginForm({ next, registered = false, oauthError = null }) {
+/**
+ * `registered` = arriving straight from sign-up, `passwordReset` = from /forgot-password: email prefilled either way.
+ * A `next` (e.g. checkout) always wins.
+ */
+export default function LoginForm({ next, registered = false, passwordReset = false, oauthError = null }) {
   const router = useRouter();
   const { login } = useAuth();
   const [values, setValues] = useState({ email: '', password: '' });
@@ -25,9 +28,9 @@ export default function LoginForm({ next, registered = false, oauthError = null 
   const [captchaError, setCaptchaError] = useState(null);
   const captchaRef = useRef(null);
 
-  // Pick up the email SignupForm left in sessionStorage (one-time) and jump straight to the password.
+  // Pick up the email SignupForm / ForgotPasswordForm left in sessionStorage (one-time) and jump straight to the password.
   useEffect(() => {
-    if (!registered) return;
+    if (!registered && !passwordReset) return;
     let email = null;
     try {
       email = sessionStorage.getItem(NEW_ACCOUNT_EMAIL_KEY);
@@ -37,7 +40,7 @@ export default function LoginForm({ next, registered = false, oauthError = null 
       setValues((v) => ({ ...v, email }));
       document.getElementById('password')?.focus();
     }
-  }, [registered]);
+  }, [registered, passwordReset]);
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -77,6 +80,12 @@ export default function LoginForm({ next, registered = false, oauthError = null 
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
+      {passwordReset && !formError && (
+        <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />
+          Your password was changed and you were signed out everywhere else. Log in with the new one.
+        </p>
+      )}
       {registered && !formError && (
         <p role="status" className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <Check size={16} strokeWidth={2.25} aria-hidden="true" className="shrink-0" />

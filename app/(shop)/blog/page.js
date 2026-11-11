@@ -5,6 +5,8 @@ import { siteConfig } from '@/lib/site';
 export const metadata = {
   title: 'Blog',
   description: `Guides, creator stories and product news from ${siteConfig.name}.`,
+  // An empty page is thin content: out of the index (and the sitemap) until the first posts are published.
+  robots: { index: false, follow: true },
 };
 
 // No posts yet — this page is ready for a CMS or MDX source when content exists.

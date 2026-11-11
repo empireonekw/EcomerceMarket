@@ -1,7 +1,9 @@
-import Link from 'next/link';
-import Form from 'next/form';
-import { PageHeader, EmptyState, buttonClasses } from '@/components/dashboard/ui';
 import ReviewModeration from '@/components/admin/ReviewModeration';
+import { SearchBox, SegmentedNav } from '@/components/admin/ListToolbar';
+import { MetricCard } from '@/components/admin/analytics/KpiCard';
+import { PageTitle } from '@/components/admin/ui';
+import { PendingContent, PendingNavProvider } from '@/components/dashboard/PendingNav';
+import { EmptyState } from '@/components/dashboard/ui';
 import { requireAdmin } from '@/lib/auth';
 import { getAdminReviews } from '@/lib/data/reviews';
 
@@ -9,11 +11,10 @@ export const metadata = { title: 'Reviews' };
 
 const VIEWS = [
   { value: 'reported', label: 'Reported', count: 'reported' },
-  { value: 'resolved', label: 'Resolved reports', count: 'resolved' },
+  { value: 'resolved', label: 'Resolved', count: 'resolved' },
   { value: 'removed', label: 'Removed', count: 'removed' },
   { value: 'all', label: 'All reviews', count: 'all' },
 ];
-const field = 'h-11 rounded-full border border-stone-300 bg-white px-4 text-sm focus:border-black focus:outline-none';
 
 /**
  * Admin → Reviews: reviews sellers reported as fake or against the rules (oldest report first), with the seller's
@@ -29,53 +30,47 @@ export default async function AdminReviewsPage({ searchParams }) {
 
   return (
     <>
-      <PageHeader title="Reviews" description="Check reviews sellers reported. Keep, correct or remove them: both the seller and the buyer are told." />
+      <PageTitle title="Reviews" description="Reviews sellers reported. Keep, correct or remove them: both the seller and the buyer are told." />
 
-      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <nav aria-label="Review views" className="flex flex-wrap gap-2">
-          {VIEWS.map((v) => (
-            <Link
-              key={v.value}
-              href={href(v.value)}
-              aria-current={view === v.value ? 'page' : undefined}
-              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors ${view === v.value ? 'border-ink bg-ink text-white' : 'border-stone-300 bg-white text-stone-700 hover:border-ink'}`}
-            >
-              {v.label}
-              <span
-                className={`rounded-full px-2 text-xs font-medium leading-4 tabular-nums ${
-                  v.value === 'reported' && counts.reported ? 'bg-amber-400 text-ink' : view === v.value ? 'bg-white/20' : 'bg-stone-100 text-stone-600'
-                }`}
-              >
-                {counts[v.count]}
-              </span>
-            </Link>
-          ))}
-        </nav>
-        <Form action="/admin/reviews" className="flex gap-2">
-          <input type="hidden" name="view" value={view} />
-          <label htmlFor="review-search" className="sr-only">
-            Search reviews
-          </label>
-          <input id="review-search" type="search" name="q" defaultValue={q} placeholder="Product, text or buyer…" className={`${field} w-full lg:w-72`} />
-          <button type="submit" className={buttonClasses.secondary}>
-            Search
-          </button>
-        </Form>
-      </div>
+      <section aria-label="Review totals" className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <MetricCard
+          label="Reported"
+          value={counts.reported.toLocaleString('en-US')}
+          sub={counts.reported ? 'Waiting for your decision' : 'All caught up'}
+          tone="brand"
+          href={href('reported')}
+        />
+        <MetricCard label="Resolved" value={counts.resolved.toLocaleString('en-US')} sub="Reports you’ve handled" href={href('resolved')} />
+        <MetricCard label="Removed" value={counts.removed.toLocaleString('en-US')} sub="Hidden from the store" href={href('removed')} />
+        <MetricCard label="All reviews" value={counts.all.toLocaleString('en-US')} sub="Written by buyers" tone="ink" href={href('all')} />
+      </section>
 
-      {items.length === 0 ? (
-        <EmptyState title={view === 'reported' ? 'No reported reviews' : 'No reviews here'}>
-          {view === 'reported' ? 'When a seller reports a review, it shows up here.' : q ? 'Try another search.' : null}
-        </EmptyState>
-      ) : (
-        <ul className="space-y-4">
-          {items.map((r) => (
-            <li key={r.id}>
-              <ReviewModeration review={r} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <PendingNavProvider>
+        <div className="mt-4 mb-4 flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+          <SegmentedNav
+            label="Review views"
+            activeKey={view}
+            items={VIEWS.map((v) => ({ key: v.value, label: v.label, count: counts[v.count], href: href(v.value) }))}
+          />
+          <SearchBox action="/admin/reviews" params={{ view }} defaultValue={q} placeholder="Product, text or buyer…" />
+        </div>
+
+        <PendingContent fallback={<div className="h-64 animate-pulse rounded-2xl border border-stone-200 bg-white" />}>
+          {items.length === 0 ? (
+            <EmptyState title={view === 'reported' ? 'No reported reviews' : 'No reviews here'}>
+              {view === 'reported' ? 'When a seller reports a review, it shows up here.' : q ? 'Try another search.' : null}
+            </EmptyState>
+          ) : (
+            <ul className="space-y-4">
+              {items.map((r) => (
+                <li key={r.id}>
+                  <ReviewModeration review={r} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </PendingContent>
+      </PendingNavProvider>
     </>
   );
 }

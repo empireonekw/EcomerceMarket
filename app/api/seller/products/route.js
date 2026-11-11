@@ -1,5 +1,5 @@
 import { getRequestUser } from '@/lib/auth';
-import { json, unauthorized, forbidden, readJson, errorResponse } from '@/lib/api';
+import { json, unauthorized, forbidden, readJson, errorResponse, tooMany } from '@/lib/api';
 import { createSellerProduct } from '@/lib/data/seller';
 import { refreshStorefront } from '@/lib/revalidate';
 
@@ -13,6 +13,8 @@ export async function POST(request) {
   if (!user) return unauthorized();
   if (user.role !== 'seller') return forbidden('Seller account required.');
   if (!user.storeName) return json({ error: 'Set up your shop first.' }, 409);
+  const slow = tooMany(`listing-create:${user.id}`, 100, 60 * 60_000, 'You’ve added a lot of listings in the last hour. Please wait a little.');
+  if (slow) return slow;
 
   try {
     const body = await readJson(request, 64 * 1024);

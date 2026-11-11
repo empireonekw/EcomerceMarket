@@ -3,6 +3,7 @@ import { Fraunces, Inter } from 'next/font/google';
 
 import NavigationProgress from '@/components/NavigationProgress';
 import RobotCheckRedirect from '@/components/RobotCheckRedirect';
+import VisitTracker from '@/components/VisitTracker';
 import { REVEAL_SCRIPT } from '@/components/Reveal';
 import { siteConfig } from '@/lib/site';
 
@@ -41,7 +42,8 @@ export const metadata = {
     url: '/',
   },
   twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true },
+  // Large image previews and full snippets in search results (product photos are the main draw).
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
 export const viewport = {
@@ -69,6 +71,7 @@ export default function RootLayout({ children }) {
         </Suspense>
         {children}
         <RobotCheckRedirect />
+        <VisitTracker />
       </body>
     </html>
   );
