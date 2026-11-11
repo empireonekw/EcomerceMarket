@@ -45,6 +45,7 @@ const LINK_GROUPS = [
       { label: 'Contact Us', href: '/contact' },
       { label: 'Sell With Us', href: '/sell/signup' },
       { label: 'Seller Agreement', href: '/legal/seller-agreement' },
+      { label: 'Payout Policy', href: '/legal/payout-policy' },
     ],
   },
   {
@@ -54,6 +55,7 @@ const LINK_GROUPS = [
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Refund Policy', href: '/legal/refund-policy' },
       { label: 'Payment Policy', href: '/legal/payment-policy' },
+      { label: 'Lemon Squeezy Payments', href: '/legal/lemon-squeezy' },
       { label: 'Delivery Policy', href: '/legal/delivery-policy' },
       { label: 'Cancellation Policy', href: '/legal/cancellation-policy' },
       { label: 'Cookie Policy', href: '/legal/cookie-policy' },

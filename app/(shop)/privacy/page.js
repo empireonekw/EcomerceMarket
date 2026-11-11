@@ -8,6 +8,7 @@ export const metadata = {
 };
 
 const { name, operator, supportEmail } = siteConfig;
+const provider = siteConfig.paymentProvider || 'our payment provider';
 
 // Describes the data the site actually stores. Have it reviewed for your jurisdiction before launch,
 // and update `updated` below whenever it changes.
@@ -24,9 +25,10 @@ const SECTIONS = [
     heading: 'What we collect',
     body: [
       [
-        'Account details: your name, email address and a securely hashed password (we never store your password itself).',
-        'Orders: what you bought, the amount paid, the email address used at checkout, and when each item was downloaded.',
-        'Sellers: your shop name and description, your products, your sales and earnings, and the bank or mobile wallet details you give us for payouts.',
+        'Account details: your name, email address, mobile number and a securely hashed password (we never store your password itself). If you sign in with Google, we receive your name, email address and Google account ID from Google.',
+        'Orders: what you bought, the amount paid, the email address and mobile number used at checkout, the payment reference from our payment provider, and when each item was downloaded.',
+        'Sellers: your shop name and description, your shop address and phone number, your products, your sales and earnings, and the bank or mobile wallet details you give us for payouts. Payout details are encrypted when stored.',
+        'Seller identity checks: before a seller’s first payout we collect photos of both sides of their government ID and a live selfie, to prevent fraud and confirm who we are paying. These files are private: only the seller and the team members who review them can open them.',
         'Reviews: the rating and text you write, shown publicly with your name.',
         'Messages: what you send us through the Contact Us page, with your name and email address.',
         'Security data: your IP address, used briefly to stop abuse such as repeated failed logins. It is not used for tracking or advertising.',
@@ -36,7 +38,11 @@ const SECTIONS = [
   {
     id: 'payments',
     heading: 'Payments',
-    body: ['Card payments are processed by our payment provider over an encrypted connection. We never see or store your full card number.'],
+    body: [
+      `Payments are processed by ${provider}. When you pay, you enter your card, wallet or bank details on their secure page, and they receive the order amount, your email address and your mobile number to process the payment and prevent fraud. We never see or store your full card number or wallet PIN. ${provider} handles that information under its own privacy policy.`,
+      'Some orders are paid through Lemon Squeezy, which acts as the Merchant of Record for them. For those orders you enter your details on Lemon Squeezy’s checkout, and it collects your name, email address, billing country and payment details to process the payment and charge the right tax. We receive the order reference, your name, email address, country, the amount and the payment status, never your full card number. Lemon Squeezy handles your data under its own Privacy Policy (lemonsqueezy.com/privacy). Our Lemon Squeezy Payments & Privacy page has the details.',
+      'Because we collect payments for sellers, we also keep the records needed to pay them their earnings, handle refunds and chargebacks, and meet accounting and anti-fraud obligations.',
+    ],
   },
   {
     id: 'how-we-use',
@@ -74,14 +80,21 @@ const SECTIONS = [
     id: 'sharing',
     heading: 'Who we share it with',
     body: [
-      'We share data only with the service providers we need to run the Marketplace, website hosting, our database provider and our payment provider, and only for that purpose. We may also disclose data when the law requires it.',
+      [
+        'Service providers we need to run the Marketplace: website hosting, our database and file storage providers, and our email provider, only for that purpose.',
+        `Our payment provider (${provider}), to process payments and refunds and prevent fraud.`,
+        'Lemon Squeezy, our Merchant of Record for orders paid through it, to process those payments, charge sales tax or VAT, handle refunds and prevent fraud.',
+        'Banks and wallet providers, to send sellers their payouts (only the payout details and amount).',
+        'Authorities, when the law requires it, for example to investigate fraud.',
+      ],
+      'We don’t sell your data or share it with advertisers.',
     ],
   },
   {
     id: 'retention',
     heading: 'How long we keep it',
     body: [
-      'We keep your account data while your account is open. If your account is deleted, we remove your profile, but we keep order and payment records for as long as accounting and tax law requires. Those records are no longer linked to an account. We delete messages sent through the Contact Us page once they are no longer needed to help you.',
+      'We keep your account data while your account is open. If your account is deleted, we remove your profile, but we keep order and payment records for as long as accounting and tax law requires. Those records are no longer linked to an account. Seller identity documents are kept while the shop is open and for as long as anti-fraud and financial record-keeping rules require after it closes. We delete messages sent through the Contact Us page once they are no longer needed to help you.',
     ],
   },
   {
@@ -109,7 +122,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      updated="October 2026"
+      updated="11 November 2026"
       intro={`This policy explains what personal data ${name} keeps, why we keep it, who can see it and how you can have it changed or deleted.`}
       sections={SECTIONS}
     />

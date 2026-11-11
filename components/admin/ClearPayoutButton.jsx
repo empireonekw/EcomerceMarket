@@ -10,7 +10,7 @@ import { formatPrice } from '@/lib/utils';
  * "Mark as Paid": confirm in a native <dialog>, optionally record the bank/wallet transaction ID,
  * then POST /api/admin/payouts. The server clears the balance atomically and writes the ledger entry.
  */
-export default function ClearPayoutButton({ sellerId, storeName, amount }) {
+export default function ClearPayoutButton({ sellerId, storeName, amount, fee = 0, net = amount }) {
   const dialogRef = useRef(null);
   const titleId = useId();
   const router = useRouter();
@@ -25,13 +25,17 @@ export default function ClearPayoutButton({ sellerId, storeName, amount }) {
       const res = await fetch('/api/admin/payouts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Send the exact amount shown (and paid): newer sales stay pending rather than being marked paid.
+        // Send the exact balance shown: newer sales stay pending rather than being marked paid. The server takes the
+        // same merchant fee from it (lib/commission.js payoutFee), so what the admin sent matches the record.
         body: JSON.stringify({ sellerId, amount, reference }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Could not clear payout');
       dialogRef.current?.close();
-      toast.success(`Paid ${formatPrice(data.amount)} to ${storeName}`, data.reference ? `Reference ${data.reference}` : undefined);
+      toast.success(
+        `Paid ${formatPrice(data.netAmount ?? data.amount)} to ${storeName}`,
+        [data.fee > 0 && `${formatPrice(data.fee)} merchant fee kept`, data.reference && `Reference ${data.reference}`].filter(Boolean).join(' · ') || undefined,
+      );
       startTransition(() => router.refresh());
     } catch (err) {
       toast.error('Payout not recorded', err.message);
@@ -59,10 +63,25 @@ export default function ClearPayoutButton({ sellerId, storeName, amount }) {
       >
         <div className="p-6">
           <h2 id={titleId} className="text-lg font-medium">
-            Clear {formatPrice(amount)} for {storeName}?
+            Send {formatPrice(net)} to {storeName}?
           </h2>
-          <p className="mt-2 text-sm text-stone-600">
-            Only confirm after you’ve sent exactly {formatPrice(amount)}. That amount moves from their pending balance to their paid total; any newer sales stay pending.
+          <dl className="mt-3 space-y-1 rounded-xl bg-stone-50 px-4 py-3 text-sm tabular-nums">
+            <div className="flex justify-between text-stone-600">
+              <dt>Pending balance</dt>
+              <dd>{formatPrice(amount)}</dd>
+            </div>
+            <div className="flex justify-between text-stone-600">
+              <dt>Merchant fee</dt>
+              <dd>−{formatPrice(fee)}</dd>
+            </div>
+            <div className="flex justify-between border-t border-stone-200 pt-1 font-medium text-ink">
+              <dt>Send to seller</dt>
+              <dd>{formatPrice(net)}</dd>
+            </div>
+          </dl>
+          <p className="mt-3 text-sm text-stone-600">
+            Only confirm after you’ve sent exactly {formatPrice(net)}. Their {formatPrice(amount)} balance is cleared and the fee is kept; any newer
+            sales stay pending.
           </p>
           <label htmlFor={`${titleId}-ref`} className="mt-5 block text-sm font-medium">
             Transaction reference <span className="font-normal text-stone-400">(optional)</span>

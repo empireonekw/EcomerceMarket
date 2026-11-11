@@ -1,7 +1,7 @@
 import Link from '@/components/PrefetchLink';
 import { ChevronDown } from 'lucide-react';
 import PageIntro from '@/components/PageIntro';
-import { NO_PLATFORM_FEE } from '@/lib/commission';
+import { NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { siteConfig, gmailCompose } from '@/lib/site';
 
 export const metadata = {
@@ -33,9 +33,21 @@ const GROUPS = [
     title: 'Selling',
     items: [
       { q: 'How do I start selling?', a: 'Create a seller account, add your first listing and submit it for review. Approved listings go live in their category.', href: '/sell/signup', link: 'Start selling' },
-      { q: 'What does it cost?', a: NO_PLATFORM_FEE ? 'Opening a shop is free and we don’t take a commission. You keep every sale.' : 'Opening a shop is free; a small commission is taken from each sale.' },
+      {
+        q: 'What does it cost?',
+        a: NO_PLATFORM_FEE
+          ? `Opening a shop is free and we don’t take a commission on sales. The only fee is a ${PAYOUT_FEE_LABEL} merchant fee, deducted when you withdraw your earnings.`
+          : 'Opening a shop is free; a small commission is taken from each sale.',
+        href: '/legal/payout-policy',
+        link: 'Payout Policy',
+      },
       { q: 'How are listings reviewed?', a: 'A person checks rights, accuracy, files and category before a listing goes live.', href: '/how-it-works#review-methodology', link: 'Our review methodology' },
-      { q: 'How do I get paid?', a: 'Add your bank account or mobile wallet on the Payouts page of your seller dashboard.', href: '/legal/seller-agreement', link: 'Seller Agreement' },
+      {
+        q: 'How do I get paid?',
+        a: `Add your bank account or mobile wallet on the Payouts page of your seller dashboard. Once your balance reaches $50 and your identity is verified, request a payout and our team sends it, minus the ${PAYOUT_FEE_LABEL} merchant fee.`,
+        href: '/legal/payout-policy',
+        link: 'Payout Policy',
+      },
     ],
   },
   {

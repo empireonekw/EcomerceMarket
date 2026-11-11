@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Send } from 'lucide-react';
 import { useToast } from '@/components/dashboard/Toaster';
 import { buttonClasses } from '@/components/dashboard/ui';
+import { formatPrice } from '@/lib/utils';
 
 /** Asks the admin team to pay out the pending balance. Disabled while a request is open. */
 export default function RequestPayoutButton({ disabled, reason }) {
@@ -19,7 +20,12 @@ export default function RequestPayoutButton({ disabled, reason }) {
       const res = await fetch('/api/seller/payouts', { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Request failed');
-      toast.success('Payout requested', 'Our team will send it to your saved bank or wallet details.');
+      toast.success(
+        'Payout requested',
+        data.fee > 0
+          ? `Our team will send ${formatPrice(data.netAmount, 'USD')} (after the ${formatPrice(data.fee, 'USD')} merchant fee) to your saved bank or wallet details.`
+          : 'Our team will send it to your saved bank or wallet details.',
+      );
       startTransition(() => router.refresh());
     } catch (err) {
       toast.error('Could not request payout', err.message);

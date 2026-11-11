@@ -10,7 +10,8 @@ export const TRANSACTION_TYPES = ['sale', 'payout'];
  *
  *  - 'sale'   one entry per order line: gross = commission + sellerEarning.
  *             Platform-owned products have no seller: commission = gross, sellerEarning = 0.
- *  - 'payout' money sent to a seller: sellerEarning is the (negative) amount debited from their balance.
+ *  - 'payout' money sent to a seller: sellerEarning is the (negative) amount debited from their balance, and
+ *             `fee` the merchant fee kept from it (the seller receives -sellerEarning - fee).
  */
 const transactionSchema = new Schema(
   {
@@ -24,6 +25,7 @@ const transactionSchema = new Schema(
     commission: { type: Number, required: true }, // platform share
     sellerEarning: { type: Number, required: true }, // seller share (+ for sales, − for payouts)
     commissionRate: { type: Number }, // rate applied at the time — history stays accurate if it changes
+    fee: { type: Number, min: 0 }, // payouts only: merchant fee kept from the withdrawal
     currency: { type: String, default: 'USD', uppercase: true },
     paymentProvider: { type: String }, // 'demo' sales can be told apart from real money
   },

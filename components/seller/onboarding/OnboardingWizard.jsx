@@ -539,7 +539,7 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
                   </span>
                 </div>
                 <p id="card-free" className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
-                  Sellpify is currently 100% free for sellers! No payment information required at this stage.
+                  Opening a shop on Sellpify is free, with no platform fees on sales! No payment information required at this stage.
                 </p>
                 <div className="mt-4 grid grid-cols-1 gap-4 opacity-70 sm:grid-cols-2" aria-hidden="true">
                   {[
@@ -843,6 +843,10 @@ export default function OnboardingWizard({ initial, uploads, agreement, firstNam
             <p className="mt-6">
               <Link href="/legal/seller-agreement" target="_blank" className="font-medium text-ink underline underline-offset-2">
                 Open the full agreement in a new tab
+              </Link>
+              {' · '}
+              <Link href="/legal/payout-policy" target="_blank" className="font-medium text-ink underline underline-offset-2">
+                Payout Policy
               </Link>
             </p>
           </div>

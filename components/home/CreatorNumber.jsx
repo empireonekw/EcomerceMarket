@@ -1,7 +1,7 @@
 import Link from '@/components/PrefetchLink';
 import { ArrowRight } from 'lucide-react';
 import { Eyebrow, Glow, Sparkle } from '@/components/home/Editorial';
-import { COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { COMMISSION_RATE, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import Reveal from '@/components/Reveal';
 import CountUp from '@/components/home/CountUp';
 
@@ -34,7 +34,10 @@ export default function CreatorNumber() {
             className="inline-block bg-gradient-to-r from-brand-500 via-peach-500 to-berry-500 bg-[length:200%_100%] bg-clip-text pr-[0.04em] text-transparent tabular-nums motion-safe:animate-[gradient-pan_8s_ease-in-out_infinite_alternate]"
           />
         </p>
-        <p className="mt-3 text-xs font-semibold tracking-caps text-stone-500 uppercase">of every sale</p>
+        <p className="mt-3 text-xs font-semibold tracking-caps text-stone-500 uppercase">of every sale price</p>
+        {NO_PLATFORM_FEE && (
+          <p className="mt-2 text-sm text-stone-500">No platform fees. A {PAYOUT_FEE_LABEL} merchant fee applies only when you withdraw.</p>
+        )}
 
         <h2 id="creators-heading" className="mx-auto mt-12 max-w-2xl font-serif text-4xl leading-display tracking-tight text-ink text-balance sm:text-5xl">
           Sell your work. Keep what you earn.

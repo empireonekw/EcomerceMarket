@@ -4,7 +4,8 @@ import { clearSellerPayout } from '@/lib/data/payouts';
 
 /**
  * POST /api/admin/payouts — { sellerId, amount?, reference? } records a manual payout.
- * `amount` (cents) = what was actually sent; only that much is cleared. Omit it to clear the full balance.
+ * `amount` (cents) = the balance shown when the admin clicked; only that much is cleared. Omit it to clear the full
+ * balance. The merchant fee (lib/commission.js payoutFee) is kept from it: the admin sends amount − fee.
  * Admin session or Bearer ADMIN_API_KEY.
  */
 export async function POST(request) {
