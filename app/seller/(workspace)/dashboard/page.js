@@ -8,7 +8,7 @@ import { requireSellerStore } from '@/lib/auth';
 import { getSellerDashboard } from '@/lib/data/seller';
 import { getBalanceTrend, getMonthlyEarnings } from '@/lib/data/seller-analytics';
 import { EarningsPanel } from '@/components/dashboard/SellerAnalytics';
-import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, splitSale, COMMISSION_RATE, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { listingStatus } from '@/lib/listing';
 import { formatPrice, NEUTRAL_BLUR_DATA_URL } from '@/lib/utils';
 import { siteConfig } from '@/lib/site';
@@ -83,7 +83,7 @@ export default async function SellerDashboardPage() {
             {data.verification?.status === 'verified' && <VerifiedBadge size={26} />}
           </span>
         }
-        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? 'No platform fees, you keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
+        description={`${data.storeDescription ? `${data.storeDescription} · ` : ''}${NO_PLATFORM_FEE ? `No platform fees on sales, a ${PAYOUT_FEE_LABEL} merchant fee only when you withdraw` : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`}`}
       />
 
       <section aria-label="Earnings" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

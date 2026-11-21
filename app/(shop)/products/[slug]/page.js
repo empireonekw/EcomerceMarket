@@ -1,4 +1,5 @@
 import Link from '@/components/PrefetchLink';
+import JsonLd, { breadcrumbLd } from '@/components/JsonLd';
 import { notFound } from 'next/navigation';
 import { BadgeCheck, Check, ChevronRight, Download, FileText, Layers, Lock, MapPin, RefreshCw, Scale, ShoppingBag, Star, Tag } from 'lucide-react';
 import BackLink from '@/components/BackLink';
@@ -51,21 +52,35 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function productJsonLd(product, reviews) {
+/**
+ * Product structured data for rich results: price and availability, the shop as brand and seller, star rating and a
+ * few real reviews once there are some. Digital files: no shipping; the refund policy is linked from the page.
+ */
+function productJsonLd(product, reviews, shop, recentReviews) {
+  const url = `${siteConfig.url}/products/${product.slug}`;
+  const seller = shop?.name
+    ? { '@type': 'Organization', name: shop.name, url: `${siteConfig.url}/shop/${shop.id}` }
+    : { '@type': 'Organization', name: siteConfig.name, url: siteConfig.url };
   return {
-    '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.title,
+    url,
     description: product.shortDescription || stripRichText(product.description).slice(0, 300),
-    image: product.images?.length ? product.images : product.coverImage ? [product.coverImage] : undefined,
-    sku: product._id,
+    image: (product.images?.length ? product.images : product.coverImage ? [product.coverImage] : []).map((src) =>
+      /^https?:/.test(src) ? src : `${siteConfig.url}${src}`,
+    ),
+    sku: String(product._id),
     category: product.category?.name,
+    brand: { '@type': 'Brand', name: seller.name },
+    ...(product.tags?.length && { keywords: product.tags.join(', ') }),
     offers: {
       '@type': 'Offer',
-      url: `${siteConfig.url}/products/${product.slug}`,
+      url,
       priceCurrency: product.currency,
       price: (product.price / 100).toFixed(2),
       availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller,
     },
     // Star rating in search results, once there are reviews.
     ...(reviews.count > 0 && {
@@ -76,6 +91,15 @@ function productJsonLd(product, reviews) {
         bestRating: 5,
         worstRating: 1,
       },
+    }),
+    ...(recentReviews?.length && {
+      review: recentReviews.slice(0, 3).map((r) => ({
+        '@type': 'Review',
+        author: { '@type': 'Person', name: r.authorName || 'Buyer' },
+        datePublished: new Date(r.createdAt).toISOString().slice(0, 10),
+        reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+        ...(r.body && { reviewBody: r.body }),
+      })),
     }),
   };
 }
@@ -123,7 +147,9 @@ export default async function ProductPage({ params }) {
     coverImage: product.coverImage,
     accessLink,
   };
-  const intro = String(product.description ?? '').split(/\n\s*\n/)[0].trim(); // first paragraph, for the buy box
+  const intro = String(product.description ?? '')
+    .split(/\n\s*\n/)[0]
+    .trim(); // first paragraph, for the buy box
   const photos = product.images?.length ? product.images : [product.coverImage].filter(Boolean);
   const country = shop?.country && countryOf(shop.country)?.name;
   const shopAge = timeOn(shop?.since);
@@ -131,10 +157,15 @@ export default async function ProductPage({ params }) {
   return (
     <div className="container-page py-6 sm:py-10">
       <ProductViewTracker productId={String(product._id)} />
-      <script
-        type="application/ld+json"
-        // Escape "<" so product text can never close the script tag.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd(product, reviewSummary)).replace(/</g, '\\u003c') }}
+      <JsonLd
+        data={[
+          productJsonLd(product, reviewSummary, shop, firstReviews?.items),
+          breadcrumbLd(siteConfig.url, [
+            { name: 'Home', href: '/' },
+            ...trail.map((c) => ({ name: c.name, href: categoryHref(c) })),
+            { name: product.title, href: `/products/${product.slug}` },
+          ]),
+        ]}
       />
 
       {/* ---------- Top navigation: Back + breadcrumbs (centred on large screens) ---------- */}
@@ -396,7 +427,9 @@ export default async function ProductPage({ params }) {
                         </p>
                         {r.imported ? (
                           <p className="mt-2">
-                            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">From the seller’s other shop</span>
+                            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
+                              From the seller’s other shop
+                            </span>
                           </p>
                         ) : (
                           <p className="mt-0.5 truncate text-xs text-stone-500">

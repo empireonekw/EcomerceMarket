@@ -1,6 +1,6 @@
 import { CheckCircle2, Lock, TrendingUp } from 'lucide-react';
 import RequestPayoutButton from '@/components/seller/RequestPayoutButton';
-import { MIN_PAYOUT } from '@/lib/commission';
+import { MIN_PAYOUT, PAYOUT_FEE_LABEL, payoutFee } from '@/lib/commission';
 import { formatDateTime } from '@/components/dashboard/ui';
 import { formatPrice } from '@/lib/utils';
 
@@ -13,7 +13,10 @@ const EMERALD = '#10b981';
  * an open request, identity, payout details. `verification` is the status string ('pending' | 'verified' | …).
  */
 export function payoutBlocker({ openRequest, verification, hasPayoutMethod }) {
-  if (openRequest) return `Request for ${usd(openRequest.amount)} sent ${formatDateTime(openRequest.createdAt).date}, awaiting payment.`;
+  if (openRequest) {
+    const { fee, net } = payoutFee(openRequest.amount);
+    return `Request for ${usd(openRequest.amount)} sent ${formatDateTime(openRequest.createdAt).date}, awaiting payment. You’ll receive ${usd(net)} after the ${usd(fee)} merchant fee.`;
+  }
   if (verification === 'pending') return 'We’re checking your identity. You can request a payout once it’s verified.';
   if (verification !== 'verified') return 'Verify your identity first (Payouts & Bank Details).';
   if (!hasPayoutMethod) return 'Add your bank or wallet details on Payouts & Bank Details first.';
@@ -168,7 +171,12 @@ export default function PayoutProgress({ balance, trend, openRequest = null, ver
 
       {unlocked ? (
         <div className="mt-4 space-y-2 border-t border-slate-100 pt-4">
-          {!blocker && <p className="text-xs text-stone-500">Your {usd(balance)} is ready to withdraw.</p>}
+          {!blocker && (
+            <p className="text-xs text-stone-500">
+              Your {usd(balance)} is ready to withdraw. After the {PAYOUT_FEE_LABEL} merchant fee ({usd(payoutFee(balance).fee)}) you receive{' '}
+              <span className="font-semibold tabular-nums text-ink">{usd(payoutFee(balance).net)}</span>.
+            </p>
+          )}
           <RequestPayoutButton disabled={Boolean(blocker)} reason={blocker} />
         </div>
       ) : (

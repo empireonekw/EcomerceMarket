@@ -42,7 +42,8 @@ export const metadata = {
     url: '/',
   },
   twitter: { card: 'summary_large_image' },
-  robots: { index: true, follow: true },
+  // Large image previews and full snippets in search results (product photos are the main draw).
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
 };
 
 export const viewport = {

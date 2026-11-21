@@ -8,6 +8,7 @@ import { siteConfig, gmailCompose } from '@/lib/site';
 export const metadata = {
   title: 'Contact Us',
   description: `Questions about an order, a download or selling on ${siteConfig.name}? Send us a message or email ${siteConfig.supportEmail}.`,
+  alternates: { canonical: '/contact' },
 };
 
 const HELP = [

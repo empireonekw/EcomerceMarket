@@ -9,6 +9,9 @@ import ProductGrid from '@/components/ProductGrid';
 import { categoryHref, categoryNav } from '@/lib/category-tree';
 import { getCategories } from '@/lib/data/categories';
 import { getProducts } from '@/lib/data/products';
+import { getSeoCatalog } from '@/lib/data/seo';
+import FilterChip from '@/components/FilterChip';
+import JsonLd, { productListLd } from '@/components/JsonLd';
 import { siteConfig } from '@/lib/site';
 import { parseProductQuery, PRODUCT_SORTS } from '@/lib/utils';
 
@@ -20,19 +23,28 @@ async function categoryFor(segments) {
   return category ? { category, categories } : null;
 }
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const { category: segments } = await params;
   const found = await categoryFor(segments);
   if (!found) return { title: 'Page not found', robots: { index: false } };
   const { category } = found;
-  const title = category.metaTitle || category.name;
+  const sp = await searchParams;
+  const total = category.totalCount ?? 0;
+  const name = category.name.charAt(0).toUpperCase() + category.name.slice(1); // some names are typed in lowercase
+  const title = category.metaTitle || (total ? `${name}: ${total.toLocaleString('en-US')} digital downloads` : name);
   const description =
-    category.metaDescription || category.description || `Shop ${category.name} from independent creators on ${siteConfig.name}. Instant downloads.`;
+    category.metaDescription ||
+    category.description ||
+    `Shop ${total ? `${total.toLocaleString('en-US')} ` : ''}${category.name.toLowerCase()} from independent creators on ${siteConfig.name}. Secure checkout and instant download.`;
+  const page = Number(sp.page) > 1 ? Number(sp.page) : 1;
+  const canonical = `${categoryHref(category)}${page > 1 ? `?page=${page}` : ''}`;
   return {
     title,
     description,
-    alternates: { canonical: categoryHref(category) },
-    openGraph: { type: 'website', title, description, url: categoryHref(category) },
+    // Empty categories (no live listings yet) and sorted / tag-filtered views stay out of the index; links are still followed.
+    robots: !total || sp.sort || sp.tag ? { index: false, follow: true } : undefined,
+    alternates: { canonical },
+    openGraph: { type: 'website', title, description, url: canonical },
   };
 }
 
@@ -48,7 +60,13 @@ export default async function CategoryPage({ params, searchParams }) {
   const { category, categories } = found;
 
   const query = parseProductQuery(await searchParams);
-  const { items, pagination } = await getProducts({ ...query, category: category._id });
+  const [{ items, pagination }, { collections }] = await Promise.all([getProducts({ ...query, category: category._id }), getSeoCatalog()]);
+  // Landing pages for this category, or its main category's (free, under $5, Canva…).
+  const ownCollections = collections.filter((c) => c.categoryId === String(category._id));
+  const related = (ownCollections.length ? ownCollections : collections.filter((c) => c.categoryId === String(category.ancestors?.[0] ?? ''))).slice(
+    0,
+    8,
+  );
 
   const byId = new Map(categories.map((c) => [c._id, c]));
   const trail = [...category.ancestors.map((id) => byId.get(id)).filter(Boolean), category];
@@ -64,7 +82,6 @@ export default async function CategoryPage({ params, searchParams }) {
   };
 
   const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [{ name: 'Home', path: '' }, ...trail.map((c) => ({ name: c.name, path: c.slugPath }))].map((c, i) => ({
       '@type': 'ListItem',
@@ -76,7 +93,18 @@ export default async function CategoryPage({ params, searchParams }) {
 
   return (
     <div className="container-wide py-6 sm:py-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, '\\u003c') }} />
+      <JsonLd
+        data={[
+          breadcrumbJsonLd,
+          {
+            '@type': 'CollectionPage',
+            name: category.name,
+            url: `${siteConfig.url}${categoryHref(category)}`,
+            ...(category.description && { description: category.description }),
+          },
+          productListLd(siteConfig.url, category.name, pagination.total, items, (pagination.page - 1) * pagination.limit),
+        ]}
+      />
 
       <div className="flex items-center gap-3">
         <BackLink fallback={parent ? categoryHref(parent) : '/categories'} />
@@ -139,6 +167,15 @@ export default async function CategoryPage({ params, searchParams }) {
             </div>
           </header>
           {category.description && <p className="mt-3 line-clamp-2 max-w-3xl text-base leading-relaxed text-stone-600">{category.description}</p>}
+          {related.length > 0 && (
+            <nav aria-label="Collections" className="mt-4 flex flex-wrap gap-2">
+              {related.map((c) => (
+                <FilterChip key={c.slug} href={`/collections/${c.slug}`}>
+                  {c.name}
+                </FilterChip>
+              ))}
+            </nav>
+          )}
 
           <div className="mt-6">
             <ProductGrid products={items} preloadCount={pagination.page === 1 ? 4 : 0} />

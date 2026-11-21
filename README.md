@@ -111,7 +111,10 @@ checkout ─▶ Transaction ledger (commission / seller share) + seller.pendingP
   with the rate used). Seller counters on `User.seller` (`totalEarnings`, `pendingPayout`, `paidPayout`) are updated
   in the **same MongoDB transaction** as the order and ledger. Commission rounds to the cent; the seller gets the
   remainder, so the split always sums exactly. Platform-owned products (no `sellerId`) keep 100%.
-  Tax/fees stay with the platform. Rate: `NEXT_PUBLIC_COMMISSION_RATE` (default `0` — no platform fee; sellers keep 100%).
+  Tax/fees stay with the platform. Rate: `NEXT_PUBLIC_COMMISSION_RATE` (default `0` — no platform fee on sales).
+- **Withdrawal merchant fee:** `PAYOUT_FEE` in `lib/commission.js` (5% + $0.50, Lemon Squeezy's rate) is taken once from
+  each payout, never from sales. `payoutFee(amount)` → `{ fee, net }`; requests and Mark as Paid store `fee` + `netAmount`
+  on the `Payout` (and `fee` on its ledger entry). The admin sends `net`; the seller's balance is debited the full amount.
 - **Moderation:** seller uploads are `status: 'pending'`; only `PUBLIC_PRODUCT_FILTER` (`isPublished && approved`)
   products are listed or purchasable. Sellers can't set status, visibility, featured, slug or `sellerId`.
 - **Files:** sellers submit `pdfFileUrl` — a schema alias of the private `downloadUrl`, delivered through the same

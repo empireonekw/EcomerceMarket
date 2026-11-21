@@ -1,5 +1,5 @@
 import { categoryHref } from '@/lib/category-tree';
-import { NO_PLATFORM_FEE } from '@/lib/commission';
+import { NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
 import { getCategories } from '@/lib/data/categories';
 import { getPopularTags, getProducts } from '@/lib/data/products';
 import { siteConfig } from '@/lib/site';
@@ -19,7 +19,7 @@ export async function GET() {
     `# ${siteConfig.name}`,
     '',
     `> ${siteConfig.name} is an online marketplace for digital products from independent creators: templates, e-books, software, vectors, planners, Notion and Canva files and more. Buyers pay through a secure checkout and download their files instantly; every purchase stays in their account for re-download. ${
-      NO_PLATFORM_FEE ? 'Sellers keep 100% of every sale.' : ''
+      NO_PLATFORM_FEE ? `There is no platform fee on sales; sellers pay only a ${PAYOUT_FEE_LABEL} merchant fee when they withdraw their earnings.` : ''
     }`.trim(),
     '',
     '## Key pages',

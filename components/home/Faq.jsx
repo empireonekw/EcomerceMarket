@@ -1,7 +1,8 @@
 import Link from '@/components/PrefetchLink';
 import { Plus } from 'lucide-react';
 import { Eyebrow, Glow, Sparkle } from '@/components/home/Editorial';
-import { commissionPercent, COMMISSION_RATE, NO_PLATFORM_FEE } from '@/lib/commission';
+import { commissionPercent, COMMISSION_RATE, MIN_PAYOUT, NO_PLATFORM_FEE, PAYOUT_FEE_LABEL } from '@/lib/commission';
+import { formatPrice } from '@/lib/utils';
 import Reveal from '@/components/Reveal';
 
 // Answers follow the published policies (lib/policies.js): delivery, formats, refunds, checkout and selling.
@@ -36,8 +37,8 @@ const QUESTIONS = [
   {
     q: 'How do I start selling?',
     a: `Create a seller account, name your shop and add your first listing. Our team reviews it before it goes live. ${
-      NO_PLATFORM_FEE ? 'You keep 100% of every sale' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`
-    }, paid out to your bank account or mobile wallet.`,
+      NO_PLATFORM_FEE ? 'There’s no platform fee on sales' : `You keep ${commissionPercent(1 - COMMISSION_RATE)} of every sale`
+    }, and earnings are paid out to your bank account or mobile wallet from ${formatPrice(MIN_PAYOUT, 'USD')}, minus a ${PAYOUT_FEE_LABEL} merchant fee on each withdrawal.`,
   },
 ];
 

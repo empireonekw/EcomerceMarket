@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { MapPin, Search, Star } from 'lucide-react';
 import Link from '@/components/PrefetchLink';
 import BackLink from '@/components/BackLink';
+import JsonLd, { breadcrumbLd, productListLd } from '@/components/JsonLd';
 import ChipScroller from '@/components/ChipScroller';
 import FilterChip from '@/components/FilterChip';
 import Pagination from '@/components/Pagination';
@@ -15,13 +16,23 @@ import { importedNote, timeOn } from '@/lib/shop-stats';
 import { siteConfig } from '@/lib/site';
 import { parseProductQuery, PRODUCT_SORTS } from '@/lib/utils';
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const shop = await getPublicShop((await params).id);
   if (!shop) return { title: 'Shop not found', robots: { index: false } };
+  const sp = await searchParams;
+  const page = Number(sp.page) > 1 ? Number(sp.page) : 1;
+  const canonical = `/shop/${shop.id}${page > 1 ? `?page=${page}` : ''}`;
+  const description = (
+    shop.description ||
+    `${shop.total} digital ${shop.total === 1 ? 'product' : 'products'} by ${shop.name} on ${siteConfig.name}. Secure checkout and instant download.`
+  ).slice(0, 160);
   return {
-    title: `${shop.name} – Shop`,
-    description: shop.description || `Digital products by ${shop.name} on Sellpify.`,
-    alternates: { canonical: `/shop/${shop.id}` },
+    title: `${shop.name}: shop on ${siteConfig.name}`,
+    description,
+    // A shop with no live listings yet, and searches, sections or sorted views of a shop, stay out of the index.
+    robots: !shop.total || sp.q || sp.category || sp.sort ? { index: false, follow: true } : undefined,
+    alternates: { canonical },
+    openGraph: { type: 'profile', title: shop.name, description, url: canonical, ...(shop.logo && { images: [{ url: shop.logo, alt: shop.name }] }) },
   };
 }
 
@@ -58,8 +69,30 @@ export default async function ShopPage({ params, searchParams }) {
   const shopAge = timeOn(stats?.since);
   const compact = (n) => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(n).toLowerCase(); // 1.9k
 
+  const shopUrl = `${siteConfig.url}/shop/${shop.id}`;
+  const abs = (src) => (/^https?:/.test(src) ? src : `${siteConfig.url}${src}`);
+
   return (
     <div className="container-wide py-6 sm:py-10">
+      <JsonLd
+        data={[
+          breadcrumbLd(siteConfig.url, [
+            { name: 'Home', href: '/' },
+            { name: shop.name, href: `/shop/${shop.id}` },
+          ]),
+          {
+            '@type': 'Organization',
+            name: shop.name,
+            url: shopUrl,
+            ...(shop.description && { description: shop.description }),
+            ...(shop.logo && { logo: abs(shop.logo) }),
+            ...(shop.banner && { image: abs(shop.banner) }),
+            ...(country && { address: { '@type': 'PostalAddress', addressCountry: shop.country } }),
+            parentOrganization: { '@type': 'Organization', name: siteConfig.name, url: siteConfig.url },
+          },
+          productListLd(siteConfig.url, `${shop.name} on ${siteConfig.name}`, pagination.total, items, (pagination.page - 1) * pagination.limit),
+        ]}
+      />
       <BackLink fallback="/products" />
 
       {/* ---------- Shop header ---------- */}
