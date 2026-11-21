@@ -186,6 +186,12 @@ export default async function AdminProductsPage({ searchParams }) {
                         <ProductStatusCell product={p} />
                         <div className="flex items-center gap-1">
                           <Link
+                            href={`/admin/products/${p._id}/edit#files`}
+                            className="inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium hover:bg-stone-100"
+                          >
+                            Files
+                          </Link>
+                          <Link
                             href={`/admin/products/${p._id}/edit`}
                             className="inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium hover:bg-stone-100"
                           >
@@ -284,6 +290,13 @@ export default async function AdminProductsPage({ searchParams }) {
                                       View
                                     </a>
                                   )}
+                                  <Link
+                                    href={`/admin/products/${p._id}/edit#files`}
+                                    className="inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium hover:bg-stone-100"
+                                    title="Open or download the seller’s files"
+                                  >
+                                    Files
+                                  </Link>
                                   <Link
                                     href={`/admin/products/${p._id}/edit`}
                                     className="inline-flex h-8 items-center rounded-lg px-3 text-sm font-medium hover:bg-stone-100"

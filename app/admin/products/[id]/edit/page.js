@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import ProductForm from '@/components/dashboard/ProductForm';
 import DeleteProductButton from '@/components/admin/DeleteProductButton';
+import ListingFiles from '@/components/admin/ListingFiles';
 import { PageHeader } from '@/components/dashboard/ui';
 import { getAdminProduct } from '@/lib/data/admin';
 import { getFormCategories } from '@/lib/data/categories';
@@ -38,6 +39,7 @@ export default async function EditProductPage({ params }) {
           </>
         }
       />
+      <ListingFiles product={product} />
       {/* key: remount the form if navigating between two products' edit pages */}
       <ProductForm key={product._id} mode="edit" categories={categories} product={product} uploads={uploadDriver()} />
     </>
